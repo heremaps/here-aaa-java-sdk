@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 HERE Global B.V.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.here.account.oauth2;
 
 import static org.junit.Assert.assertTrue;
@@ -14,14 +29,14 @@ import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.PasswordGrantRequest;
-import com.here.account.util.MyClock;
+import com.here.account.util.TestClock;
 import com.here.account.util.RefreshableResponseProvider;
 
 public class RefreshableUserCredentialsProviderTest extends AbstractUserTezt {
     
     RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider;
 
-    MyClock clock;
+    TestClock clock;
     
     @Before
     public void setUp() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
@@ -31,7 +46,7 @@ public class RefreshableUserCredentialsProviderTest extends AbstractUserTezt {
         AccessTokenResponse accessTokenResponse = 
                 signIn.signIn(passwordGrantRequest);
         Long refreshIntervalMillis = null;
-        clock = new MyClock();
+        clock = new TestClock();
         refreshableResponseProvider = new RefreshableResponseProvider<AccessTokenResponse>(
                 clock,
                 refreshIntervalMillis,
