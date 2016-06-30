@@ -23,12 +23,14 @@ import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
+import com.here.account.util.RefreshableResponseProvider;
 
-public class ClientCredentialsTest extends AbstractCredentialTezt {
+public class HereAccessTokenProvidersTest extends AbstractCredentialTezt {
 
     @Test
-    public void test_javadocs_sample() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+    public void test_getSignIn_javadocs() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
          // set up urlStart, clientId, and clientSecret.
          SignIn signIn = HereAccessTokenProviders.getSignIn(
               ApacheHttpClientProvider.builder().build(), 
@@ -36,5 +38,20 @@ public class ClientCredentialsTest extends AbstractCredentialTezt {
          String hereAccessToken = signIn.signIn(
               new ClientCredentialsGrantRequest()).getAccessToken();
          // use hereAccessToken on requests until expires...
+    }
+    
+    @Test
+    public void test_getRefreshableClientCredentialsProvider_javadocs() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+        // set up urlStart, clientId, and clientSecret.
+        // call this once and keep a reference to refreshableResponseProvider, such as in your beans
+        RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider = HereAccessTokenProviders.getRefreshableClientCredentialsProvider(
+                ApacheHttpClientProvider.builder().build(), 
+                urlStart, clientId, clientSecret,
+                null);
+        // using your reference to refreshableResponse, for each request, just ask for a new hereAccessToken
+        // the same hereAccessToken is returned for most of the valid time; but as it nears 
+        // expiry the returned value will change.
+        String hereAccessToken = refreshableResponseProvider.getUnexpiredResponse().getAccessToken();
+        // use hereAccessToken on your request...
     }
 }
