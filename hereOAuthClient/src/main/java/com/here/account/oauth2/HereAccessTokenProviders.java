@@ -27,13 +27,15 @@ import com.here.account.oauth2.bo.PasswordGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
 
 /**
- * See the OAuth2.0 
- * <a href="https://tools.ietf.org/html/rfc6749#section-4.4">Client Credentials Grant</a>.
+ * Get a HERE Access Token to use on requests to HERE Service REST APIs according to 
+ * <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>.
+ * See also the OAuth2.0 
+ * <a href="https://tools.ietf.org/html/rfc6749#section-1.4">Access Token</a> spec.
  * 
  * @author kmccrack
  *
  */
-public class HereClientCredentialsGrantProviders {
+public class HereAccessTokenProviders {
 
     /**
      * Get the ability to run various Obtaining Authorization API calls to the 

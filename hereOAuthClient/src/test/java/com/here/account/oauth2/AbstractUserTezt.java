@@ -32,7 +32,7 @@ public class AbstractUserTezt extends AbstractCredentialTezt {
         .setConnectionTimeoutInMs(connectionTimeoutInMs)
         .setRequestTimeoutInMs(requestTimeoutInMs)
         .build();
-        this.signIn = HereClientCredentialsGrantProviders
+        this.signIn = HereAccessTokenProviders
                 .getSignIn(httpProvider, urlStart, clientId, clientSecret);
     }
     
