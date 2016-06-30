@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>hereAAAClient</name>    
+    <groupId>com.here.account</groupId>
+    <artifactId>hereAAAClientAll</artifactId>
+    <version>1.6.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>hereAAAClient is for clients the HERE AAA, and demos grant_types=client_credentials, password, and refresh_token</description>
+
+    <modules>
+        <module>hereOAuthClient</module>
+    </modules>
+
+
+    <properties>
+	  <!-- Begin From prior parent -->
+	  <general.encoding>UTF-8</general.encoding>
+	  <java.version>1.8</java.version>
+	  <project.build.sourceEncoding>${general.encoding}</project.build.sourceEncoding>
+	  <java.source.linelength>120</java.source.linelength>
+			<java.source.tabwidth>4</java.source.tabwidth>
+	  <project.reporting.outputEncoding>${general.encoding}</project.reporting.outputEncoding>
+	  
+	  <repositoryName>crypto</repositoryName>
+	  <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
+	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	  
+	  
+    </properties>
+    
+
+    <distributionManagement>
+        <repository>
+            <id>crypto</id>
+            <name>${repositoryName}</name>
+            <url>${nexusUrl}</url>
+        </repository>
+    </distributionManagement>
+
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>sonatype-releases</id>
+            <name>Sonatype Releases</name>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+	<dependencies>
+	
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.8</version>
+		</dependency>    
+
+		<dependency>    
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.6.1</version>
+		</dependency>    
+
+                <dependency>
+                         <groupId>com.ning</groupId>
+                         <artifactId>async-http-client</artifactId>
+                         <version>1.8.15</version>
+                 </dependency>
+
+		<dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>httpclient</artifactId>
+		  <version>4.5</version>
+		</dependency>
+                
+		<!-- test dependencies -->
+		
+		<dependency>    
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+                        <scope>test</scope>
+		</dependency>    				
+
+	</dependencies>
+
+	<build>
+		<defaultGoal>package</defaultGoal>
+
+		  <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.1</version>
+                </plugin>
+            </plugins>
+		  </pluginManagement>   
+
+		<plugins>
+		
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <compilerVersion>${java.version}</compilerVersion>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <optimize>false</optimize>
+                </configuration>
+            </plugin>		
+							
+		
+		</plugins>	
+				
+	</build>        
+	
+    <profiles>	
+	
+		<profile>
+			<id>crypto</id>
+		</profile>
+	
+    </profiles>	
+        
+</project>

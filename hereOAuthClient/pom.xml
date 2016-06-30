@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>hereOAuthClient</name>    
+    <groupId>com.here.account</groupId>
+    <artifactId>hereOAuthClient</artifactId>
+    <packaging>jar</packaging>
+    <description>hereAAAClient is for clients the HERE AAA, and demos grant_types=client_credentials, password, and refresh_token</description>
+
+    <parent>    
+		<groupId>com.here.account</groupId>
+		<artifactId>hereAAAClientAll</artifactId>
+		<version>1.6.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>				
+    </parent>
+    
+
+	<build>
+
+		<plugins>
+				
+			<!-- Build an executable JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>com.here.account</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>				
+					
+		</plugins>	
+				
+	</build>        
+	
+    <profiles>	
+	
+		<profile>
+			<id>crypto</id>
+		</profile>
+	
+    </profiles>	
+        
+</project>
