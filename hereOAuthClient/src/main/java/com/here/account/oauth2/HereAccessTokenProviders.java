@@ -21,6 +21,7 @@ import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.oauth2.bo.PasswordGrantRequest;
@@ -42,6 +43,20 @@ public class HereAccessTokenProviders {
      * HERE Account Authorization Server.
      * See OAuth2.0 
      * <a href="https://tools.ietf.org/html/rfc6749#section-4">Obtaining Authorization</a>.
+     * 
+     * <p>
+     * Example code:
+     * <pre>
+     * {@code
+     * // set up urlStart, clientId, and clientSecret.
+     * SignIn signIn = HereAccessTokenProviders.getSignIn(
+     *      ApacheHttpClientProvider.builder().build(), 
+     *      urlStart, clientId, clientSecret);
+     * String hereAccessToken = signIn.signIn(
+     *      new ClientCredentialsGrantRequest()).getAccessToken();
+     * // use hereAccessToken on requests until expires...
+     * }
+     * </pre>
      * 
      * @param httpProvider
      * @param urlStart
