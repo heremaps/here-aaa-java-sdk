@@ -9,7 +9,7 @@
     <description>hereAAAClient is for clients the HERE AAA, and demos grant_types=client_credentials, password, and refresh_token</description>
 
     <modules>
-        <module>hereOAuthClient</module>
+        <module>here-oauth-client</module>
     </modules>
 
 
