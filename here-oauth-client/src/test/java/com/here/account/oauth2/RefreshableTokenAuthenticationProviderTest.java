@@ -49,7 +49,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
         .build();
 
         this.provider = (RefreshableResponseProvider<AccessTokenResponse>) HereAccessTokenProviders
-                .getRefreshableClientCredentialsProvider(
+                .getRefreshableClientAuthorizationProvider(
                         httpProvider,
                         urlStart, clientId, clientSecret, 
                 100L);
