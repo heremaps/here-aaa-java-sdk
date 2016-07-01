@@ -63,12 +63,9 @@ public class SignIn {
             throws IOException, AuthenticationRuntimeException, AuthenticationHttpException, HttpException {
         String method = HTTP_METHOD_POST;
         
-        // using application/json
-        HttpRequest apacheRequest = httpProvider
-                .getRequest(oauth1Signer, method, url, authorizationRequest.toJson());
-        
-        // switch to OAuth2.0 application/x-www-form-urlencoded
-        //HttpRequest apacheRequest = httpProvider.getRequest(oauth1Signer, method, url, authorizationRequest.toFormParams());
+        // OAuth2.0 uses application/x-www-form-urlencoded
+        HttpRequest apacheRequest = httpProvider.getRequest(oauth1Signer, method, url, 
+                authorizationRequest.toFormParams());
 
         // blocking
         HttpProvider.HttpResponse apacheResponse = httpProvider.execute(apacheRequest);

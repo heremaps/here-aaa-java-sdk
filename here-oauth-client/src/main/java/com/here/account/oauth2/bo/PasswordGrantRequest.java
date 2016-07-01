@@ -21,6 +21,7 @@ import java.util.Map;
 
 /**
  * For grant_type=password.
+ * There is a danger we may have to remove this class as unsupported.
  * 
  * @author kmccrack
  *
