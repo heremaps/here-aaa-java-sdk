@@ -22,13 +22,12 @@ import org.junit.Test;
 import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
-import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
 
-public class HereAccessTokenProvidersTest extends AbstractUserTezt {
+public class HereAccessTokenProvidersTest extends AbstractCredentialTezt {
 
     @Test
     public void test_getSignIn_javadocs() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
@@ -57,19 +56,4 @@ public class HereAccessTokenProvidersTest extends AbstractUserTezt {
         // use hereAccessToken on your request...
     }
     
-    @Test
-    public void test_getRefreshableUserAuthorizationProvider_javadocs() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
-        // set up urlStart, clientId, clientSecret, email, and password
-        RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider =
-                HereAccessTokenProviders.getRefreshableUserAuthorizationProvider(
-                        ApacheHttpClientProvider.builder().build(), 
-                        urlStart, clientId, clientSecret,
-                        email, password,
-                        null);
-        // using your reference to refreshableResponse, for each request, just ask for a new hereAccessToken
-        // the same hereAccessToken is returned for most of the valid time; but as it nears 
-        // expiry the returned value will change.
-        String hereAccessToken = refreshableResponseProvider.getUnexpiredResponse().getAccessToken();
-        // use hereAccessToken on your request...
-    }
 }

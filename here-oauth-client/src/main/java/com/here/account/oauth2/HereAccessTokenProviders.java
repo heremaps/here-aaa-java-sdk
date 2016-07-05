@@ -21,10 +21,8 @@ import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
-import com.here.account.oauth2.bo.PasswordGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
 
 /**
@@ -120,66 +118,4 @@ public class HereAccessTokenProviders {
                 new ClientCredentialsRefresher(signIn));
     }
     
-    /**
-     * Get the an object where when you invoke {@link RefreshableResponseProvider#getClass()}, 
-     * you will always get a current HERE Access Token, 
-     * for the password grant followed by refresh_token grants use case.
-     * 
-     * <p>
-     * <b>WARNING:</b> There is a danger we may have to remove this method as unsupported.
-     *
-     * <p>
-     * Example code:
-     * <pre>
-     * {@code
-        // set up urlStart, clientId, clientSecret, email, and password
-        RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider =
-                HereAccessTokenProviders.getRefreshableUserAuthorizationProvider(
-                        ApacheHttpClientProvider.builder().build(), 
-                        urlStart, clientId, clientSecret,
-                        email, password,
-                        null);
-        // using your reference to refreshableResponse, for each request, just ask for a new hereAccessToken
-        // the same hereAccessToken is returned for most of the valid time; but as it nears 
-        // expiry the returned value will change.
-        String hereAccessToken = refreshableResponseProvider.getUnexpiredResponse().getAccessToken();
-        // use hereAccessToken on your request...
-       }
-     * </pre>
-     * 
-     * @param httpProvider
-     * @param urlStart
-     * @param clientId
-     * @param clientSecret
-     * @param email
-     * @param password
-     * @param optionalRefreshInterval
-     * @return
-     * @throws AuthenticationRuntimeException
-     * @throws IOException
-     * @throws AuthenticationHttpException
-     * @throws HttpException
-     */
-    public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableUserAuthorizationProvider(
-            HttpProvider httpProvider,
-            String urlStart, String clientId, String clientSecret, 
-            String email, String password,
-            Long optionalRefreshInterval
-            ) throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
-        SignIn signIn = 
-                getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
-                        );
-        PasswordGrantRequest passwordGrantRequest = new PasswordGrantRequest().setEmail(email).setPassword(password);
-        AccessTokenResponse accessTokenResponse = 
-                signIn.signIn(passwordGrantRequest);
-        Long refreshIntervalMillis = null;
-        RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider 
-        = new RefreshableResponseProvider<AccessTokenResponse>(
-                refreshIntervalMillis,
-                accessTokenResponse,
-                new UserCredentialsRefresher(signIn)
-                );
-        return refreshableResponseProvider;
-    }
-
 }

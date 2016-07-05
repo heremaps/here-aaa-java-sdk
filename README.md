@@ -22,7 +22,7 @@ Configuration
 
 The tests use command-line arguments for configuration.  Please run
 
-  mvn -DargLine='-DurlStart=https://stg.account.api.here.com -DclientId=myclientid -DclientSecret=mysupersecret -Demail=mytest1234@example.com -Dpassword=mypassword' clean test
+  mvn -DargLine='-DurlStart=https://stg.account.api.here.com -DclientId=myclientid -DclientSecret=mysupersecret' clean test
 
 to demonstrate a failing credential.  This test is intended to fail.  
 Substitute your Staging clientId, clientSecret, email, and password above, to achieve success.

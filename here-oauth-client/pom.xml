@@ -32,6 +32,13 @@
 						</manifest>
 					</archive>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>				
 					
 		</plugins>	
