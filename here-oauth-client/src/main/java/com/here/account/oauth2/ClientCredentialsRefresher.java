@@ -38,7 +38,7 @@ public class ClientCredentialsRefresher implements ResponseRefresher<AccessToken
     @Override
     public AccessTokenResponse refresh(AccessTokenResponse previous) {
         try {
-            return signIn.signIn(new ClientCredentialsGrantRequest());
+            return signIn.postToken(new ClientCredentialsGrantRequest());
         } catch (IOException | AuthenticationHttpException | HttpException e) {
             throw new AuthenticationRuntimeException("trouble refresh: " + e, e);
         }

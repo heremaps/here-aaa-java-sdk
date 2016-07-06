@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 import com.here.account.auth.OAuth1Signer;
 import com.here.account.bo.AuthenticationHttpException;
-import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
@@ -35,7 +34,7 @@ public class SignIn {
     public static final String HTTP_METHOD_POST = "POST";
 
     private HttpProvider httpProvider;
-    private String url;
+    private String urlStart;
     private OAuth1Signer oauth1Signer;
 
     /**
@@ -51,7 +50,7 @@ public class SignIn {
     SignIn(HttpProvider httpProvider, String urlStart, String clientId, String clientSecret 
             ) {
         this.httpProvider = httpProvider;
-        this.url = urlStart + POST_TOKEN_PATH;
+        this.urlStart = urlStart;
         this.oauth1Signer = new OAuth1Signer(clientId, clientSecret);
     }
 
@@ -69,9 +68,11 @@ public class SignIn {
      *      or the authorization server rejected your request
      * @throws HttpException if an exception from the provider
      */
-    public AccessTokenResponse signIn(AuthorizationRequest authorizationRequest) 
+    public AccessTokenResponse postToken(AuthorizationRequest authorizationRequest) 
             throws IOException, AuthenticationHttpException, HttpException {
         String method = HTTP_METHOD_POST;
+        
+        String url = urlStart + POST_TOKEN_PATH;
         
         // OAuth2.0 uses application/x-www-form-urlencoded
         HttpRequest apacheRequest = httpProvider.getRequest(oauth1Signer, method, url, 
@@ -85,7 +86,6 @@ public class SignIn {
         try {
             jsonInputStream = apacheResponse.getResponseBody();
             if (200 == statusCode) {
-                
                 return JsonSerializer.toPojo(
                         LowerUpperCamelCaseToUnderscoreConverter.convertRootKeysToUnderscores(jsonInputStream)
                         , AccessTokenResponse.class);

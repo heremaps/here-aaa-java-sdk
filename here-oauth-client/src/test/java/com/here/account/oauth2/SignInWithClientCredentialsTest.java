@@ -63,7 +63,7 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
     @Test
     public void test_signIn() throws IOException, InterruptedException, ExecutionException, AuthenticationHttpException, AuthenticationRuntimeException, HttpException {
-        String hereAccessToken = signIn.signIn(new ClientCredentialsGrantRequest()).getAccessToken();
+        String hereAccessToken = signIn.postToken(new ClientCredentialsGrantRequest()).getAccessToken();
         assertTrue("hereAccessToken was null or blank", null != hereAccessToken && hereAccessToken.length() > 0);
     }
     
@@ -75,7 +75,7 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
                 );
 
         try{
-            signIn.signIn(new ClientCredentialsGrantRequest()).getAccessToken();
+            signIn.postToken(new ClientCredentialsGrantRequest()).getAccessToken();
         } catch (AuthenticationHttpException e) {
             ErrorResponse errorResponse = e.getErrorResponse();
             assertTrue("errorResponse was null", null != errorResponse);

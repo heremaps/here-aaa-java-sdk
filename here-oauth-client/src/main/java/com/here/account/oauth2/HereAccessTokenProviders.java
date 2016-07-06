@@ -120,7 +120,7 @@ public class HereAccessTokenProviders {
                         );
         return new RefreshableResponseProvider<AccessTokenResponse>(
                 optionalRefreshIntervalMillis,
-                signIn.signIn(new ClientCredentialsGrantRequest()),
+                signIn.postToken(new ClientCredentialsGrantRequest()),
                 new ClientCredentialsRefresher(signIn));
     }
     

@@ -35,7 +35,7 @@ public class HereAccessTokenProvidersTest extends AbstractCredentialTezt {
         SignIn signIn = HereAccessTokenProviders.getSignIn(
              ApacheHttpClientProvider.builder().build(), 
              urlStart, clientId, clientSecret);
-        String hereAccessToken = signIn.signIn(
+        String hereAccessToken = signIn.postToken(
              new ClientCredentialsGrantRequest()).getAccessToken();
         // use hereAccessToken on requests until expires...
     }
