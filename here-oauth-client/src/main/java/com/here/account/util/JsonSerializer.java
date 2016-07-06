@@ -80,7 +80,7 @@ public class JsonSerializer {
     }
     
     /**
-     * Conerts the input mapObject to its JSON String representation.
+     * Converts the input mapObject to its JSON String representation.
      * 
      * @param mapObject the json's Map representation
      * @return the JSON String representation of the input.

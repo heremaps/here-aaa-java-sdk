@@ -15,7 +15,6 @@
  */
 package com.here.account.util;
 
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -81,19 +80,29 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
   ) {
       this(Clock.SYSTEM, refreshIntervalMillis, 
               initialToken, refreshTokenFunction,
-              Executors.newScheduledThreadPool(
-                      1, new ThreadFactory() {
-
-                          @Override
-                          public Thread newThread(Runnable r) {
-                              Thread thread = new Thread(r, "here-auth-refresh-%s");
-                              thread.setDaemon(true);
-                              return thread;
-                          }
-                    
-                      }
-                      )
+              getScheduledExecutorServiceSize1()
               );
+  }
+  
+  /**
+   * Gets a here-auth-refresh ScheduledExecutorService with 1 core pool thread.
+   * 
+   * @return the ScheduledExecutorService size 1
+   */
+  public static ScheduledExecutorService getScheduledExecutorServiceSize1() {
+      return Executors.newScheduledThreadPool(
+              1, new ThreadFactory() {
+
+                  @Override
+                  public Thread newThread(Runnable r) {
+                      Thread thread = new Thread(r, "here-auth-refresh-%s");
+                      thread.setDaemon(true);
+                      return thread;
+                  }
+            
+              }
+              );
+
   }
   
   public RefreshableResponseProvider(
