@@ -90,7 +90,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
         /**
          * Build using builders, builders, and more builders.
          * 
-         * @return
+         * @return the built HttpProvider implementation for Apache httpclient.
          */
         public HttpProvider build() {
             // uses PoolingHttpClientConnectionManager by default

@@ -67,6 +67,7 @@ public class JsonSerializer {
     /**
      * Converts the input JSON InputStream, to a POJO of the class specified as pojoClass.
      * 
+     * @param <T> the type of the POJO
      * @param jsonInputStream the input stream to the JSON object
      * @param pojoClass the class to deserialize into
      * @return the instance of the pojoClass with member variables populated
@@ -83,7 +84,7 @@ public class JsonSerializer {
      * 
      * @param mapObject the json's Map representation
      * @return the JSON String representation of the input.
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException if an exception from the jackson serializer
      */
     public static String toJson(Map<String, Object> mapObject) throws JsonProcessingException {
         return objectMapper.writeValueAsString(mapObject);

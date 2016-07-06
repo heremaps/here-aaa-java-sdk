@@ -38,6 +38,16 @@ public class SignIn {
     private String url;
     private OAuth1Signer oauth1Signer;
 
+    /**
+     * Construct a new ability to SignIn to the HERE authorization server.
+     * 
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param urlStart the protocol, host, and port portion of the HERE authorization server endpoint you want to call.
+     * @param clientId see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_id</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     */
     SignIn(HttpProvider httpProvider, String urlStart, String clientId, String clientSecret 
             ) {
         this.httpProvider = httpProvider;
@@ -52,15 +62,15 @@ public class SignIn {
      * and <a href="https://tools.ietf.org/html/rfc6750">OAuth2.0 Bearer Token Usage</a> 
      * for details.
      *
-     * @param authorizationRequest
-     * @return
-     * @throws IOException
-     * @throws AuthenticationRuntimeException
-     * @throws AuthenticationHttpException
-     * @throws HttpException
+     * @param authorizationRequest the request for authorization
+     * @return the Access Token that can be used as Bearer token for HERE Service requests
+     * @throws IOException if I/O trouble processing the request
+     * @throws AuthenticationHttpException if you had trouble authenticating your request to the authorization server, 
+     *      or the authorization server rejected your request
+     * @throws HttpException if an exception from the provider
      */
     public AccessTokenResponse signIn(AuthorizationRequest authorizationRequest) 
-            throws IOException, AuthenticationRuntimeException, AuthenticationHttpException, HttpException {
+            throws IOException, AuthenticationHttpException, HttpException {
         String method = HTTP_METHOD_POST;
         
         // OAuth2.0 uses application/x-www-form-urlencoded

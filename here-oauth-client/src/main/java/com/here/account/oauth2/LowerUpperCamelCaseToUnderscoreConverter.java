@@ -24,7 +24,7 @@ public class LowerUpperCamelCaseToUnderscoreConverter {
      * 
      * @param lowerUpperInputStream the input stream for a lower-upper camel case json top-level keys
      * @return the input stream for an underscore-separated json top-level keys
-     * @throws IOException
+     * @throws IOException if an I/O exception during deserialization
      */
     public static final InputStream convertRootKeysToUnderscores(InputStream lowerUpperInputStream) throws IOException {
         Map<String, Object> map = JsonSerializer.toMap(lowerUpperInputStream);

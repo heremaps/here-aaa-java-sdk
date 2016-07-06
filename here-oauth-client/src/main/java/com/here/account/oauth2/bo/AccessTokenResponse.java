@@ -151,10 +151,9 @@ public class AccessTokenResponse implements ExpiringResponse {
     }
     
     /**
-     * Current time milliseconds UTC at time of receipt of this object.
-     * 
-     * @return
+     * {@inheritDoc}
      */
+    @Override
     public Long getStartTimeMilliseconds() {
         return startTimeMilliseconds;
     }

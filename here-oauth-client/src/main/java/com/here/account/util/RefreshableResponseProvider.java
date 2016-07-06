@@ -44,7 +44,7 @@ import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
  * 
  * @author kmccrack
  * @author ramsden
- * @authro Adam Stuenkel
+ * @author Adam Stuenkel
  */
 public class RefreshableResponseProvider<T extends ExpiringResponse> {//implements GetHereAccessToken {//implements AuthenticationProvider {
   private static final Logger LOG = Logger.getLogger(RefreshableResponseProvider.class.getName());
@@ -74,15 +74,6 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
   private volatile T refreshToken;  //volatile so consistent across threads
   private Clock clock;
 
-  /**
-   * shut down the executor service.
-   */
-  public void close() throws IOException {
-      if (null != scheduledExecutorService) {
-          scheduledExecutorService.shutdown();
-      }
-  }
-  
   public RefreshableResponseProvider(
       final Long refreshIntervalMillis,
       final T initialToken,
@@ -162,14 +153,16 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
       Long getExpiresIn();
 
       /**
-       * Current time milliseconds UTC at time of receipt of this object.
+       * Current time milliseconds UTC at the time of construction of this object.
+       * In practice, this can generally be considered to be close to the time of receipt of 
+       * the object from the server.
        * 
        * @return the start time in milliseconds UTC when this object was received.
        */
       Long getStartTimeMilliseconds();
 
   }
-
+  
   /**
    * Shutdown the background threads
    */
@@ -177,7 +170,9 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
     if (started) {
       try {
         LOG.info("Shutting down refresh token thread");
-        scheduledExecutorService.shutdown();
+        if (null != scheduledExecutorService) {
+            scheduledExecutorService.shutdown();
+        }
       } finally {
         started = false;
       }
@@ -197,8 +192,9 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
    * seconds, on your request.
    * It is assumed that your code always comes back to this method, for every 
    * API request.
+   * 
+   * @return the unexpired response
    */
-  //@Override
   public T getUnexpiredResponse() {
       return refreshToken;
   }

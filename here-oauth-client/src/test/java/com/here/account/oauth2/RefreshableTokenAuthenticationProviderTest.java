@@ -111,7 +111,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
             } 
         } finally {
             if (null != provider) {
-                this.provider.close();
+                this.provider.shutdown();
             }
         }
     }

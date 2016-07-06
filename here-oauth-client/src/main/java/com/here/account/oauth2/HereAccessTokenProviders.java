@@ -18,7 +18,6 @@ package com.here.account.oauth2;
 import java.io.IOException;
 
 import com.here.account.bo.AuthenticationHttpException;
-import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
@@ -56,11 +55,13 @@ public class HereAccessTokenProviders {
        }
      * </pre>
      * 
-     * @param httpProvider
-     * @param urlStart
-     * @param clientId
-     * @param clientSecret
-     * @return
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param urlStart the protocol, host, and port portion of the HERE authorization server endpoint you want to call.
+     * @param clientId see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_id</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     * @return the ability to SignIn.
      */
     public static SignIn getSignIn(
             HttpProvider httpProvider,
@@ -94,26 +95,31 @@ public class HereAccessTokenProviders {
        }
      * </pre>
      *
-     * @param httpProvider
-     * @param urlStart
-     * @param clientId
-     * @param clientSecret
-     * @param optionalRefreshInterval
-     * @return
-     * @throws AuthenticationRuntimeException
-     * @throws IOException
-     * @throws AuthenticationHttpException
-     * @throws HttpException
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param urlStart the protocol, host, and port portion of the HERE authorization server endpoint you want to call.
+     * @param clientId see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_id</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
+     *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+     * @param optionalRefreshIntervalMillis only specify during tests, not in real code.  
+     *     if you want to ignore the normal response <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">expires_in</a>, 
+     *     and instead refresh on a fixed interval not set by the HERE authorization server, specify this value in 
+     *     milliseconds.
+     * @return the refreshable response provider presenting an always "fresh" client_credentials-based HERE Access Token.
+     * @throws IOException if I/O trouble processing the request
+     * @throws AuthenticationHttpException if you had trouble authenticating your request to the authorization server, 
+     *      or the authorization server rejected your request
+     * @throws HttpException if an exception from the provider
      */
     public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientAuthorizationProvider(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret, 
-            Long optionalRefreshInterval) throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+            Long optionalRefreshIntervalMillis) throws IOException, AuthenticationHttpException, HttpException {
         SignIn signIn = 
                 getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         return new RefreshableResponseProvider<AccessTokenResponse>(
-                optionalRefreshInterval,
+                optionalRefreshIntervalMillis,
                 signIn.signIn(new ClientCredentialsGrantRequest()),
                 new ClientCredentialsRefresher(signIn));
     }

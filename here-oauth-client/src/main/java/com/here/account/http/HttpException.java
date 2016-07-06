@@ -15,6 +15,13 @@
  */
 package com.here.account.http;
 
+/**
+ * If there is an Exception from the underlying HTTP provider implementation, we wrap it 
+ * in an HttpException.
+ * 
+ * @author kmccrack
+ *
+ */
 public class HttpException extends Exception {
 
     /**
