@@ -75,7 +75,10 @@ public class SignIn {
         try {
             jsonInputStream = apacheResponse.getResponseBody();
             if (200 == statusCode) {
-                return JsonSerializer.toPojo(jsonInputStream, AccessTokenResponse.class);
+                
+                return JsonSerializer.toPojo(
+                        LowerUpperCamelCaseToUnderscoreConverter.convertRootKeysToUnderscores(jsonInputStream)
+                        , AccessTokenResponse.class);
             } else {
                 ErrorResponse errorResponse = JsonSerializer.toPojo(jsonInputStream, ErrorResponse.class);
                 throw new AuthenticationHttpException(statusCode, errorResponse);

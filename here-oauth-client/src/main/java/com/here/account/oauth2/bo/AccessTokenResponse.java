@@ -15,22 +15,69 @@
  */
 package com.here.account.oauth2.bo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
 
+/**
+ * See the OAuth2.0 
+ * <a href="https://tools.ietf.org/html/rfc6749#section-5.1">Successful Response</a> 
+ * section for details.
+ * 
+ * @author kmccrack
+ *
+ */
 public class AccessTokenResponse implements ExpiringResponse {
 
+    /**
+     * access_token
+         REQUIRED.  The access token issued by the authorization server.
+     */
+    @JsonProperty("access_token")
     private final String accessToken;
+    
+    /**
+     * token_type
+         REQUIRED.  The type of the token issued as described in
+         Section 7.1.  Value is case insensitive.
+     */
+    @JsonProperty("token_type")
+    private final String tokenType;
+
+    /**
+     * expires_in
+         RECOMMENDED.  The lifetime in seconds of the access token.  For
+         example, the value "3600" denotes that the access token will
+         expire in one hour from the time the response was generated.
+         If omitted, the authorization server SHOULD provide the
+         expiration time via other means or document the default value.
+     */
+    @JsonProperty("expires_in")
     private final Long expiresIn;
-    private final Long startTimeMilliseconds;
+    
+    /**
+     * refresh_token
+         OPTIONAL.  The refresh token, which can be used to obtain new
+         access tokens using the same authorization grant as described
+         in Section 6.
+     */
+    @JsonProperty("refresh_token")
     private final String refreshToken;
     
+    /**
+     * The start time in milliseconds, for this object, at the time it was 
+     * constructed.
+     */
+    private final Long startTimeMilliseconds;
+    
     public AccessTokenResponse() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
     
     public AccessTokenResponse(String accessToken, 
+            String tokenType,
             Long expiresIn, String refreshToken) {
         this.accessToken = accessToken;
+        this.tokenType = tokenType;
         this.expiresIn = expiresIn;
         this.refreshToken = refreshToken;
         this.startTimeMilliseconds = System.currentTimeMillis();
@@ -39,21 +86,70 @@ public class AccessTokenResponse implements ExpiringResponse {
     /**
      * HERE Access Token.
      * 
-     * @return
+     * <p> 
+     * From OAuth2.0 
+     * access_token
+         REQUIRED.  The access token issued by the authorization server.
+     *
+     * @return the access_token
      */
     public String getAccessToken() {
         return accessToken;
     }
 
     /**
+     * The returned type of the token.
+     * 
+     * <p> 
+     * From OAuth2.0 
+     * token_type
+         REQUIRED.  The type of the token issued as described in
+         Section 7.1.  Value is case insensitive.
+     * 
+     * @return the token_type
+     */
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    /**
      * Seconds until expiration, at time of receipt of this object.
      * 
-     * @return
+     * <p> 
+     * From OAuth2.0 
+     * expires_in
+         RECOMMENDED.  The lifetime in seconds of the access token.  For
+         example, the value "3600" denotes that the access token will
+         expire in one hour from the time the response was generated.
+         If omitted, the authorization server SHOULD provide the
+         expiration time via other means or document the default value.
+     * 
+     * @return the expires_in
      */
     public Long getExpiresIn() {
        return expiresIn;
     }
 
+    /**
+     * If non-null, the refreshToken allows you to re-authorize and get a 
+     * new fresh accessToken.
+     * Remember, client_credentials grants never return a refresh token.
+     * Resource owner password grants, and refresh token grants, sometimes do.
+     * 
+     * 
+     * <p> 
+     * From OAuth2.0 
+     * refresh_token
+         OPTIONAL.  The refresh token, which can be used to obtain new
+         access tokens using the same authorization grant as described
+         in Section 6.
+     * 
+     * @return the refresh_token
+     */
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+    
     /**
      * Current time milliseconds UTC at time of receipt of this object.
      * 
@@ -63,16 +159,4 @@ public class AccessTokenResponse implements ExpiringResponse {
         return startTimeMilliseconds;
     }
 
-    /**
-     * If non-null, the refreshToken allows you to re-authorize and get a 
-     * new fresh accessToken.
-     * Remember, client_credentials grants never return a refresh token.
-     * Resource owner password grants, and refresh token grants, sometimes do.
-     * 
-     * @return the refreshToken
-     */
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-        
 }

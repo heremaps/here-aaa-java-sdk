@@ -18,7 +18,17 @@ package com.here.account.util;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * An interface to a clock that can be used to read the 
+ * {@link #currentTimeMillis()} and that can be used to 
+ * {@link #schedule(ScheduledExecutorService, Runnable, long)} a Runnable 
+ * for execution against it.
+ * 
+ * @author kmccrack
+ *
+ */
 public interface Clock {
+    
     /**
      * java.lang.System Clock (digital approximation of wall clock).
      */

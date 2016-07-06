@@ -15,15 +15,45 @@
  */
 package com.here.account.oauth2.bo;
 
-/*
+/* Example:
 com.here.account.bo.AuthenticationHttpException: HTTP status code 401, body 
 {"errorId":"ERROR-905ffdd8-34b1-4fc7-ba98-775206d292f9","httpStatus":401,"hereErrorCode":401400,"errorCode":401400,"message":"Invalid Credentials for user:test4312@example.com"}
  */
+/**
+ * The POJO representation of a HERE authorization server error response.
+ * See also the 
+ * OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
+ * section.
+ * 
+ * @author kmccrack
+ *
+ */
 public class ErrorResponse {
 
+    /**
+     * A unique error identifier, useful for support questions, 
+     * or tracking purposes.
+     */
     private final String errorId;
+    
+    /**
+     * The numeric HTTP status code.
+     * See also the HTTP 
+     * <a href="https://tools.ietf.org/html/rfc7231#section-6">Response Status Codes</a> 
+     * section.
+     */
     private final Integer httpStatus;
+    
+    /**
+     * A more detailed categorized code for the error, specific to the HERE authorization server 
+     * semantics.
+     */
     private final Integer errorCode;
+    
+    /**
+     * A potentially-human-readable message describing the error.
+     * No machine or automated code should process or interpret this value.
+     */
     private final String message;
     
     public ErrorResponse() {
@@ -42,6 +72,8 @@ public class ErrorResponse {
 
     /**
      * the errorId.
+     * A unique error identifier, useful for support questions, 
+     * or tracking purposes.
      * 
      * @return the errorId
      */
@@ -51,6 +83,10 @@ public class ErrorResponse {
 
     /**
      * the httpStatus.
+     * The numeric HTTP status code.
+     * See also the HTTP 
+     * <a href="https://tools.ietf.org/html/rfc7231#section-6">Response Status Codes</a> 
+     * section.
      * 
      * @return the httpStatus
      */
@@ -60,6 +96,8 @@ public class ErrorResponse {
 
     /**
      * the errorCode.
+     * A more detailed categorized code for the error, specific to the HERE authorization server 
+     * semantics.
      * 
      * @return the errorCode
      */
@@ -69,6 +107,8 @@ public class ErrorResponse {
 
     /**
      * the message.
+     * A potentially-human-readable message describing the error.
+     * No machine or automated code should process or interpret this value.
      * 
      * @return the message
      */

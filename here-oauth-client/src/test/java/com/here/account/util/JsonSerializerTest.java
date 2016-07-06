@@ -37,7 +37,7 @@ public class JsonSerializerTest {
     public void test_pojo_extensible() throws JsonParseException, JsonMappingException, IOException {
         String arbitraryProperty = "prop"+UUID.randomUUID();
         String accessToken = "at"+UUID.randomUUID();
-        String json = "{\"accessToken\":\""+accessToken+"\",\"expiresIn\":123,\""+arbitraryProperty+"\":\"asdf\"}";
+        String json = "{\"access_token\":\""+accessToken+"\",\"expires_in\":123,\""+arbitraryProperty+"\":\"asdf\"}";
         InputStream jsonInputStream = new ByteArrayInputStream(json.getBytes(JsonSerializer.CHARSET));
         AccessTokenResponse accessTokenResponse = JsonSerializer.toPojo(jsonInputStream, AccessTokenResponse.class);
         assertTrue("accessTokenResponse was null", null != accessTokenResponse);

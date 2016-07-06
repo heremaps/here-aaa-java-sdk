@@ -28,9 +28,22 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * A jackson-based JSON serializer and deserializer.
+ * 
+ * @author kmccrack
+ *
+ */
 public class JsonSerializer {
 
+    /**
+     * The name of the UTF-8 {@link #CHARSET}.
+     */
     public static final String CHARSET_STRING = "UTF-8";
+
+    /**
+     * Constant for the loaded UTF-8 Charset.
+     */
     public static final Charset CHARSET = Charset.forName(CHARSET_STRING);
     
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -40,14 +53,38 @@ public class JsonSerializer {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
     
+    /**
+     * Converts the input JSON InputStream, to a Map&lt;String, Object&gt;.
+     * 
+     * @param jsonInputStream the input stream to the JSON object
+     * @return its Map representation
+     * @throws IOException if trouble deserializing
+     */
     public static Map<String, Object> toMap(InputStream jsonInputStream) throws IOException {
         return (HashMap<String, Object>) objectMapper.readValue(jsonInputStream, HashMap.class);
     }
     
+    /**
+     * Converts the input JSON InputStream, to a POJO of the class specified as pojoClass.
+     * 
+     * @param jsonInputStream the input stream to the JSON object
+     * @param pojoClass the class to deserialize into
+     * @return the instance of the pojoClass with member variables populated
+     * @throws JsonParseException if trouble parsing
+     * @throws JsonMappingException if trouble mapping
+     * @throws IOException if trouble deserializing
+     */
     public static <T> T toPojo (InputStream jsonInputStream, Class<T> pojoClass) throws JsonParseException, JsonMappingException, IOException {
         return objectMapper.readValue(jsonInputStream, pojoClass);
     }
     
+    /**
+     * Conerts the input mapObject to its JSON String representation.
+     * 
+     * @param mapObject the json's Map representation
+     * @return the JSON String representation of the input.
+     * @throws JsonProcessingException
+     */
     public static String toJson(Map<String, Object> mapObject) throws JsonProcessingException {
         return objectMapper.writeValueAsString(mapObject);
     }
