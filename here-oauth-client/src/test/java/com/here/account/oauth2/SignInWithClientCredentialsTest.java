@@ -31,6 +31,7 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
+import com.here.account.oauth2.bo.ErrorResponse;
 
 public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
@@ -64,5 +65,24 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
     public void test_signIn() throws IOException, InterruptedException, ExecutionException, AuthenticationHttpException, AuthenticationRuntimeException, HttpException {
         String hereAccessToken = signIn.signIn(new ClientCredentialsGrantRequest()).getAccessToken();
         assertTrue("hereAccessToken was null or blank", null != hereAccessToken && hereAccessToken.length() > 0);
+    }
+    
+    @Test
+    public void test_signIn_fatFinger() throws AuthenticationRuntimeException, IOException, HttpException {
+        this.signIn = new SignIn(
+                httpProvider,
+                urlStart, clientId, "fat" + clientSecret
+                );
+
+        try{
+            signIn.signIn(new ClientCredentialsGrantRequest()).getAccessToken();
+        } catch (AuthenticationHttpException e) {
+            ErrorResponse errorResponse = e.getErrorResponse();
+            assertTrue("errorResponse was null", null != errorResponse);
+            Integer errorCode = errorResponse.getErrorCode();
+            Integer expectedErrorCode = 401300;
+            assertTrue("errorCode was expected "+expectedErrorCode+", actual "+errorCode, expectedErrorCode.equals(errorCode));
+        }
+
     }
 }
