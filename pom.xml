@@ -6,7 +6,7 @@
     <artifactId>hereAAAClientAll</artifactId>
     <version>1.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <description>hereAAAClient is for clients the HERE AAA, and demos grant_types=client_credentials, password, and refresh_token</description>
+    <description>hereAAAClient is for clients the HERE AAA, and demos grant_type=client_credentials</description>
 
     <modules>
         <module>here-oauth-client</module>
