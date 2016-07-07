@@ -75,14 +75,12 @@ public interface HttpProvider extends Closeable {
         int getStatusCode();
         
         /**
-         * Get the entire response body, as a <tt>String</tt>, using "UTF-8" charset.
+         * Returns the HTTP Content-Length header value.
+         * The content length of the response body.
          * 
-         * @return if there was a response entity, returns the String containing the 
-         *     whole response entity in "UTF-8".
-         *     otherwise, if there was no response entity, this method returns null.
-         * @throws IOException if there is I/O trouble
+         * @return the content length of the response body.
          */
-        String getResponseBodyAsString() throws IOException;
+        long getContentLength();
         
         /**
          * Get the response body, as an <tt>InputStream</tt>.

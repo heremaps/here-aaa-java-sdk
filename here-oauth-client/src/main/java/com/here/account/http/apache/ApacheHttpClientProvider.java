@@ -16,7 +16,6 @@
 package com.here.account.http.apache;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -150,44 +149,19 @@ public class ApacheHttpClientProvider implements HttpProvider {
             }
             return null;
         }
-
+        
         /**
          * {@inheritDoc}
          */
         @Override
-        public String getResponseBodyAsString() throws IOException {
+        public long getContentLength() {
             HttpEntity httpEntity = apacheHttpResponse.getEntity();
             if (null != httpEntity) {
-                return readFullyToString(httpEntity);
-            } 
-            return null;
+                return httpEntity.getContentLength();
+            }
+            return 0L;
         }
 
-        private String readFullyToString(HttpEntity entity) throws IOException {
-            ByteArrayOutputStream baos = null;
-            InputStream inputStream = null;
-            try {
-                baos = new ByteArrayOutputStream();
-                inputStream = entity.getContent();
-                int numRead;
-                byte[] bytes = new byte[4096];
-                while ((numRead = inputStream.read(bytes)) > 0) {
-                    baos.write(bytes, 0, numRead);
-                }
-                return new String(baos.toByteArray(), HttpConstants.ENCODING_CHARSET);
-            } finally {
-                try {
-                    if (null != inputStream) {
-                        inputStream.close();
-                    }
-                } finally {
-                    if (null != baos) {
-                        baos.close();
-                    }
-                }
-            }
-        }
-        
     }
 
     private HttpRequestBase getRequestNoAuth(String method, String url, 
