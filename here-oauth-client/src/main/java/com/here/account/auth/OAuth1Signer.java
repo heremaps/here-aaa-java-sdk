@@ -23,6 +23,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
+import com.here.account.util.Clock;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.oauth.ConsumerKey;
 import com.ning.http.client.oauth.OAuthSignatureCalculator;
@@ -49,6 +50,8 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      */
     private static final int NONCE_LENGTH = 6;
     
+    private final Clock clock;
+    
     /**
      * HERE clientId.  Becomes the value of oauth_consumer_key in the 
      * Authorization: OAuth header.
@@ -70,6 +73,21 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      *      in the Authorization: OAuth header.
      */
     public OAuth1Signer(String clientId, String clientSecret) {
+        this(Clock.SYSTEM, clientId, clientSecret);
+    }
+    
+    /**
+     * Construct the OAuth signer based on clock, clientId, and clientSecret.
+     * Use this if you want to inject your own clock, such as during unit tests.
+     * 
+     * @param clock the implementation of a clock you want to use
+     * @param clientId the HERE clientId.  Becomes the value of oauth_consumer_key in 
+     *      the Authorization: OAuth header.
+     * @param clientSecret the HERE clientSecret.  Used to calculate the oauth_signature 
+     *      in the Authorization: OAuth header.
+     */
+    OAuth1Signer(Clock clock, String clientId, String clientSecret) {
+        this.clock = clock;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
     }
@@ -80,9 +98,9 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * Note the OAuth1.0 spec specifically tells us we do not need to use a SecureRandom 
      * number generator.
      * 
-     * @return
+     * @param bytes the byte array in which to stick the nonce value
      */
-    private void nextBytes(byte[] bytes) {
+    protected void nextBytes(byte[] bytes) {
         ThreadLocalRandom.current().nextBytes(bytes);;
     }
 
@@ -111,7 +129,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         
         // <a href="https://tools.ietf.org/html/rfc5849#section-3.3">timestamp</no I a>.
         // the number of seconds since January 1, 1970 00:00:00 GMT
-        long timestamp = System.currentTimeMillis() / 1000L;
+        long timestamp = clock.currentTimeMillis() / 1000L;
         // choose the first 6 chars from base64 alphabet
         byte[] bytes = new byte[NONCE_LENGTH]; 
         nextBytes(bytes);
@@ -147,6 +165,9 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         return calculator;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void authorize(HttpRequest httpRequest, String method, String url, Map<String, List<String>> formParams) {
         String authorizationHeaderValue = getAuthorizationHeaderValue(method, url, formParams);

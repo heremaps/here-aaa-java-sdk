@@ -15,6 +15,7 @@
  */
 package com.here.account.util;
 
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -112,6 +113,11 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
           final ResponseRefresher<T> refreshTokenFunction,
           final ScheduledExecutorService scheduledExecutorService
       ) {
+      Objects.requireNonNull(clock, "clock cannot be null");
+      Objects.requireNonNull(initialToken, "initialToken cannot be null");
+      Objects.requireNonNull(refreshTokenFunction, "refreshTokenFunction cannot be null");
+      Objects.requireNonNull(scheduledExecutorService, "scheduledExecutorService cannot be null");
+      
       this.clock = clock;
       this.refreshIntervalMillis = refreshIntervalMillis;
       this.refreshToken = initialToken;
@@ -179,9 +185,7 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
     if (started) {
       try {
         LOG.info("Shutting down refresh token thread");
-        if (null != scheduledExecutorService) {
-            scheduledExecutorService.shutdown();
-        }
+        scheduledExecutorService.shutdown();
       } finally {
         started = false;
       }
