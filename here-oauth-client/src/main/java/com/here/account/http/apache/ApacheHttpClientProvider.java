@@ -103,14 +103,14 @@ public class ApacheHttpClientProvider implements HttpProvider {
 
     private static class ApacheHttpClientRequest implements HttpRequest {
         
-        private final HttpRequestBase apacheHttpRequest;
+        private final HttpRequestBase httpRequestBase;
         
-        private ApacheHttpClientRequest(HttpRequestBase apacheHttpRequest) {
-            this.apacheHttpRequest = apacheHttpRequest;
+        private ApacheHttpClientRequest(HttpRequestBase httpRequestBase) {
+            this.httpRequestBase = httpRequestBase;
         }
         
-        private HttpRequestBase getApacheHttpRequest() {
-            return apacheHttpRequest;
+        private HttpRequestBase getHttpRequestBase() {
+            return httpRequestBase;
         }
 
         /**
@@ -118,7 +118,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
          */
         @Override
         public void addAuthorizationHeader(String value) {
-            apacheHttpRequest.addHeader(HttpConstants.AUTHORIZATION_HEADER, value);
+            httpRequestBase.addHeader(HttpConstants.AUTHORIZATION_HEADER, value);
         }
     }
     
@@ -170,7 +170,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
         try {
             uri = new URI(url);
         } catch (URISyntaxException e) {
-            throw new RuntimeException("malformed URL: " + e, e);
+            throw new IllegalArgumentException("malformed URL: " + e, e);
         }
         HttpRequestBase apacheRequest = null;
         HttpEntityEnclosingRequestBase apacheRequestSupportsEntity = null;
@@ -187,6 +187,8 @@ public class ApacheHttpClientProvider implements HttpProvider {
         } else if (method.equals(HttpHead.METHOD_NAME)) {
             apacheRequest = new HttpHead(uri);
         } else if (method.equals(HttpOptions.METHOD_NAME)) {
+            apacheRequest = new HttpOptions(uri);
+        } else if (method.equals(HttpTrace.METHOD_NAME)) {
             apacheRequest = new HttpTrace(uri);
         } else if (method.equals(HttpPatch.METHOD_NAME)) {
             apacheRequestSupportsEntity = new HttpPatch(uri);
@@ -318,14 +320,14 @@ public class ApacheHttpClientProvider implements HttpProvider {
 
     @Override
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
-        HttpRequestBase apacheHttpRequest = ((ApacheHttpClientRequest) httpRequest).getApacheHttpRequest();
+        HttpRequestBase httpRequestBase = ((ApacheHttpClientRequest) httpRequest).getHttpRequestBase();
         
         // we are stateless
         HttpContext httpContext = null;
         
         try {
             // blocking
-            org.apache.http.HttpResponse apacheHttpResponse = httpClient.execute(apacheHttpRequest, httpContext);
+            org.apache.http.HttpResponse apacheHttpResponse = httpClient.execute(httpRequestBase, httpContext);
             
             return new ApacheHttpClientResponse(apacheHttpResponse);
         } catch (ClientProtocolException e) {
