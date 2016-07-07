@@ -72,9 +72,11 @@ public class HereAccessTokenProviders {
     }
     
     /**
-     * Get the an object where when you invoke {@link RefreshableResponseProvider#getClass()}, 
+     * Get a RefreshableResponseProvider where when you invoke 
+     * {@link RefreshableResponseProvider#getUnexpiredResponse()}, 
      * you will always get a current HERE Access Token, 
-     * for the client_credentials grant use case.
+     * for the grant_type=client_credentials use case, for 
+     * confidential clients.
      * 
      * <p>
      * Example code:
