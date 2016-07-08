@@ -52,6 +52,9 @@ public class OAuth2Authorizer implements HttpProvider.HttpRequestAuthorizer {
         this.bearerSpaceAccessToken = BEARER_SPACE + accessToken;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void authorize(HttpRequest httpRequest, String method, String url, Map<String, List<String>> formParams) {
         httpRequest.addAuthorizationHeader(bearerSpaceAccessToken);
