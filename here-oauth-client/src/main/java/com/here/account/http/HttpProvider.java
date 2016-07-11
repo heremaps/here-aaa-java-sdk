@@ -95,8 +95,9 @@ public interface HttpProvider extends Closeable {
     }
 
     /**
-     * Gets the RequestBuilder, with the specified method, url, and requestBodyJson, 
-     * and with Authorization header already set.
+     * Gets the RequestBuilder, with the specified method, url, and requestBodyJson.
+     * The Authorization header has already been set according to the 
+     * httpRequestAuthorizer implementation.
      * 
      * @param httpRequestAuthorizer for adding the Authorization header value
      * @param method HTTP method value
@@ -109,8 +110,9 @@ public interface HttpProvider extends Closeable {
     HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url, String requestBodyJson);
     
     /**
-     * Gets the RequestBuilder, with the specified method, url, and requestBodyJson, 
-     * and with Authorization header already set.
+     * Gets the RequestBuilder, with the specified method, url, and formParams. 
+     * The Authorization header has already been set according to the 
+     * httpRequestAuthorizer implementation.
      * 
      * @param httpSigner for adding the Authorization header value
      * @param method HTTP method value
