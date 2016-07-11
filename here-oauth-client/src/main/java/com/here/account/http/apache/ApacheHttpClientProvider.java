@@ -55,6 +55,16 @@ import com.here.account.http.HttpProvider;
  * See <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Components</a> 
  * for more information, specifically the HttpClient project.
  * 
+ * <p>
+ * If you just want the default 5000 ms for both connection timeout and request timeout, 
+ * just use the following example code:
+ * <pre>
+ * {@code
+       HttpProvider httpProvider = ApacheHttpClientProvider.builder().build();
+       // use httpProvider such as with HereAccessTokenProviders...
+ * }
+ * </pre>
+ * 
  * @author kmccrack
  *
  */
@@ -70,7 +80,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
         private Builder() {
             apacheConfigBuilder = RequestConfig.custom();
             setConnectionTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS);
-            setRequestTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS);
+            setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS);
         }
     
         public Builder setConnectionTimeoutInMs(int connectionTimeoutInMs) {

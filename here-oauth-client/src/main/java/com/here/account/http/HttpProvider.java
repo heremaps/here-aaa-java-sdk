@@ -21,6 +21,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An interface to the HTTP wireline provider implementation of your choosing.
+ * 
+ * 
+ * @author kmccrack
+ *
+ */
 public interface HttpProvider extends Closeable {
     
     /**
