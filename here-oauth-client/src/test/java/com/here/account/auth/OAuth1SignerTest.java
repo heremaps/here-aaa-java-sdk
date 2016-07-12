@@ -133,6 +133,8 @@ public class OAuth1SignerTest {
     
     /**
      * Demonstrate the tradeoffs between HmacSHA1 and HmacSHA256 signature methods.
+     * OAuth1 signature spec calls out the former by name, 
+     * but is extensible to the latter as well.
      * 
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
