@@ -2,12 +2,20 @@ package com.here.account.auth;
 
 import static org.junit.Assert.assertTrue;
 
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -122,4 +130,40 @@ public class OAuth1SignerTest {
         assertTrue("signatureFooBar "+signatureFooBar+" matches signatureFooNone "+signatureFooNone+", but shouldn't",
                 !signatureFooBar.equals(signatureFooNone));
     }
+    
+    /**
+     * Demonstrate the tradeoffs between HmacSHA1 and HmacSHA256 signature methods.
+     * 
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    @Test
+    public void test_HmacSHA1_HmacSHA256() throws NoSuchAlgorithmException, InvalidKeyException {
+        String key = UUID.randomUUID().toString();
+        
+        String input = "my dog has fleas";
+        
+        String sig1 = HmacSHAN(key, "HmacSHA1", input);
+        assertTrue("sig1 was null for HmacSHA1", null != sig1);
+        
+        String sig256 = HmacSHAN(key, "HmacSHA256", input);
+        assertTrue("sig256 was null for HmacSHA256", null != sig256);
+        
+        assertTrue("sig1 "+sig1+" wasn't smaller than sig256 "+sig256, sig1.length() < sig256.length());
+
+    }
+    
+    protected String HmacSHAN(String keyString, String algorithm, String baseString) throws NoSuchAlgorithmException, InvalidKeyException {
+        Key signingKey = new SecretKeySpec(keyString.getBytes(), algorithm);
+        Mac mac = Mac.getInstance(algorithm);
+        mac.init(signingKey);
+    
+        //generate signature bytes
+        byte[] signatureBytes = mac.doFinal(baseString.toString().getBytes());
+    
+        // base64-encode the hmac
+        return new Base64().encodeAsString(signatureBytes);
+    }
+
+
 }
