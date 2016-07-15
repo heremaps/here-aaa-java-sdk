@@ -27,6 +27,13 @@ The tests use command-line arguments for configuration.  Please run
 to demonstrate a failing credential.  This test is intended to fail.  
 Substitute your Staging clientId, clientSecret above, to achieve success.
 
+Developer Usage
+===============
+
+Read the javadocs for details.  If you are just getting started, go to HereAccessTokenProviders.java javadocs for the overview of two options:
+- get an "always fresh" HERE Access Token via getRefreshableClientAuthorizationProvider(..) approach
+- explicitly generate a HERE Access Token via getSignIn(..) approach
+
 Sub-Projects
 ============
 
