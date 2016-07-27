@@ -4,7 +4,7 @@
     <name>hereAAAClient</name>    
     <groupId>com.here.account</groupId>
     <artifactId>hereAAAClientAll</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>1.6.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>hereAAAClient is for clients the HERE AAA, and demos grant_type=client_credentials</description>
 
@@ -23,8 +23,11 @@
 	  <project.reporting.outputEncoding>${general.encoding}</project.reporting.outputEncoding>
 	  
 	  <repositoryName>crypto</repositoryName>
+<!-- Uncomment the following line for snapshot development -->
 	  <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
-	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	  
+<!-- Uncomment the following line for official release -->
+<!-- 	  <nexusServer>http://ncr.hq.navteq.com/nexus/content/repositories</nexusServer> -->
+	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	 
 	  
     </properties>
     
