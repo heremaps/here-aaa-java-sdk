@@ -4,3 +4,7 @@
 **/.classpath
 **/.project
 **/.settings
+.idea/*
+target
+/bin/
+pom.xml.versionsBackup

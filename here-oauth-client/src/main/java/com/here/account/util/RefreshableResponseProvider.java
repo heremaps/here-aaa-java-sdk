@@ -74,6 +74,19 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {//implemen
   private volatile T refreshToken;  //volatile so consistent across threads
   private Clock clock;
 
+  /**
+   * Create a RefreshableResponseProvider with optional refreshIntervalMillis, initialToken, 
+   * and refreshTokenFunction.
+   * 
+   * @param refreshIntervalMillis optional.  only specify during tests, not in real code.  
+   *     if you want to ignore the normal response 
+   *     <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">expires_in</a>, 
+   *     and instead refresh on a fixed interval not set by the HERE authorization server, 
+   *     specify this value in milliseconds.
+   * @param initialToken the initial value of an active token
+   * @param refreshTokenFunction the ability to refresh and get a new token prior to the 
+   *     previous one expiring.
+   */
   public RefreshableResponseProvider(
       final Long refreshIntervalMillis,
       final T initialToken,

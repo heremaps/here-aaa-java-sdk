@@ -32,6 +32,7 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
+import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
 
 public class RefreshableTokenAuthenticationProviderTest extends AbstractCredentialTezt {
@@ -48,11 +49,14 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
         .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
         .build();
 
-        this.provider = (RefreshableResponseProvider<AccessTokenResponse>) HereAccessTokenProviders
-                .getRefreshableClientAuthorizationProvider(
-                        httpProvider,
-                        urlStart, clientId, clientSecret, 
-                100L);
+        SignIn signIn = 
+                HereAccessTokenProviders.getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+                        );
+        long optionalRefreshIntervalMillis = 100L;
+        this.provider = new RefreshableResponseProvider<AccessTokenResponse>(
+                optionalRefreshIntervalMillis,
+                signIn.postToken(new ClientCredentialsGrantRequest()),
+                new ClientCredentialsRefresher(signIn));
     }
     
     protected static void verifyLoopChanges(RefreshableResponseProvider<AccessTokenResponse> signedIn) throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {

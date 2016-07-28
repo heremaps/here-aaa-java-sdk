@@ -20,6 +20,7 @@ import java.io.IOException;
 import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
@@ -87,8 +88,7 @@ public class HereAccessTokenProviders {
         RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider = 
             HereAccessTokenProviders.getRefreshableClientAuthorizationProvider(
                  ApacheHttpClientProvider.builder().build(), 
-                 urlStart, clientId, clientSecret,
-                 null);
+                 urlStart, clientId, clientSecret);
         // using your reference to refreshableResponse, for each request, just ask for a new hereAccessToken
         // the same hereAccessToken is returned for most of the valid time; but as it nears 
         // expiry the returned value will change.
@@ -103,10 +103,6 @@ public class HereAccessTokenProviders {
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
      * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
-     * @param optionalRefreshIntervalMillis only specify during tests, not in real code.  
-     *     if you want to ignore the normal response <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">expires_in</a>, 
-     *     and instead refresh on a fixed interval not set by the HERE authorization server, specify this value in 
-     *     milliseconds.
      * @return the refreshable response provider presenting an always "fresh" client_credentials-based HERE Access Token.
      * @throws IOException if I/O trouble processing the request
      * @throws AuthenticationHttpException if you had trouble authenticating your request to the authorization server, 
@@ -115,11 +111,11 @@ public class HereAccessTokenProviders {
      */
     public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientAuthorizationProvider(
             HttpProvider httpProvider,
-            String urlStart, String clientId, String clientSecret, 
-            Long optionalRefreshIntervalMillis) throws IOException, AuthenticationHttpException, HttpException {
+            String urlStart, String clientId, String clientSecret) throws IOException, AuthenticationHttpException, HttpException {
         SignIn signIn = 
                 getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
+        Long optionalRefreshIntervalMillis = null;
         return new RefreshableResponseProvider<AccessTokenResponse>(
                 optionalRefreshIntervalMillis,
                 signIn.postToken(new ClientCredentialsGrantRequest()),

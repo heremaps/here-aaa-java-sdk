@@ -47,8 +47,7 @@ public class HereAccessTokenProvidersTest extends AbstractCredentialTezt {
         RefreshableResponseProvider<AccessTokenResponse> refreshableResponseProvider = 
             HereAccessTokenProviders.getRefreshableClientAuthorizationProvider(
                  ApacheHttpClientProvider.builder().build(), 
-                 urlStart, clientId, clientSecret,
-                 null);
+                 urlStart, clientId, clientSecret);
         // using your reference to refreshableResponse, for each request, just ask for a new hereAccessToken
         // the same hereAccessToken is returned for most of the valid time; but as it nears 
         // expiry the returned value will change.

@@ -4,7 +4,7 @@
     <name>hereAAAClient</name>    
     <groupId>com.here.account</groupId>
     <artifactId>hereAAAClientAll</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.6.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>hereAAAClient is for clients the HERE AAA, and demos grant_type=client_credentials</description>
 
@@ -51,6 +51,13 @@
           <jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec</jacoco.it.execution.data.file>
           <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
           <argLine></argLine>
+	  
+	  <repositoryName>crypto</repositoryName>
+          <!-- Uncomment the following line for snapshot development -->
+	  <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
+          <!-- Uncomment the following line for official release -->
+          <!-- 	  <nexusServer>http://ncr.hq.navteq.com/nexus/content/repositories</nexusServer> -->
+	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	 
 	  
           <repositoryName>crypto</repositoryName>
           <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
