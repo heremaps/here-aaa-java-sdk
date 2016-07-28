@@ -52,25 +52,24 @@
           <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
           <argLine></argLine>
 	  
-	  <repositoryName>crypto</repositoryName>
-          <!-- Uncomment the following line for snapshot development -->
-	  <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
-          <!-- Uncomment the following line for official release -->
-          <!-- 	  <nexusServer>http://ncr.hq.navteq.com/nexus/content/repositories</nexusServer> -->
-	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	 
-	  
-          <repositoryName>crypto</repositoryName>
-          <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
-          <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	  
+		  <repositoryName>crypto</repositoryName>
+
     </properties>
     
 
     <distributionManagement>
         <repository>
-            <id>crypto</id>
+            <id>crypto-releases</id>
             <name>${repositoryName}</name>
-            <url>${nexusUrl}</url>
+            <url>http://ncr.hq.navteq.com/nexus/content/repositories/${repositoryName}</url>
         </repository>
+        
+        <snapshotRepository>
+            <id>crypto-snapshots</id>
+            <name>${repositoryName}</name>
+            <url>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories/${repositoryName}</url>
+        </snapshotRepository>        
+        
     </distributionManagement>
 
 
