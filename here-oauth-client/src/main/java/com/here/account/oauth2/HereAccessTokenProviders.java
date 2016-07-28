@@ -20,7 +20,6 @@ import java.io.IOException;
 import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
@@ -64,11 +63,11 @@ public class HereAccessTokenProviders {
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
      * @return the ability to SignIn.
      */
-    public static SignIn getSignIn(
+    public static AuthorizationObtainer getSignIn(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) {
         return
-                new SignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+                new AuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
     }
     
@@ -112,7 +111,7 @@ public class HereAccessTokenProviders {
     public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientAuthorizationProvider(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) throws IOException, AuthenticationHttpException, HttpException {
-        SignIn signIn = 
+        AuthorizationObtainer signIn = 
                 getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         Long optionalRefreshIntervalMillis = null;

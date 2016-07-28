@@ -24,11 +24,23 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.oauth2.bo.AccessTokenResponse;
-import com.here.account.oauth2.bo.AuthorizationRequest;
+import com.here.account.oauth2.bo.AccessTokenRequest;
 import com.here.account.oauth2.bo.ErrorResponse;
 import com.here.account.util.JsonSerializer;
 
-public class SignIn {
+/**
+ * A class used for obtaining authorization from the HERE OAuth2.0 authorization server.
+ * Use this class with the default {@link HttpProvider}, to makes remote API calls 
+ * on-demand according to the OAuth2.0 "Obtaining Authorization" sequences.
+ * 
+ * <p>
+ * See also the <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>.
+ * 
+ * 
+ * @author kmccrack
+ *
+ */
+public class AuthorizationObtainer {
 
     public static final String POST_TOKEN_PATH = "/oauth2/token";
     public static final String HTTP_METHOD_POST = "POST";
@@ -38,7 +50,7 @@ public class SignIn {
     private OAuth1Signer oauth1Signer;
 
     /**
-     * Construct a new ability to SignIn to the HERE authorization server.
+     * Construct a new ability to obtain authorization from the HERE authorization server.
      * 
      * @param httpProvider the HTTP-layer provider implementation
      * @param urlStart the protocol, host, and port portion of the HERE authorization server endpoint you want to call.
@@ -47,7 +59,7 @@ public class SignIn {
      * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
      */
-    SignIn(HttpProvider httpProvider, String urlStart, String clientId, String clientSecret 
+    AuthorizationObtainer(HttpProvider httpProvider, String urlStart, String clientId, String clientSecret 
             ) {
         this.httpProvider = httpProvider;
         this.urlStart = urlStart;
@@ -68,7 +80,7 @@ public class SignIn {
      *      or the authorization server rejected your request
      * @throws HttpException if an exception from the provider
      */
-    public AccessTokenResponse postToken(AuthorizationRequest authorizationRequest) 
+    public AccessTokenResponse postToken(AccessTokenRequest authorizationRequest) 
             throws IOException, AuthenticationHttpException, HttpException {
         String method = HTTP_METHOD_POST;
         

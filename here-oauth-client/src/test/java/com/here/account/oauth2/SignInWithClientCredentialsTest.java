@@ -36,7 +36,7 @@ import com.here.account.oauth2.bo.ErrorResponse;
 public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
     HttpProvider httpProvider;
-    SignIn signIn;
+    AuthorizationObtainer signIn;
     
     @Before
     public void setUp() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
@@ -48,7 +48,7 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
         .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
         .build();
         
-        this.signIn = new SignIn(
+        this.signIn = new AuthorizationObtainer(
                 httpProvider,
                 urlStart, clientId, clientSecret
                 );
@@ -69,7 +69,7 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
     
     @Test
     public void test_signIn_fatFinger() throws AuthenticationRuntimeException, IOException, HttpException {
-        this.signIn = new SignIn(
+        this.signIn = new AuthorizationObtainer(
                 httpProvider,
                 urlStart, clientId, "fat" + clientSecret
                 );

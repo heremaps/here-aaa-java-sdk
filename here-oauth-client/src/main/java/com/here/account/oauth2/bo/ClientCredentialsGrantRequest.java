@@ -25,7 +25,7 @@ import java.util.Map;
  * @author kmccrack
  *
  */
-public class ClientCredentialsGrantRequest extends AuthorizationRequest {
+public class ClientCredentialsGrantRequest extends AccessTokenRequest {
     
     public ClientCredentialsGrantRequest() {
         super("client_credentials");

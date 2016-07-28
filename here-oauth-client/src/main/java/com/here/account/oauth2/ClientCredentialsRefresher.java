@@ -26,9 +26,9 @@ import com.here.account.util.RefreshableResponseProvider.ResponseRefresher;
 
 public class ClientCredentialsRefresher implements ResponseRefresher<AccessTokenResponse> {
     
-    private SignIn signIn;
+    private AuthorizationObtainer signIn;
     
-    public ClientCredentialsRefresher(SignIn signIn) {
+    public ClientCredentialsRefresher(AuthorizationObtainer signIn) {
         this.signIn = signIn;
     }
 

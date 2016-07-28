@@ -49,7 +49,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
         .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
         .build();
 
-        SignIn signIn = 
+        AuthorizationObtainer signIn = 
                 HereAccessTokenProviders.getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         long optionalRefreshIntervalMillis = 100L;

@@ -11,11 +11,11 @@ import org.junit.Test;
 
 public class AuthorizationRequestTest {
     
-    AuthorizationRequest authorizationRequest;
+    AccessTokenRequest authorizationRequest;
     
     @Before
     public void setUp() {
-        authorizationRequest = new AuthorizationRequest("foo") {
+        authorizationRequest = new AccessTokenRequest("foo") {
 
             @Override
             public String toJson() {
