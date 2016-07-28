@@ -50,7 +50,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
         .build();
 
         AuthorizationObtainer signIn = 
-                HereAccessTokenProviders.getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+                HereAccessTokenProviders.getAuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         long optionalRefreshIntervalMillis = 100L;
         this.provider = new RefreshableResponseProvider<AccessTokenResponse>(

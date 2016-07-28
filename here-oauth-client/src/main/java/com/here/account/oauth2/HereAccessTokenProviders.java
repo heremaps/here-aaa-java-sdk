@@ -47,9 +47,10 @@ public class HereAccessTokenProviders {
      * <pre>
      * {@code
         // set up urlStart, clientId, and clientSecret.
-        AuthorizationObtainer authorizationObtainer = HereAccessTokenProviders.getSignIn(
-             ApacheHttpClientProvider.builder().build(), 
-             urlStart, clientId, clientSecret);
+        AuthorizationObtainer authorizationObtainer = HereAccessTokenProviders
+             .getAuthorizationObtainer(
+                     ApacheHttpClientProvider.builder().build(), 
+                     urlStart, clientId, clientSecret);
         String hereAccessToken = authorizationObtainer.postToken(
              new ClientCredentialsGrantRequest()).getAccessToken();
         // use hereAccessToken on requests until expires...
@@ -64,7 +65,7 @@ public class HereAccessTokenProviders {
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
      * @return the ability to SignIn.
      */
-    public static AuthorizationObtainer getSignIn(
+    public static AuthorizationObtainer getAuthorizationObtainer(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) {
         return
@@ -112,14 +113,14 @@ public class HereAccessTokenProviders {
     public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientAuthorizationProvider(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) throws IOException, AuthenticationHttpException, HttpException {
-        AuthorizationObtainer signIn = 
-                getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+        AuthorizationObtainer authorizationObtainer = 
+                getAuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         Long optionalRefreshIntervalMillis = null;
         return new RefreshableResponseProvider<AccessTokenResponse>(
                 optionalRefreshIntervalMillis,
-                signIn.postToken(new ClientCredentialsGrantRequest()),
-                new ClientCredentialsRefresher(signIn));
+                authorizationObtainer.postToken(new ClientCredentialsGrantRequest()),
+                new ClientCredentialsRefresher(authorizationObtainer));
     }
     
 }
