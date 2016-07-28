@@ -61,7 +61,7 @@
         <repository>
             <id>crypto-releases</id>
             <name>${repositoryName}</name>
-            <url>http://ncr.hq.navteq.com/nexus/content/repositories/${repositoryName}</url>
+            <url>http://ncr.in.here.com/nexus/content/repositories/${repositoryName}</url>
         </repository>
         
         <snapshotRepository>
