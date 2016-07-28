@@ -4,7 +4,7 @@
     <name>hereAAAClient</name>    
     <groupId>com.here.account</groupId>
     <artifactId>hereAAAClientAll</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>hereAAAClient is for clients the HERE AAA, and demos grant_type=client_credentials</description>
 
@@ -18,14 +18,43 @@
 	  <general.encoding>UTF-8</general.encoding>
 	  <java.version>1.8</java.version>
 	  <project.build.sourceEncoding>${general.encoding}</project.build.sourceEncoding>
-	  <java.source.linelength>120</java.source.linelength>
-			<java.source.tabwidth>4</java.source.tabwidth>
-	  <project.reporting.outputEncoding>${general.encoding}</project.reporting.outputEncoding>
+          <java.source.linelength>120</java.source.linelength>
+          <java.source.tabwidth>4</java.source.tabwidth>
+          <project.reporting.outputEncoding>${general.encoding}</project.reporting.outputEncoding>
+          
+          <!-- Declare versions for plugins -->
+          <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
+          <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+          <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
+          <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
+          <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+          <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
+          <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+
+          <!-- Declare versions for dependencies -->
+          <apache.httpclient.version>4.5</apache.httpclient.version>          
+          <commons-codec.version>1.8</commons-codec.version>
+          <jackson.version>2.6.1</jackson.version>
+          <junit.version>4.11</junit.version>
+          <mockito.version>1.10.19</mockito.version>
+          <ning.version>1.8.15</ning.version>
+          
+          <!-- configure surefire and maven to be individually skippable -->
+          <!-- set to skip all tests -->
+          <skipTests>false</skipTests>
+          <!-- set to skip only unit tests -->
+          <skip.unit.tests>${skipTests}</skip.unit.tests>
+          <!-- set to skip only integration tests -->
+          <skip.integration.tests>${skipTests}</skip.integration.tests>
+          
+          <!-- custom properties to support jacoco configuration -->
+          <jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec</jacoco.it.execution.data.file>
+          <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
+          <argLine></argLine>
 	  
-	  <repositoryName>crypto</repositoryName>
-	  <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
-	  <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	  
-	  
+          <repositoryName>crypto</repositoryName>
+          <nexusServer>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories</nexusServer>
+          <nexusUrl>${nexusServer}/${repositoryName}</nexusUrl>	  
     </properties>
     
 
@@ -46,90 +75,197 @@
         </pluginRepository>
     </pluginRepositories>
 
-	<dependencies>
-	
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.8</version>
-		</dependency>    
-
-		<dependency>    
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.6.1</version>
-		</dependency>    
-
-                <dependency>
-                         <groupId>com.ning</groupId>
-                         <artifactId>async-http-client</artifactId>
-                         <version>1.8.15</version>
-                 </dependency>
-
-		<dependency>
-		  <groupId>org.apache.httpcomponents</groupId>
-		  <artifactId>httpclient</artifactId>
-		  <version>4.5</version>
-		</dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>    
+            <dependency>    
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>    
+            <dependency>
+                <groupId>com.ning</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>${ning.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${apache.httpclient.version}</version>
+            </dependency>
                 
-		<!-- test dependencies -->
-		
-		<dependency>    
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-                        <scope>test</scope>
-		</dependency>    	
-
-		<dependency>
-		      <groupId>org.mockito</groupId>
-		      <artifactId>mockito-all</artifactId>
-		      <version>1.10.19</version>
-		      <scope>test</scope>
-		</dependency>
-
+            <!-- test dependencies -->
+            <dependency>    
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>    	
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
 	</dependencies>
+    </dependencyManagement>
+    
+    <build>
+        <defaultGoal>package</defaultGoal>
 
-	<build>
-		<defaultGoal>package</defaultGoal>
-
-		  <pluginManagement>
+        <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <compilerVersion>${java.version}</compilerVersion>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <optimize>false</optimize>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <configuration>
+                        <argLine>${failsafeArgLine}</argLine>
+                        <skipTests>${skip.integration.tests}</skipTests>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addClasspath>true</addClasspath>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                    <configuration>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <argLine>${argLine} ${surefireArgLine}</argLine>
+                        <skipTests>${skip.unit.tests}</skipTests>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                    <executions>
+                        <!--
+                            Prepares the property pointing to the JaCoCo runtime agent which
+                            is passed as VM argument when Maven the Surefire plugin is executed.
+                        -->
+                        <execution>
+                            <id>pre-unit-test</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Sets the path to the file which contains the execution data. -->
+                                <destFile>${jacoco.ut.execution.data.file}</destFile>
+                                <!--
+                                    Sets the name of the property containing the settings
+                                    for JaCoCo runtime agent.
+                                -->
+                                <propertyName>surefireArgLine</propertyName>
+                            </configuration>
+                        </execution>
+                        <!--
+                            Ensures that the code coverage report for unit tests is created after
+                            unit tests have been run.
+                        -->
+                        <execution>
+                            <id>post-unit-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Sets the path to the file which contains the execution data. -->
+                                <dataFile>${jacoco.ut.execution.data.file}</dataFile>
+                                <!-- Sets the output directory for the code coverage report. -->
+                                <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                            </configuration>
+                        </execution>
+                        <!--
+                            Prepares the property pointing to the JaCoCo runtime agent which
+                            is passed as VM argument when Maven the Failsafe plugin is executed.
+                        -->
+                        <execution>
+                            <id>pre-integration-test</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Sets the path to the file which contains the execution data. -->
+                                <destFile>${jacoco.it.execution.data.file}</destFile>
+                                <!--
+                                    Sets the name of the property containing the settings
+                                    for JaCoCo runtime agent.
+                                -->
+                                <propertyName>failsafeArgLine</propertyName>
+                            </configuration>
+                        </execution>
+                        <!--
+                            Ensures that the code coverage report for integration tests after
+                            integration tests have been run.
+                        -->
+                        <execution>
+                            <id>post-integration-test</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <!-- Sets the path to the file which contains the execution data. -->
+                                <dataFile>${jacoco.it.execution.data.file}</dataFile>
+                                <!-- Sets the output directory for the code coverage report. -->
+                                <outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+                            </configuration>
+                        </execution>
+                </executions>
                 </plugin>
             </plugins>
-		  </pluginManagement>   
-
-		<plugins>
-		
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <compilerVersion>${java.version}</compilerVersion>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                    <optimize>false</optimize>
-                </configuration>
-            </plugin>		
-							
-		
-		</plugins>	
-				
-	</build>        
+        </pluginManagement>	
+    </build>        
 	
-    <profiles>	
-	
-		<profile>
-			<id>crypto</id>
-		</profile>
-	
-    </profiles>	
-        
 </project>
