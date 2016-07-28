@@ -20,6 +20,7 @@ import java.io.IOException;
 import com.here.account.bo.AuthenticationHttpException;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.bo.AccessTokenResponse;
 import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
@@ -45,13 +46,13 @@ public class HereAccessTokenProviders {
      * Example code:
      * <pre>
      * {@code
-       // set up urlStart, clientId, and clientSecret.
-       SignIn signIn = HereAccessTokenProviders.getSignIn(
-            ApacheHttpClientProvider.builder().build(), 
-            urlStart, clientId, clientSecret);
-       String hereAccessToken = signIn.signIn(
-            new ClientCredentialsGrantRequest()).getAccessToken();
-       // use hereAccessToken on requests until expires...
+        // set up urlStart, clientId, and clientSecret.
+        AuthorizationObtainer authorizationObtainer = HereAccessTokenProviders.getSignIn(
+             ApacheHttpClientProvider.builder().build(), 
+             urlStart, clientId, clientSecret);
+        String hereAccessToken = authorizationObtainer.postToken(
+             new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
        }
      * </pre>
      * 
