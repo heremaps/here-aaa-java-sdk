@@ -98,8 +98,7 @@ public class AuthorizationObtainer {
         try {
             jsonInputStream = apacheResponse.getResponseBody();
             if (200 == statusCode) {
-                return JsonSerializer.toPojo(
-                        LowerUpperCamelCaseToUnderscoreConverter.convertRootKeysToUnderscores(jsonInputStream)
+                return JsonSerializer.toPojo(jsonInputStream
                         , AccessTokenResponse.class);
             } else {
                 ErrorResponse errorResponse = JsonSerializer.toPojo(jsonInputStream, ErrorResponse.class);
