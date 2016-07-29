@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>here-oauth-client</name>    
+    <name>HERE OAuth Client</name>    
     <artifactId>here-oauth-client</artifactId>
     <packaging>jar</packaging>
-    <description>here-oauth-client is for clients the HERE AAA, and supports OAuth2.0 grant_types=client_credentials</description>
+    <description>here-oauth-client is for clients of the HERE AAA, and supports OAuth2.0 grant_types=client_credentials</description>
 
     <parent>    
 	<groupId>com.here.account</groupId>
-	<artifactId>hereAAAClientAll</artifactId>
+	<artifactId>here-aaa-sdk</artifactId>
 	<version>1.6.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>				
     </parent>

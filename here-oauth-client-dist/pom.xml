@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>HERE OAuth Client Distribution</name>    
+    <artifactId>here-oauth-client-dist</artifactId>
+    <packaging>pom</packaging>
+    <description>here-oauth-client-dist is the distribution package for here-oauth-client</description>
+
+    <parent>    
+	<groupId>com.here.account</groupId>
+	<artifactId>here-aaa-sdk</artifactId>
+	<version>1.6.7-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>				
+    </parent>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <build>
+        
+        <!-- activate these plugins in this build -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/dist.xml</descriptor>
+                    </descriptors>
+                    <tarLongFileMode>posix</tarLongFileMode>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.here.account</groupId>
+            <artifactId>here-oauth-client</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.here.account</groupId>
+            <artifactId>here-oauth-client</artifactId>
+            <classifier>javadoc</classifier>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
+</project>

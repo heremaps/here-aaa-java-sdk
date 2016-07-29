@@ -1,0 +1,32 @@
+  _  _ ___ ___ ___     _    _    _
+ | || | __| _ \ __|   /_\  /_\  /_\
+ | __ | _||   / _|   / _ \/ _ \/ _ \
+ |_||_|___|_|_\___| /_/ \_\/ \_\/ \_\
+
+HERE Authentication, Authorization, and Accounting
+
+Authentication https://confluence.in.here.com/display/HEREAccount
+Authorization  https://confluence.in.here.com/display/APIPlatform/Sentry
+Accounting     https://confluence.in.here.com/display/APIPlatform/Unity
+
+For help, contact HERE_ACCOUNT_SUPPORT@here.com and ampsupport@here.com.
+Built using Apache Maven (https://maven.apache.org/)
+
+Developer Setup
+===============
+
+1. Requires Java 1.8.
+
+Configuration
+=============
+
+Using the SDK simply requires including the included JAR file in your project's classpath.
+
+Developer Usage
+===============
+
+Read the javadocs for details, included in the /javadoc directory.  If you are just getting started, 
+go to HereAccessTokenProviders.java javadocs for the overview of two options:
+- get an "always fresh" HERE Access Token via getRefreshableClientAuthorizationProvider(..) approach
+- explicitly generate a HERE Access Token via getSignIn(..) approach
+
