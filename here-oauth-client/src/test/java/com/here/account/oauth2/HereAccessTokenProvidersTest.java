@@ -32,10 +32,11 @@ public class HereAccessTokenProvidersTest extends AbstractCredentialTezt {
     @Test
     public void test_getSignIn_javadocs() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
         // set up urlStart, clientId, and clientSecret.
-        SignIn signIn = HereAccessTokenProviders.getSignIn(
-             ApacheHttpClientProvider.builder().build(), 
-             urlStart, clientId, clientSecret);
-        String hereAccessToken = signIn.postToken(
+        AuthorizationObtainer authorizationObtainer = HereAccessTokenProviders
+             .getAuthorizationObtainer(
+                     ApacheHttpClientProvider.builder().build(), 
+                     urlStart, clientId, clientSecret);
+        String hereAccessToken = authorizationObtainer.postToken(
              new ClientCredentialsGrantRequest()).getAccessToken();
         // use hereAccessToken on requests until expires...
     }

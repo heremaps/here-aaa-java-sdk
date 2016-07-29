@@ -27,13 +27,13 @@ import java.util.Map;
  * @author kmccrack
  *
  */
-public abstract class AuthorizationRequest {
+public abstract class AccessTokenRequest {
 
     static final String GRANT_TYPE = "grantType";
     
     private final String grantType;
     
-    protected AuthorizationRequest(String grantType) {
+    protected AccessTokenRequest(String grantType) {
         this.grantType = grantType;
     }
     

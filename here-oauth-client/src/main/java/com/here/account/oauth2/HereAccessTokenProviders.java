@@ -46,13 +46,14 @@ public class HereAccessTokenProviders {
      * Example code:
      * <pre>
      * {@code
-       // set up urlStart, clientId, and clientSecret.
-       SignIn signIn = HereAccessTokenProviders.getSignIn(
-            ApacheHttpClientProvider.builder().build(), 
-            urlStart, clientId, clientSecret);
-       String hereAccessToken = signIn.signIn(
-            new ClientCredentialsGrantRequest()).getAccessToken();
-       // use hereAccessToken on requests until expires...
+        // set up urlStart, clientId, and clientSecret.
+        AuthorizationObtainer authorizationObtainer = HereAccessTokenProviders
+             .getAuthorizationObtainer(
+                     ApacheHttpClientProvider.builder().build(), 
+                     urlStart, clientId, clientSecret);
+        String hereAccessToken = authorizationObtainer.postToken(
+             new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
        }
      * </pre>
      * 
@@ -64,11 +65,11 @@ public class HereAccessTokenProviders {
      *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
      * @return the ability to SignIn.
      */
-    public static SignIn getSignIn(
+    public static AuthorizationObtainer getAuthorizationObtainer(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) {
         return
-                new SignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+                new AuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
     }
     
@@ -112,14 +113,14 @@ public class HereAccessTokenProviders {
     public static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientAuthorizationProvider(
             HttpProvider httpProvider,
             String urlStart, String clientId, String clientSecret) throws IOException, AuthenticationHttpException, HttpException {
-        SignIn signIn = 
-                getSignIn( httpProvider,  urlStart,  clientId,  clientSecret 
+        AuthorizationObtainer authorizationObtainer = 
+                getAuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
                         );
         Long optionalRefreshIntervalMillis = null;
         return new RefreshableResponseProvider<AccessTokenResponse>(
                 optionalRefreshIntervalMillis,
-                signIn.postToken(new ClientCredentialsGrantRequest()),
-                new ClientCredentialsRefresher(signIn));
+                authorizationObtainer.postToken(new ClientCredentialsGrantRequest()),
+                new ClientCredentialsRefresher(authorizationObtainer));
     }
     
 }
