@@ -13,20 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.bo;
 
-public class AuthenticationRuntimeException extends RuntimeException {
-
-    /**
-     * default
-     */
-    private static final long serialVersionUID = 1L;
-
-    public AuthenticationRuntimeException(String msg) {
-        super(msg);
-    }
-    
-    public AuthenticationRuntimeException(String msg, Exception cause) {
-        super(msg, cause);
-    }
-}
+/**
+ * An Apache HTTP Client Implementation of {@code com.here.account.http}.
+ */
+package com.here.account.http.apache;

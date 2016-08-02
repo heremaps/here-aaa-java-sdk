@@ -24,7 +24,7 @@ import com.here.account.http.HttpProvider.HttpRequest;
 /**
  * Appends the specified 
  * <a href="https://tools.ietf.org/html/rfc6750">OAuth2.0 Bearer Token</a>
- * the the HTTP request.
+ * to the HTTP request.
  * 
  * <p>
  * See also 

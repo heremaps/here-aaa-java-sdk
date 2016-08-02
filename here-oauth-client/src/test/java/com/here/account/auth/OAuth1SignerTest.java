@@ -1,5 +1,6 @@
 package com.here.account.auth;
 
+import com.here.account.auth.OAuth1Signer;
 import static org.junit.Assert.assertTrue;
 
 import java.security.InvalidKeyException;

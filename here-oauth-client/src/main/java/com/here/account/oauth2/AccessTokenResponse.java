@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2.bo;
+package com.here.account.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
 
 /**
- * See the OAuth2.0 
+ * Represents a parsed response received from an OAuth2.0 token endpoint. See the OAuth2.0 
  * <a href="https://tools.ietf.org/html/rfc6749#section-5.1">Successful Response</a> 
  * section for details.
  * 

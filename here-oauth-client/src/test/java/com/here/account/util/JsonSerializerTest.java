@@ -29,7 +29,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.here.account.oauth2.bo.AccessTokenResponse;
+import com.here.account.oauth2.AccessTokenResponse;
 
 public class JsonSerializerTest {
 

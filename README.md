@@ -30,9 +30,9 @@ Substitute your Staging clientId, clientSecret above, to achieve success.
 Developer Usage
 ===============
 
-Read the javadocs for details.  If you are just getting started, go to HereAccessTokenProviders.java javadocs for the overview of two options:
-- get an "always fresh" HERE Access Token via getRefreshableClientAuthorizationProvider(..) approach
-- explicitly generate a HERE Access Token via getSignIn(..) approach
+Read the javadocs for details.  If you are just getting started, go to Account.java javadocs for the overview of two options:
+- get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
+- get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 
 Sub-Projects
 ============

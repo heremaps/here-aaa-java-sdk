@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2.bo;
+package com.here.account.oauth2;
 
 /* Example:
-com.here.account.bo.AuthenticationHttpException: HTTP status code 401, body 
+com.here.account.AccessTokenException: HTTP status code 401, body 
 {"errorId":"ERROR-905ffdd8-34b1-4fc7-ba98-775206d292f9","httpStatus":401,"hereErrorCode":401400,"errorCode":401400,"message":"Invalid Credentials for user:test4312@example.com"}
  */
 /**
- * The POJO representation of a HERE authorization server error response.
+ * The POJO representation of an OAuth2.0 HERE authorization server error response.
  * See also the 
  * OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
  * section.

@@ -15,21 +15,18 @@
  */
 package com.here.account.oauth2;
 
-
-import org.junit.Before;
-
-
-public abstract class AbstractCredentialTezt {
-
-    String url;
-    String accessKeyId;
-    String accessKeySecret;
+/**
+ * Wraps an object such that it is guaranteed to be "fresh" or always up to date.
+ * The definition of "fresh" is implementation specific.
+ * 
+ * @param <T> the type of the represented object
+ */
+public interface Fresh<T> {
     
-    @Before
-    public void setUp() throws Exception {
-        url = System.getProperty("urlStart") + "/oauth2/token";
-        accessKeyId = System.getProperty("clientId");
-        accessKeySecret = System.getProperty("clientSecret");
-    }
-
+    /**
+     * Get the most up to date version of the wrapped object.
+     * 
+     * @return a "fresh" version of the object
+     */
+    T get();
 }

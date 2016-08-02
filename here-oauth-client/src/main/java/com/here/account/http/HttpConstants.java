@@ -17,7 +17,15 @@ package com.here.account.http;
 
 import java.nio.charset.Charset;
 
+/**
+ * Utility class which defines constants used in HTTP operations.
+ */
 public class HttpConstants {
+    
+    /**
+     * This class cannot be instantiated.
+     */
+    private HttpConstants() {}
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final Charset ENCODING_CHARSET = Charset.forName("UTF-8");

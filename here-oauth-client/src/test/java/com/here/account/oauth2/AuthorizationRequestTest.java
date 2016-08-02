@@ -1,4 +1,4 @@
-package com.here.account.oauth2.bo;
+package com.here.account.oauth2;
 
 import static org.junit.Assert.assertTrue;
 

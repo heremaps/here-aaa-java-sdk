@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.bo;
-
-import com.here.account.oauth2.bo.ErrorResponse;
+package com.here.account.oauth2;
 
 /**
  * If you had trouble authenticating, and got an HTTP response, 
@@ -28,7 +26,7 @@ import com.here.account.oauth2.bo.ErrorResponse;
  * @author kmccrack
  *
  */
-public class AuthenticationHttpException extends Exception {
+public class AccessTokenException extends Exception {
 
     /**
      * default.
@@ -38,7 +36,7 @@ public class AuthenticationHttpException extends Exception {
     private final int statusCode;
     private final ErrorResponse errorResponse;
     
-    public AuthenticationHttpException(int statusCode, ErrorResponse errorResponse) {
+    public AccessTokenException(int statusCode, ErrorResponse errorResponse) {
         super("HTTP status code " + statusCode + ", body " + errorResponse);
         this.statusCode = statusCode;
         this.errorResponse = errorResponse;

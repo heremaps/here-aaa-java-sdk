@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2.bo;
+package com.here.account.oauth2;
 
 import java.util.Collections;
 import java.util.List;

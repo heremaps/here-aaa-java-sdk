@@ -20,13 +20,20 @@ Developer Setup
 Configuration
 =============
 
-Using the SDK simply requires including the included JAR file in your project's classpath.
+Manual usage
+============
 
-Developer Usage
+Using the SDK simply requires including the included here-oauth-client JAR file in your project's classpath.
+
+NOTE: This library requires the here-oauth-client JAR file as well as the JAR files
+in the /lib directory to be available on your classpath.  By default, the /lib JARs
+are referenced in the here-oauth-client's Class-Path.
+
+Documentation
 ===============
 
-Read the javadocs for details, included in the /javadoc directory.  If you are just getting started, 
-go to HereAccessTokenProviders.java javadocs for the overview of two options:
-- get an "always fresh" HERE Access Token via getRefreshableClientAuthorizationProvider(..) approach
-- explicitly generate a HERE Access Token via getSignIn(..) approach
+Read the javadocs for details, included in the /javadoc directory.  Open the /javadoc/index.html
+to get started.  To skip ahead, go to HereAccount.java javadocs for the overview of two options:
+- get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
+- get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 

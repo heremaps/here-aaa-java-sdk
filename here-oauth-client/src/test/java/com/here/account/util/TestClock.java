@@ -21,7 +21,6 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.here.account.util.Clock;
 
 /**
  * A TestClock starts at currentTimeMillis = System.currentTimeMillis(), but you can call 

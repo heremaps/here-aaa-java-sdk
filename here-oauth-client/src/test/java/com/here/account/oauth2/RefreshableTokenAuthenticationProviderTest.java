@@ -15,7 +15,7 @@
  */
 package com.here.account.oauth2;
 
-import static org.junit.Assert.assertTrue;
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -25,15 +25,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.here.account.bo.AuthenticationHttpException;
-import com.here.account.bo.AuthenticationRuntimeException;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
-import com.here.account.oauth2.bo.AccessTokenResponse;
-import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
 import com.here.account.util.RefreshableResponseProvider;
+import static org.junit.Assert.assertTrue;
 
 public class RefreshableTokenAuthenticationProviderTest extends AbstractCredentialTezt {
 
@@ -41,7 +38,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
     RefreshableResponseProvider<AccessTokenResponse> provider;
     
     @Before
-    public void setUp() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+    public void setUp() throws Exception {
         super.setUp();
         
         httpProvider = ApacheHttpClientProvider.builder()
@@ -49,17 +46,24 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
         .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
         .build();
 
-        AuthorizationObtainer signIn = 
-                HereAccessTokenProviders.getAuthorizationObtainer( httpProvider,  urlStart,  clientId,  clientSecret 
+        TokenEndpoint tokenEndpoint = 
+                HereAccount.getTokenEndpoint(httpProvider,  
+                                             new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret)
                         );
         long optionalRefreshIntervalMillis = 100L;
         this.provider = new RefreshableResponseProvider<AccessTokenResponse>(
                 optionalRefreshIntervalMillis,
-                signIn.postToken(new ClientCredentialsGrantRequest()),
-                new ClientCredentialsRefresher(signIn));
+                tokenEndpoint.requestToken(new ClientCredentialsGrantRequest()),
+                (AccessTokenResponse previous) -> {
+                    try {
+                        return tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+                    } catch (AccessTokenException | RequestExecutionException | ResponseParsingException e) {
+                        throw new RuntimeException("trouble refresh: " + e, e);
+                    }
+                });
     }
     
-    protected static void verifyLoopChanges(RefreshableResponseProvider<AccessTokenResponse> signedIn) throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+    protected static void verifyLoopChanges(RefreshableResponseProvider<AccessTokenResponse> signedIn) throws IOException, AccessTokenException, HttpException {
         String hereAccessToken = signedIn.getUnexpiredResponse().getAccessToken();
         assertTrue("hereAccessToken was null or blank", null != hereAccessToken && hereAccessToken.length() > 0);
 
@@ -83,7 +87,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
     }
 
     protected static String verifyChanges(
-            RefreshableResponseProvider<AccessTokenResponse> signedIn, String hereAccessToken) throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+            RefreshableResponseProvider<AccessTokenResponse> signedIn, String hereAccessToken) throws IOException, AccessTokenException, HttpException {
         long expires = System.currentTimeMillis() + 10*1000L;
         String newAccessToken = hereAccessToken;
         int countSame = 0;
@@ -103,7 +107,7 @@ public class RefreshableTokenAuthenticationProviderTest extends AbstractCredenti
 
     
     @Test
-    public void test_10tokens() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+    public void test_10tokens() throws IOException, AccessTokenException, HttpException {
         verifyLoopChanges(provider);
     }
     

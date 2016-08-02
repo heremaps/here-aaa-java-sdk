@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2.bo;
+package com.here.account.oauth2;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * For grant_type=client_credentials.
+ * An {@link AccessTokenRequest} for grant_type=client_credentials.
  * 
  * @author kmccrack
  *

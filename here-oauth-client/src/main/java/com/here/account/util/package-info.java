@@ -13,23 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2;
 
-
-import org.junit.Before;
-
-
-public abstract class AbstractCredentialTezt {
-
-    String url;
-    String accessKeyId;
-    String accessKeySecret;
-    
-    @Before
-    public void setUp() throws Exception {
-        url = System.getProperty("urlStart") + "/oauth2/token";
-        accessKeyId = System.getProperty("clientId");
-        accessKeySecret = System.getProperty("clientSecret");
-    }
-
-}
+/**
+ * HERE Account utility classes.
+ */
+package com.here.account.util;

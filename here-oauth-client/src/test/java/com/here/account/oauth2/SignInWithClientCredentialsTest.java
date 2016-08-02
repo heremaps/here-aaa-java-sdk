@@ -15,43 +15,37 @@
  */
 package com.here.account.oauth2;
 
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.here.account.bo.AuthenticationHttpException;
-import com.here.account.bo.AuthenticationRuntimeException;
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpConstants;
-import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
-import com.here.account.oauth2.bo.ClientCredentialsGrantRequest;
-import com.here.account.oauth2.bo.ErrorResponse;
+import static org.junit.Assert.assertTrue;
 
 public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
     HttpProvider httpProvider;
-    AuthorizationObtainer signIn;
+    TokenEndpoint signIn;
     
     @Before
-    public void setUp() throws AuthenticationRuntimeException, IOException, AuthenticationHttpException, HttpException {
+    public void setUp() throws Exception {
         super.setUp();
-        //    public SignInWithClientCredentials(String urlStart, String clientId, String clientSecret) {
         
         httpProvider = ApacheHttpClientProvider.builder()
         .setConnectionTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS)
         .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
         .build();
         
-        this.signIn = new AuthorizationObtainer(
+        this.signIn = HereAccount.getTokenEndpoint(
                 httpProvider,
-                urlStart, clientId, clientSecret
-                );
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret)
+        );
     }
     
     @After
@@ -62,21 +56,21 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
     }
 
     @Test
-    public void test_signIn() throws IOException, InterruptedException, ExecutionException, AuthenticationHttpException, AuthenticationRuntimeException, HttpException {
-        String hereAccessToken = signIn.postToken(new ClientCredentialsGrantRequest()).getAccessToken();
+    public void test_signIn() throws Exception {
+        String hereAccessToken = signIn.requestToken(new ClientCredentialsGrantRequest()).getAccessToken();
         assertTrue("hereAccessToken was null or blank", null != hereAccessToken && hereAccessToken.length() > 0);
     }
     
     @Test
-    public void test_signIn_fatFinger() throws AuthenticationRuntimeException, IOException, HttpException {
-        this.signIn = new AuthorizationObtainer(
+    public void test_signIn_fatFinger() throws Exception {
+        this.signIn = HereAccount.getTokenEndpoint(
                 httpProvider,
-                urlStart, clientId, "fat" + clientSecret
-                );
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "fat" + accessKeySecret)
+        );
 
         try{
-            signIn.postToken(new ClientCredentialsGrantRequest()).getAccessToken();
-        } catch (AuthenticationHttpException e) {
+            signIn.requestToken(new ClientCredentialsGrantRequest()).getAccessToken();
+        } catch (AccessTokenException e) {
             ErrorResponse errorResponse = e.getErrorResponse();
             assertTrue("errorResponse was null", null != errorResponse);
             Integer errorCode = errorResponse.getErrorCode();
