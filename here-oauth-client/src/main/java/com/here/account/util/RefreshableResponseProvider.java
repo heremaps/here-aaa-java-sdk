@@ -46,7 +46,7 @@ import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
  * @author ramsden
  * @author Adam Stuenkel
  */
-public class RefreshableResponseProvider<T extends ExpiringResponse> {//implements GetHereAccessToken {//implements AuthenticationProvider {
+public class RefreshableResponseProvider<T extends ExpiringResponse> {
   private static final Logger LOG = Logger.getLogger(RefreshableResponseProvider.class.getName());
 
   /**
