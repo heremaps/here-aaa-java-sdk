@@ -53,27 +53,27 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
     private final Clock clock;
     
     /**
-     * HERE clientId.  Becomes the value of oauth_consumer_key in the 
+     * HERE client accessKeyId.  Becomes the value of oauth_consumer_key in the 
      * Authorization: OAuth header.
      */
-    private final String clientId;
+    private final String accessKeyId;
     
     /**
-     * HERE clientSecret.  Used to calculate the oauth_signature in the 
+     * HERE client accessKeySecret.  Used to calculate the oauth_signature in the 
      * Authorization: OAuth header.
      */
-    private final String clientSecret;
+    private final String accessKeySecret;
     
     /**
-     * Construct the OAuth signer based on clientId and clientSecret.
+     * Construct the OAuth signer based on accessKeyId and accessKeySecret.
      * 
-     * @param clientId the HERE clientId.  Becomes the value of oauth_consumer_key in 
+     * @param accessKeyId the HERE client accessKeyId.  Becomes the value of oauth_consumer_key in 
      *      the Authorization: OAuth header.
-     * @param clientSecret the HERE clientSecret.  Used to calculate the oauth_signature 
+     * @param accessKeySecret the HERE client accessKeySecret.  Used to calculate the oauth_signature 
      *      in the Authorization: OAuth header.
      */
-    public OAuth1Signer(String clientId, String clientSecret) {
-        this(Clock.SYSTEM, clientId, clientSecret);
+    public OAuth1Signer(String accessKeyId, String accessKeySecret) {
+        this(Clock.SYSTEM, accessKeyId, accessKeySecret);
     }
     
     /**
@@ -81,15 +81,15 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * Use this if you want to inject your own clock, such as during unit tests.
      * 
      * @param clock the implementation of a clock you want to use
-     * @param clientId the HERE clientId.  Becomes the value of oauth_consumer_key in 
+     * @param accessKeyId the HERE clientId.  Becomes the value of oauth_consumer_key in 
      *      the Authorization: OAuth header.
-     * @param clientSecret the HERE clientSecret.  Used to calculate the oauth_signature 
+     * @param accessKeySecret the HERE clientSecret.  Used to calculate the oauth_signature 
      *      in the Authorization: OAuth header.
      */
-    OAuth1Signer(Clock clock, String clientId, String clientSecret) {
+    OAuth1Signer(Clock clock, String accessKeyId, String accessKeySecret) {
         this.clock = clock;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+        this.accessKeyId = accessKeyId;
+        this.accessKeySecret = accessKeySecret;
     }
 
     /**
@@ -117,7 +117,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * Section.
      * 
      * <p>
-     * Note that the clientSecret, once configured on this object, does not leave this method, 
+     * Note that the accessKeySecret, once configured on this object, does not leave this method, 
      * as signatures are used in its place on the wire.
      * 
      * @param method
@@ -157,10 +157,10 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         // If the request is not associated with a resource owner
         // (no token available), clients MAY omit the parameter.
         RequestToken emptyUserAuth = new RequestToken(null, "");
-        // clientId is "Client Identifier" a.k.a. "oauth_consumer_key" in the OAuth1.0 spec
-        // clientSecret is "Client Shared-Secret" , which becomes the client shared-secret component 
+        // client accessKeyId is "Client Identifier" a.k.a. "oauth_consumer_key" in the OAuth1.0 spec
+        // client accessKeySecret is "Client Shared-Secret" , which becomes the client shared-secret component 
         // of the HMAC-SHA1 key per http://tools.ietf.org/html/rfc5849#section-3.4.2.
-        ConsumerKey consumerKey = new ConsumerKey(clientId, clientSecret);
+        ConsumerKey consumerKey = new ConsumerKey(accessKeyId, accessKeySecret);
         OAuthSignatureCalculator calculator = new OAuthSignatureCalculator(consumerKey, emptyUserAuth);
         return calculator;
     }

@@ -15,10 +15,15 @@
  */
 package com.here.account.auth;
 
-import com.here.account.http.HttpProvider;
-import com.here.account.oauth2.ClientCredentialsProvider;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.Properties;
+
+import com.here.account.http.HttpProvider;
+import com.here.account.oauth2.ClientCredentialsProvider;
 
 /**
  * A {@link ClientCredentialsProvider} that injects client credentials by signing
@@ -85,6 +90,46 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
             super(properties.getProperty(URL_PROPERTY),
                   properties.getProperty(ACCESS_KEY_ID_PROPERTY),
                   properties.getProperty(ACCESS_KEY_SECRET_PROPERTY));
+        }
+    }
+    
+    /**
+     * An {@link FromProperties} that pulls credential values from the specified File.
+     */
+    public static class FromFile extends FromProperties {
+        
+        /**
+         * Builds an {@link OAuth1ClientCredentialsProvider} by pulling the
+         * required url, accessKeyId, and accessKeySecret from the given
+         * File.
+         * 
+         * @param file the File object to pull the required credentials from
+         * @throws IOException
+         */
+        public FromFile(File file) throws IOException {
+            super(getPropertiesFromFile(file));
+        }
+        
+        /**
+         * Loads the File as an InputStream into a new Properties object, 
+         * and returns it.
+         * 
+         * @param file the File to use as input
+         * @return the Properties populated from the specified file's contents
+         * @throws IOException
+         */
+        private static Properties getPropertiesFromFile(File file) throws IOException {
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                return properties;
+            } finally {
+                if (null != inputStream) {
+                    inputStream.close();
+                }
+            }
         }
     }
 }

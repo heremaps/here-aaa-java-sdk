@@ -16,20 +16,85 @@
 package com.here.account.oauth2;
 
 
+import java.io.File;
+import java.lang.reflect.Field;
+
 import org.junit.Before;
+
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import com.here.account.auth.OAuth1Signer;
 
 
 public abstract class AbstractCredentialTezt {
-
+    
+    OAuth1ClientCredentialsProvider hereCredentialsProvider;
+    
+    private static final String USER_DOT_HOME = "user.home";
+    private static final String DOT_HERE_SUBDIR = ".here";
+    private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
+    
+    protected File getDefaultCredentialsFile() {
+        String userDotHome = System.getProperty(USER_DOT_HOME);
+        if (userDotHome != null && userDotHome.length() > 0) {
+            File dir = new File(userDotHome, DOT_HERE_SUBDIR);
+            if (dir.exists() && dir.isDirectory()) {
+                File file = new File(dir, CREDENTIALS_DOT_PROPERTIES_FILENAME);
+                if (file.exists() && file.isFile()) {
+                    return file;
+                }
+            }
+        }
+        return null;
+    }
+    
+    protected String getDefaultCredentialsFilePathString() {
+        return "~" + File.separatorChar + DOT_HERE_SUBDIR + File.separatorChar + CREDENTIALS_DOT_PROPERTIES_FILENAME;
+    }
+    
     String url;
     String accessKeyId;
     String accessKeySecret;
     
     @Before
     public void setUp() throws Exception {
-        url = System.getProperty("urlStart") + "/oauth2/token";
-        accessKeyId = System.getProperty("clientId");
-        accessKeySecret = System.getProperty("clientSecret");
+        File file = getDefaultCredentialsFile();
+        if (null != file) {
+            OAuth1ClientCredentialsProvider propertiesCredentialsProvider = 
+                    new OAuth1ClientCredentialsProvider.FromFile(file);
+            hereCredentialsProvider = propertiesCredentialsProvider;
+            url = hereCredentialsProvider.getTokenEndpointUrl();
+            Field field = OAuth1ClientCredentialsProvider.class.getDeclaredField("oauth1Signer");
+            field.setAccessible(true);
+            OAuth1Signer oauth1Signer = (OAuth1Signer) field.get(hereCredentialsProvider);
+            field = OAuth1Signer.class.getDeclaredField("accessKeyId");
+            field.setAccessible(true);
+            accessKeyId = (String) field.get(oauth1Signer);
+            field = OAuth1Signer.class.getDeclaredField("accessKeySecret");
+            field.setAccessible(true);
+            accessKeySecret = (String) field.get(oauth1Signer);
+        }
+        
+        String url = System.getProperty("urlStart") + "/oauth2/token";
+        String accessKeyId = System.getProperty("clientId");
+        String accessKeySecret = System.getProperty("clientSecret");
+        if (isNotBlank(url) && isNotBlank(accessKeyId) && isNotBlank(accessKeySecret)) {
+            this.url = url;
+            this.accessKeyId = accessKeyId;
+            this.accessKeySecret = accessKeySecret;
+            // System.properties override
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
+        }
+        
+        /*
+        // verify some credentials will be available
+        assertTrue("no credentials configs were available, try populating "
+                + getDefaultCredentialsFilePathString(), 
+                null != hereCredentialsProvider);
+                */
+    }
+
+    protected boolean isNotBlank(String str) {
+        return null != str && str.trim().length() > 0;
     }
 
 }
