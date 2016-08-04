@@ -104,7 +104,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
          * File.
          * 
          * @param file the File object to pull the required credentials from
-         * @throws IOException
+         * @throws IOException if there is a problem loading the file
          */
         public FromFile(File file) throws IOException {
             super(getPropertiesFromFile(file));

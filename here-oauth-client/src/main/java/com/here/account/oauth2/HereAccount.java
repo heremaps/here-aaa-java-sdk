@@ -71,6 +71,25 @@ import java.io.UncheckedIOException;
  * </pre>
  * </li>
  * </ul>
+ * 
+ * <p>
+ * Convenience {@link ClientCredentialsProvider} implementations are also available to
+ * automatically pull the {@code url}, {@code accessKeyId}, and {@code accessKeySecret}
+ * from a {@code Properties} object or properties file:
+ * <ul>
+ * <li>
+ * Get configuration from properties file:
+ * <pre>
+ * {@code
+        // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile("credentials.properties"));
+   }
+ * </pre>
+ * </li>
+ * 
+ * </ul>
  */
 public class HereAccount {
     

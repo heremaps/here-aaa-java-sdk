@@ -19,8 +19,6 @@ package com.here.account.oauth2;
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.HttpProvider.HttpRequest;
-import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.HttpProvider.HttpResponse;
 import org.junit.Test;
 
@@ -28,9 +26,9 @@ import com.here.account.http.apache.ApacheHttpClientProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 import org.junit.Assert;
+import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
 
 public class HereAccountTest extends AbstractCredentialTezt {
 
@@ -113,11 +111,11 @@ public class HereAccountTest extends AbstractCredentialTezt {
     }
     
     @Test
-    public void testGetTokenInvalidResponse() throws Exception {
+    public void testGetTokenInvalidResponseBody() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                new MockHttpProvider(
-                        ApacheHttpClientProvider.builder().build(),
-                        new ByteArrayInputStream("bogus".getBytes("UTF-8"))),
+                mockHttpProvider(dummyResponse(200, 
+                                               "bogus".getBytes().length, 
+                                               new ByteArrayInputStream("bogus".getBytes("UTF-8")))),
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         
         try {
@@ -131,9 +129,9 @@ public class HereAccountTest extends AbstractCredentialTezt {
     @Test
     public void testGetTokenInvalidErrorResponse() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                new MockHttpProvider(
-                        ApacheHttpClientProvider.builder().build(),
-                        new ByteArrayInputStream("bogus".getBytes("UTF-8"))),
+                mockHttpProvider(dummyResponse(400, 
+                                               "bogus".getBytes().length, 
+                                               new ByteArrayInputStream("bogus".getBytes("UTF-8")))),
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
         
         try {
@@ -144,57 +142,107 @@ public class HereAccountTest extends AbstractCredentialTezt {
         }
     }
     
+    @Test
+    public void testGetTokenHttpExceptionExecuting() throws Exception {
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockThrowingHttpProvider(new HttpException("error")),
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+        
+        try {
+            tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+            Assert.fail("Expected RequestExecutionException");
+        } catch (RequestExecutionException ree) {
+            
+        }
+    }
+    
+    @Test
+    public void testGetTokenIOExceptionExecuting() throws Exception {
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockThrowingHttpProvider(new IOException("error")),
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+        
+        try {
+            tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+            Assert.fail("Expected RequestExecutionException");
+        } catch (RequestExecutionException ree) {
+            
+        }
+    }
+    
+    @Test
+    public void testGetFreshTokenVerifyRefresh() throws Exception {
+        // first token expires after 30 seconds (minimum refresh time)
+        String validToken1 = "{"
+                + " \"access_token\": \"12345\","
+                + " \"expires_in\": 30"
+                + "}";
+        String validToken2 = "{"
+                + " \"access_token\": \"67890\","
+                + " \"expires_in\": 30"
+                + "}";
+        
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockHttpProvider(dummyResponse(200, 
+                                               validToken1.getBytes().length, 
+                                               new ByteArrayInputStream(validToken1.getBytes("UTF-8"))),
+                                 dummyResponse(200,
+                                               validToken2.getBytes().length,
+                                               new ByteArrayInputStream(validToken2.getBytes("UTF-8")))),
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+        
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.
+                requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+        // verify validToken1
+        Assert.assertEquals("12345", freshToken.get().getAccessToken());
+        Assert.assertEquals("12345", freshToken.get().getAccessToken());
+        // wait for refresh
+        Thread.sleep(31000);
+        // verify validToken2
+        Assert.assertEquals("67890", freshToken.get().getAccessToken());
+    }
+    
+    
+    private HttpResponse dummyResponse(final int statusCode,
+                                       final long contentLength,
+                                       final InputStream body) {
+        return new HttpResponse() {
+            @Override
+            public int getStatusCode() {
+                return statusCode;
+            }
+            
+            @Override
+            public long getContentLength() {
+                return contentLength;
+            }
+            
+            @Override
+            public InputStream getResponseBody() throws IOException {
+                return body;
+            }
+        };
+    }
     
     /**
-     * Wrap an HttpProvider into a provider that will always
-     * intercept the response and return the provided response body.
+     * Build a mock HttpProvider that always returns the provided response body.
      */
-    private static class MockHttpProvider implements HttpProvider {
-        private final HttpProvider wrapped;
-        private final InputStream mockResponse;
-        private MockHttpProvider(HttpProvider wrapped,
-                                  InputStream mockResponse) {
-            this.wrapped = wrapped;
-            this.mockResponse = mockResponse;
+    private HttpProvider mockHttpProvider(HttpResponse... responses) throws Exception {
+        HttpProvider mock = Mockito.mock(HttpProvider.class);
+        OngoingStubbing<HttpResponse> stub = Mockito.when(mock.execute(Mockito.any()));
+        for (HttpResponse response : responses) {
+            stub = stub.thenReturn(response);
         }
-
-        @Override
-        public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
-            HttpResponse response = wrapped.execute(httpRequest);
-            return new HttpResponse() {
-                @Override
-                public int getStatusCode() {
-                    return response.getStatusCode();
-                }
-
-                @Override
-                public long getContentLength() {
-                    return response.getContentLength();
-                }
-
-                @Override
-                public InputStream getResponseBody() throws IOException {
-                    return mockResponse;
-                }
-            };
-        }
-
-        @Override
-        public void close() throws IOException {
-            wrapped.close();
-        }
-
-        @Override
-        public HttpRequest getRequest(HttpRequestAuthorizer httpSigner, String method, String url, Map<String, List<String>> formParams) {
-            return wrapped.getRequest(httpSigner, method, url, formParams);
-        }
-
-        @Override
-        public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url, String requestBodyJson) {
-            return wrapped.getRequest(httpRequestAuthorizer, method, url, requestBodyJson);
-        }
-        
-        
-        
+        return mock;
+    }
+    
+    /**
+     * Build a mock HttpProvider that always throws the given exception when
+     * attempting to execute the http request.
+     */
+    private HttpProvider mockThrowingHttpProvider(final Throwable throwable) throws Exception {
+        HttpProvider mock = Mockito.mock(HttpProvider.class);
+        Mockito.when(mock.execute(Mockito.any())).thenThrow(throwable);
+        return mock;
     }
 }
