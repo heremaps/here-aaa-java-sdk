@@ -75,9 +75,9 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      */
     public static class FromProperties extends OAuth1ClientCredentialsProvider {
         
-        public static final String URL_PROPERTY = "com.here.account.auth.token.endpoint.url";
-        public static final String ACCESS_KEY_ID_PROPERTY = "com.here.account.auth.access.key.id";
-        public static final String ACCESS_KEY_SECRET_PROPERTY = "com.here.account.auth.access.key.secret";
+        public static final String URL_PROPERTY = "here.token.endpoint.url";
+        public static final String ACCESS_KEY_ID_PROPERTY = "here.access.key.id";
+        public static final String ACCESS_KEY_SECRET_PROPERTY = "here.access.key.secret";
 
         /**
          * Builds an {@link OAuth1ClientCredentialsProvider} by pulling the
