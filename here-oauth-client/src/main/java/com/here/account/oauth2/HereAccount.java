@@ -15,10 +15,13 @@
  */
 package com.here.account.oauth2;
 
+import java.io.File;
 import java.io.IOException;
 
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.JsonSerializer;
 import com.here.account.util.RefreshableResponseProvider;
 import java.io.InputStream;
@@ -84,7 +87,11 @@ import java.io.UncheckedIOException;
         // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider.FromFile("credentials.properties"));
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        // choose 
+        //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+        // or 
+        //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
    }
  * </pre>
  * </li>

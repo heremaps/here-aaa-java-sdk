@@ -16,21 +16,46 @@
 package com.here.account.oauth2;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
+
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
-import org.junit.Test;
-
 import com.here.account.http.apache.ApacheHttpClientProvider;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import org.junit.Assert;
-import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 
 public class HereAccountTest extends AbstractCredentialTezt {
+
+    /**
+     * We expect FileNotFoundException because we expect the current working directory 
+     * not to contain credentials.properties.
+     * Clients are free to put their "credentials.properties" File anywhere on their filesystem, 
+     * for positive outcomes.
+     * This test verifies the Javadoc sample compiles; 
+     * it would not throw any Exception if the File existed.
+     * 
+     * @throws IOException
+     */
+    @Test(expected=FileNotFoundException.class) 
+    public void test_file_javadocs() throws IOException {
+        // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        // choose 
+        //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+        // or 
+        //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+    }
 
     @Test
     public void test_getSignIn_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
