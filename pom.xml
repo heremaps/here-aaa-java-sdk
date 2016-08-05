@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>HERE AAA Client SDK Parent POM</name>    
+    <name>HERE AAA Client SDK Parent POM</name>
     <groupId>com.here.account</groupId>
     <artifactId>here-aaa-sdk</artifactId>
     <version>0.1.0-SNAPSHOT</version>
@@ -21,7 +21,7 @@
         <java.source.linelength>120</java.source.linelength>
         <java.source.tabwidth>4</java.source.tabwidth>
         <project.reporting.outputEncoding>${general.encoding}</project.reporting.outputEncoding>
-          
+
         <!-- Declare versions for plugins -->
         <jacoco-maven-plugin.version>0.7.5.201505241946</jacoco-maven-plugin.version>
         <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
@@ -33,13 +33,13 @@
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 
         <!-- Declare versions for dependencies -->
-        <apache.httpclient.version>4.5</apache.httpclient.version>          
+        <apache.httpclient.version>4.5</apache.httpclient.version>
         <commons-codec.version>1.8</commons-codec.version>
         <jackson.version>2.6.1</jackson.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <ning.version>1.8.15</ning.version>
-          
+
         <!-- configure surefire and maven to be individually skippable -->
         <!-- set to skip all tests -->
         <skipTests>false</skipTests>
@@ -47,15 +47,15 @@
         <skip.unit.tests>${skipTests}</skip.unit.tests>
         <!-- set to skip only integration tests -->
         <skip.integration.tests>${skipTests}</skip.integration.tests>
-          
+
         <!-- custom properties to support jacoco configuration -->
         <jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec</jacoco.it.execution.data.file>
         <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
         <argLine></argLine>
-	  
+
         <repositoryName>crypto</repositoryName>
     </properties>
-    
+
 
     <distributionManagement>
         <repository>
@@ -63,13 +63,13 @@
             <name>${repositoryName}</name>
             <url>http://ncr.in.here.com/nexus/content/repositories/${repositoryName}</url>
         </repository>
-        
+
         <snapshotRepository>
             <id>crypto-snapshots</id>
             <name>${repositoryName}</name>
             <url>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories/${repositoryName}</url>
-        </snapshotRepository>        
-        
+        </snapshotRepository>
+
     </distributionManagement>
 
 
@@ -87,12 +87,12 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
-            </dependency>    
-            <dependency>    
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>    
+            </dependency>
             <dependency>
                 <groupId>com.ning</groupId>
                 <artifactId>async-http-client</artifactId>
@@ -103,23 +103,23 @@
                 <artifactId>httpclient</artifactId>
                 <version>${apache.httpclient.version}</version>
             </dependency>
-                
+
             <!-- test dependencies -->
-            <dependency>    
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
-            </dependency>    	
+            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-	</dependencies>
+        </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <defaultGoal>package</defaultGoal>
 
@@ -277,7 +277,7 @@
                 </executions>
                 </plugin>
             </plugins>
-        </pluginManagement>	
-    </build>        
-	
+        </pluginManagement>
+    </build>
+
 </project>
