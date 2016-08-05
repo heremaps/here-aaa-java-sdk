@@ -51,13 +51,13 @@
         <dependency>
             <groupId>com.here.account</groupId>
             <artifactId>here-oauth-client</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.here.account</groupId>
             <artifactId>here-oauth-client</artifactId>
             <classifier>javadoc</classifier>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
