@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>HERE OAuth Client</name>    
+    <name>HERE OAuth Client</name>
     <artifactId>here-oauth-client</artifactId>
     <packaging>jar</packaging>
     <description>here-oauth-client is for clients of the HERE AAA, and supports OAuth2.0 grant_types=client_credentials</description>
 
-    <parent>    
-	<groupId>com.here.account</groupId>
-	<artifactId>here-aaa-sdk</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>				
+    <parent>
+        <groupId>com.here.account</groupId>
+        <artifactId>here-aaa-sdk</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <licenses>
@@ -28,21 +28,21 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
-        
+
         <!-- activate these plugins in this build -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-	    <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-jar-plugin</artifactId>
-	    </plugin>
-	    <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-javadoc-plugin</artifactId>
-	    </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -61,17 +61,17 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <dependencies>
         <!-- compile dependencies -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-        </dependency>    
-        <dependency>    
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>    
+        </dependency>
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>async-http-client</artifactId>
@@ -80,13 +80,13 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-                
+
         <!-- test dependencies -->
-        <dependency>    
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>    	
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
