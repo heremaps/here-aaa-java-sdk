@@ -74,9 +74,13 @@ public abstract class AbstractCredentialTezt {
             accessKeySecret = (String) field.get(oauth1Signer);
         }
         
-        String url = System.getProperty("urlStart") + "/oauth2/token";
-        String accessKeyId = System.getProperty("clientId");
-        String accessKeySecret = System.getProperty("clientSecret");
+        String url = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.URL_PROPERTY,
+                System.getProperty("urlStart") + "/oauth2/token"
+                );
+        String accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY,
+                System.getProperty("clientId"));
+        String accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY,
+                System.getProperty("clientSecret"));
         if (isNotBlank(url) && isNotBlank(accessKeyId) && isNotBlank(accessKeySecret)) {
             this.url = url;
             this.accessKeyId = accessKeyId;

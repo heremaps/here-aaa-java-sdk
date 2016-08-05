@@ -22,15 +22,19 @@ Configuration
 
 The tests use command-line arguments for configuration.  Please run
 
-  mvn -DargLine='-DurlStart=https://stg.account.api.here.com -DclientId=myclientid -DclientSecret=mysupersecret' clean test
+  mvn -DargLine='-Dhere.token.endpoint.url=https://stg.account.api.here.com/oauth2/token -Dhere.access.key.id=myclientid -Dhere.access.key.secret=myfailingsecret' clean package
 
 to demonstrate a failing credential.  This test is intended to fail.  
-Substitute your Staging clientId, clientSecret above, to achieve success.
+Substitute your Staging here.access.key.id, here.access.key.secret above, to achieve success.
 
 Developer Usage
 ===============
 
-Read the javadocs for details.  If you are just getting started, go to Account.java javadocs for the overview of two options:
+Read the javadocs for details.  The mvn command above will create javadocs locally, which you can open via 
+
+  open here-oauth-client/target/apidocs/index.html
+
+If you are just getting started, go to com.here.account.oauth2.HereAccount.java javadocs for the overview of two options:
 - get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 
