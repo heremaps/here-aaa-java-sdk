@@ -46,6 +46,20 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>crypto-releases</id>
+            <name>${repositoryName}</name>
+            <url>http://ncr.in.here.com/nexus/content/repositories/${repositoryName}</url>
+        </repository>
+
+        <repository>
+            <id>crypto-snapshots</id>
+            <name>${repositoryName}</name>
+            <url>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories/${repositoryName}</url>
+        </repository>
+    </repositories>
     
     <dependencies>
         <dependency>
