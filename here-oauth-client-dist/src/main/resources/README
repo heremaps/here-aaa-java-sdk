@@ -7,13 +7,16 @@ HERE Authentication, Authorization, and Accounting
 
 Introduction
 ============
-here-oauth-client JAR
-- Authentication features for OAuth1 signature to the HERE OAuth2 Authorization Server.
-- Authorization features for OAuth2.0 client_credentials grant_type for confidential clients to obtain 
-  HERE Access Tokens from the HERE OAuth2.0 Authorization Server, including the ability to automatically 
-  refresh HERE Access Tokens.
-- Authorization features for using OAuth2.0 Bearer tokens in the Authorization header to HERE Services
-- Accounting within HERE Services using digitally signed claims from the HERE Access Token
+The here-oauth-client JAR includes
+- Authentication features for signing requests to the HERE OAuth2.0 Authorization Server.  The 
+  client provides its provisioned id and secret to make authenticated requests via the OAuth1.0 
+  authentication method.
+- Authorization features for obtaining HERE Access Tokens from the HERE OAuth2.0 Authorization 
+  Server, including the ability to automatically refresh HERE Access Tokens.  Supported 
+  flows include OAuth2.0 client_credentials grant for confidential clients.
+- Authorization features for using OAuth2.0 Bearer HERE Access Token in the Authorization header 
+  for requests to HERE Services.
+- Accounting is provided by HERE Services using the signed claims from the HERE Access Token.
 
 For help, contact HERE_ACCOUNT_SUPPORT@here.com.
 Built using Apache Maven (https://maven.apache.org/)
