@@ -42,6 +42,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <bottom>Copyright &#169; {currentYear} HERE Global B.V. and its affiliate(s).  All rights reserved.</bottom>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
