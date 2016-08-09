@@ -15,10 +15,10 @@
 
     <licenses>
         <license>
-            <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>HERE Proprietary</name>
+            <url>http://www.here.com</url>
         </license>
-    </licenses>
+    </licenses> 
 
     <build>
 
