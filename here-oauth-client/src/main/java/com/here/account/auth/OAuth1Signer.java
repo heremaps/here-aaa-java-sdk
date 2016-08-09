@@ -15,19 +15,14 @@
  */
 package com.here.account.auth;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.apache.commons.codec.binary.Base64;
-
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.util.Clock;
-import com.ning.http.client.FluentStringsMap;
-import com.ning.http.client.oauth.ConsumerKey;
-import com.ning.http.client.oauth.OAuthSignatureCalculator;
-import com.ning.http.client.oauth.RequestToken;
+import org.apache.commons.codec.binary.Base64;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Appends the 
@@ -117,7 +112,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * Section.
      * 
      * <p>
-     * Note that the accessKeySecret, once configured on this object, does not leave this method, 
+     * Note that the client accessKeySecret, once configured on this object, does not leave this method, 
      * as signatures are used in its place on the wire.
      * 
      * @param method
@@ -125,7 +120,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      */
     private String getAuthorizationHeaderValue(String method, String url, 
             Map<String, List<String>> formParams) {
-        OAuthSignatureCalculator calculator = getSignatureCalculator();
+        SignatureCalculator calculator = getSignatureCalculator();
         
         // <a href="https://tools.ietf.org/html/rfc5849#section-3.3">timestamp</no I a>.
         // the number of seconds since January 1, 1970 00:00:00 GMT
@@ -134,34 +129,24 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         byte[] bytes = new byte[NONCE_LENGTH]; 
         nextBytes(bytes);
         String nonce = Base64.encodeBase64URLSafeString(bytes).substring(0, NONCE_LENGTH);
-        FluentStringsMap fluentFormParams = null;
-        if (null != formParams && !formParams.isEmpty()) {
-            fluentFormParams = new FluentStringsMap();
-            fluentFormParams.putAll(formParams);
-        }
-        String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, 
-                fluentFormParams,
+        String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, SignatureMethod.HMACSHA1,
+                formParams,
                 null);
         
-        return calculator.constructAuthHeader(computedSignature, nonce, timestamp);
+        return calculator.constructAuthHeader(computedSignature, nonce, timestamp, SignatureMethod.HMACSHA1);
     }
     
     /**
      * Gets the signature calculator, given that we don't use a user auth, and we do use 
-     * the configured clientId, clientSecret pair.
+     * the configured client accessKeyId, client accessKeySecret pair.
      * 
      * @return
      */
-    OAuthSignatureCalculator getSignatureCalculator() {
-        // https://tools.ietf.org/html/rfc5849#section-3.1" Making Requests
-        // If the request is not associated with a resource owner
-        // (no token available), clients MAY omit the parameter.
-        RequestToken emptyUserAuth = new RequestToken(null, "");
+    SignatureCalculator getSignatureCalculator() {
         // client accessKeyId is "Client Identifier" a.k.a. "oauth_consumer_key" in the OAuth1.0 spec
         // client accessKeySecret is "Client Shared-Secret" , which becomes the client shared-secret component 
         // of the HMAC-SHA1 key per http://tools.ietf.org/html/rfc5849#section-3.4.2.
-        ConsumerKey consumerKey = new ConsumerKey(accessKeyId, accessKeySecret);
-        OAuthSignatureCalculator calculator = new OAuthSignatureCalculator(consumerKey, emptyUserAuth);
+        SignatureCalculator calculator = new SignatureCalculator(accessKeyId, accessKeySecret);
         return calculator;
     }
 
@@ -173,6 +158,5 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         String authorizationHeaderValue = getAuthorizationHeaderValue(method, url, formParams);
         httpRequest.addAuthorizationHeader(authorizationHeaderValue);
     }
-    
 
 }
