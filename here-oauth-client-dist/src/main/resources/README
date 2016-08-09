@@ -5,11 +5,20 @@
 
 HERE Authentication, Authorization, and Accounting
 
-Authentication https://confluence.in.here.com/display/HEREAccount
-Authorization  https://confluence.in.here.com/display/APIPlatform/Sentry
-Accounting     https://confluence.in.here.com/display/APIPlatform/Unity
+Introduction
+============
+The here-oauth-client JAR includes
+- Authentication features for signing requests to the HERE OAuth2.0 Authorization Server.  The 
+  client provides its provisioned id and secret to make authenticated requests via the OAuth1.0 
+  authentication method.
+- Authorization features for obtaining HERE Access Tokens from the HERE OAuth2.0 Authorization 
+  Server, including the ability to automatically refresh HERE Access Tokens.  Supported 
+  flows include OAuth2.0 client_credentials grant for confidential clients.
+- Authorization features for using OAuth2.0 Bearer HERE Access Token in the Authorization header 
+  for requests to HERE Services.
+- Accounting is provided by HERE Services using the signed claims from the HERE Access Token.
 
-For help, contact HERE_ACCOUNT_SUPPORT@here.com and ampsupport@here.com.
+For help, contact HERE_ACCOUNT_SUPPORT@here.com.
 Built using Apache Maven (https://maven.apache.org/)
 
 Developer Setup
