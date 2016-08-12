@@ -5,8 +5,16 @@
 
 HERE Authentication, Authorization, and Accounting
 
+Copyright (c) 2016 HERE Global B.V. and its affiliate(s).
+
 Introduction
 ============
+The purpose of here-oauth-client JAR is to obtain authorization from the HERE OAuth2.0 
+Authorization Server, for use with HERE Services.  See also https://tools.ietf.org/html/rfc6749.
+
+The HERE Access Tokens obtained are provided as Authorization: Bearer values on requests to 
+HERE Services.  See also https://tools.ietf.org/html/rfc6750#section-2.1.
+
 The here-oauth-client JAR includes
 - Authentication features for signing requests to the HERE OAuth2.0 Authorization Server.  The 
   client provides its provisioned id and secret to make authenticated requests via the OAuth1.0 
@@ -16,10 +24,10 @@ The here-oauth-client JAR includes
   flows include OAuth2.0 client_credentials grant for confidential clients.
 - Authorization features for using OAuth2.0 Bearer HERE Access Token in the Authorization header 
   for requests to HERE Services.
-- Accounting is provided by HERE Services using the signed claims from the HERE Access Token.
+- Accounting claims in the Access Tokens it uses.  HERE Services extract signed Accounting claims 
+  from the Access Tokens.
 
 For help, contact HERE_ACCOUNT_SUPPORT@here.com.
-Built using Apache Maven (https://maven.apache.org/)
 
 Developer Setup
 ===============
@@ -39,10 +47,10 @@ in the /lib directory to be available on your classpath.  By default, the /lib J
 are referenced in the here-oauth-client's Class-Path.
 
 Documentation
-===============
+=============
 
 Read the javadocs for details, included in the /javadoc directory.  Open the /javadoc/index.html
-to get started.  To skip ahead, go to HereAccount.java javadocs for the overview of two options:
+to get started.  To skip ahead, go to com.here.account.oauth2.HereAccountjavadocs for the overview of two options:
 - get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 
