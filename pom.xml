@@ -38,7 +38,7 @@
         <jackson.version>2.6.1</jackson.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.19</mockito.version>
-        <ning.version>1.8.15</ning.version>
+        <ning.version>1.8.17</ning.version>
 
         <!-- configure surefire and maven to be individually skippable -->
         <!-- set to skip all tests -->
