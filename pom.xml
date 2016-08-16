@@ -34,7 +34,7 @@
 
         <!-- Declare versions for dependencies -->
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
-        <commons-codec.version>1.8</commons-codec.version>
+        <commons-codec.version>1.10</commons-codec.version>
         <jackson.version>2.8.1</jackson.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.19</mockito.version>
