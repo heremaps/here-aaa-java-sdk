@@ -45,7 +45,10 @@ public class SignatureCalculator {
     }
 
     /**
-     * Calculate the OAuth 1.0 signature based on the given parameters
+     * Calculate the OAuth 1.0 signature based on the given parameters.
+     * Same as 
+     * {@link #calculateSignature(String, String, long, String, SignatureMethod, String, Map, Map)} 
+     * but with oauthVersion hard-coded to "1.0".
      *
      * @param method          the HTTP method
      * @param baseURL         the base url including the protocol, host and port.
@@ -57,7 +60,36 @@ public class SignatureCalculator {
      * @return computed signature using the requested signature method.
      */
     public String calculateSignature(String method, String baseURL, long oauthTimestamp,
-                                     String nonce, SignatureMethod signatureMethod, Map<String, List<String>> formParams, Map<String, List<String>> queryParams) {
+                                     String nonce, SignatureMethod signatureMethod, 
+                                     Map<String, List<String>> formParams, 
+                                     Map<String, List<String>> queryParams) {
+        return calculateSignature(method, baseURL, oauthTimestamp, nonce, signatureMethod,
+                "1.0",
+                formParams,
+                queryParams);
+    }
+    
+    /**
+     * Calculate the OAuth 1.0 signature based on the given parameters
+     *
+     * @param method          the HTTP method
+     * @param baseURL         the base url including the protocol, host and port.
+     * @param oauthTimestamp  the time stamp
+     * @param nonce           nonce
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1 and HMAC-SHA256
+     * @param oauthVersion    the oauth_version value; 
+     *                        OPTIONAL.  If present, MUST be set to "1.0".  Provides the
+     *                        version of the authentication process as defined in RFC5849.
+     * @param formParams      the list of form parameters
+     * @param queryParams     list of query parameters
+     * @return computed signature using the requested signature method.
+     */
+    public String calculateSignature(String method, String baseURL, long oauthTimestamp,
+            String nonce, SignatureMethod signatureMethod, 
+            String oauthVersion,
+            Map<String, List<String>> formParams, 
+            Map<String, List<String>> queryParams) {
+
         //Create signature base with the http method and base url
         StringBuilder signatureBaseString = new StringBuilder(100);
         signatureBaseString.append(method.toUpperCase());
@@ -70,7 +102,9 @@ public class SignatureCalculator {
         parameterSet.add("oauth_nonce", nonce);
         parameterSet.add("oauth_signature_method", signatureMethod.getOauth1SignatureMethod());
         parameterSet.add("oauth_timestamp", String.valueOf(oauthTimestamp));
-        parameterSet.add("oauth_version", "1.0");
+        if (null != oauthVersion) {
+            parameterSet.add("oauth_version", oauthVersion);
+        }
 
         //add form parameters
         if (formParams != null && !formParams.isEmpty()) {
