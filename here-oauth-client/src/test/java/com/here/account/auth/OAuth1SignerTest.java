@@ -15,9 +15,10 @@
  */
 package com.here.account.auth;
 
-import com.here.account.auth.OAuth1Signer;
 import static org.junit.Assert.assertTrue;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,6 +40,7 @@ import org.junit.Test;
 
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.util.Clock;
+import com.here.account.util.OAuthConstants;
 
 public class OAuth1SignerTest {
 
@@ -73,6 +77,8 @@ public class OAuth1SignerTest {
     private String url;
     private Clock clock;
     
+    private long clockCurrentTimeMillis = 0;
+    
     @Before
     public void setUp() {
         this.clock = new Clock() {
@@ -80,7 +86,7 @@ public class OAuth1SignerTest {
             @Override
             public long currentTimeMillis() {
                 // TODO Auto-generated method stub
-                return 0;
+                return clockCurrentTimeMillis;
             }
 
             @Override
@@ -114,6 +120,7 @@ public class OAuth1SignerTest {
             }
         }
     }
+    
     
     @Test
     public void test_sign_formParams_impactsSignature() {
@@ -154,9 +161,10 @@ public class OAuth1SignerTest {
      * 
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
+     * @throws UnsupportedEncodingException 
      */
     @Test
-    public void test_HmacSHA1_HmacSHA256() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void test_HmacSHA1_HmacSHA256() throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
         String key = UUID.randomUUID().toString();
         
         String input = "my dog has fleas";
@@ -171,16 +179,79 @@ public class OAuth1SignerTest {
 
     }
     
-    protected String HmacSHAN(String keyString, String algorithm, String baseString) throws NoSuchAlgorithmException, InvalidKeyException {
-        Key signingKey = new SecretKeySpec(keyString.getBytes(), algorithm);
+    @Test
+    public void test_OAuth1Signer_uses_HMAC_SHA256() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        this.clockCurrentTimeMillis = System.currentTimeMillis();
+        
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        String nonce = Base64.encodeBase64URLSafeString(nonceBytes).substring(0, nonceBytes.length);
+        
+        long oauth_timestamp = clockCurrentTimeMillis / 1000L; // oauth1 uses seconds
+
+        String shaVariant = "SHA256";//"SHA1";
+        
+        String requestParameters = "oauth_consumer_key="+clientId+"&oauth_nonce="+nonce+"&oauth_signature_method=HMAC-"+shaVariant+"&oauth_timestamp="+oauth_timestamp+"&oauth_version=1.0";
+        String signatureBaseString = "GET&"
+                +urlEncode(url)+"&"
+                + urlEncode(requestParameters); // no request parameters in this test case
+        
+
+        System.out.println("test       signatureBaseString "+signatureBaseString);
+        
+        String key = urlEncode(clientSecret) + "&"; // no token shared-secret
+        
+        String expectedSignature = HmacSHAN(key, "Hmac"+shaVariant, signatureBaseString);
+
+        String expectedSignatureInAuthorizationHeader = urlEncode(expectedSignature);
+        
+        oauth1Signer.authorize(httpRequest, method, url, null);
+        String actualHeader = httpRequest.getAuthorizationHeader();
+        
+        Pattern pattern = Pattern.compile("\\A.*oauth_signature=\\\"([^\\\"]+).*\\z");
+        Matcher matcher = pattern.matcher(actualHeader);
+        assertTrue("pattern wasn't matched: "+actualHeader, matcher.matches());
+        String actualSignature = matcher.group(1);
+        
+        
+        assertTrue("expected signature "+expectedSignatureInAuthorizationHeader+", actual signature "+actualSignature, 
+                expectedSignatureInAuthorizationHeader.equals(actualSignature));
+    }
+    
+    private String urlEncode(String s) throws UnsupportedEncodingException {
+        return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING).replaceAll("\\+", "%20");
+    }
+
+    
+    protected String HmacSHAN(String keyString, String algorithm, String baseString) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        /*
+                     byte[] keyBytes = (urlEncode(consumerSecret) + "&").getBytes(OAuthConstants.UTF_8_CHARSET);
+            SecretKeySpec signingKey = new SecretKeySpec(keyBytes, signatureMethod);
+
+            //generate signature based on the requested signature method
+            Mac mac = Mac.getInstance(signatureMethod);
+            mac.init(signingKey);
+            byte[] signedBytes = mac.doFinal(bytesToSign);
+            return Base64.encodeBase64String(signedBytes);
+
+         */
+        byte[] keyBytes = keyString.getBytes("UTF-8");
+        Key signingKey = new SecretKeySpec(keyBytes, algorithm);
         Mac mac = Mac.getInstance(algorithm);
         mac.init(signingKey);
     
         //generate signature bytes
-        byte[] signatureBytes = mac.doFinal(baseString.toString().getBytes());
+        byte[] signatureBytes = mac.doFinal(baseString.getBytes("UTF-8"));
     
         // base64-encode the hmac
-        return new Base64().encodeAsString(signatureBytes);
+        //return new Base64().encodeAsString(signatureBytes);
+        return Base64.encodeBase64String(signatureBytes);
     }
 
 

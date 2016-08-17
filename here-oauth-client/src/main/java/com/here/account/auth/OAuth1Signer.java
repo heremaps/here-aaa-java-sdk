@@ -129,11 +129,13 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         byte[] bytes = new byte[NONCE_LENGTH]; 
         nextBytes(bytes);
         String nonce = Base64.encodeBase64URLSafeString(bytes).substring(0, NONCE_LENGTH);
-        String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, SignatureMethod.HMACSHA1,
+        String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, 
+                SignatureMethod.HMACSHA256,
                 formParams,
                 null);
         
-        return calculator.constructAuthHeader(computedSignature, nonce, timestamp, SignatureMethod.HMACSHA1);
+        return calculator.constructAuthHeader(computedSignature, nonce, timestamp, 
+                SignatureMethod.HMACSHA256);
     }
     
     /**
