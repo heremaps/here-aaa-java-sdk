@@ -36,8 +36,8 @@ import com.here.account.util.OAuthConstants;
  * @author srrajago
  */
 public class SignatureCalculator {
-    private String consumerKey;
-    private String consumerSecret;
+    private final String consumerKey;
+    private final String consumerSecret;
 
     public SignatureCalculator(String clientAccessKeyId, String clientAccessKeySecret) {
         this.consumerKey = clientAccessKeyId;
@@ -207,9 +207,9 @@ public class SignatureCalculator {
     /**
      * Container class for Parameters.
      */
-    static final private class OAuthParameterSet {
+    private static final class OAuthParameterSet {
 
-        private List<Parameter> allParameters = new ArrayList<>();
+        private final List<Parameter> allParameters = new ArrayList<>();
 
         /**
          * Add the given URL encoded key-value to the parameter list
@@ -248,9 +248,9 @@ public class SignatureCalculator {
      * Holds a tuple key-value pair.
      * Implements <code>Comparable</code> for sorting by the key.
      */
-    static final private class Parameter implements Comparable<Parameter> {
-        private String key;
-        private String value;
+    private static final class Parameter implements Comparable<Parameter> {
+        private final String key;
+        private final String value;
 
         public Parameter(String key, String value) {
             this.key = key;
@@ -268,6 +268,7 @@ public class SignatureCalculator {
         /**
          * Compare the key, if the key is the same, compare by the value.
          */
+        @Override
         public int compareTo(Parameter other) {
             int diff = this.key.compareTo(other.key);
             if (diff == 0) {

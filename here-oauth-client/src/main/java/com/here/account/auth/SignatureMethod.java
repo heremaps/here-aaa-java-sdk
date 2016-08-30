@@ -24,8 +24,8 @@ public enum SignatureMethod {
     HMACSHA1("HmacSHA1", "HMAC-SHA1"),
     HMACSHA256("HmacSHA256", "HMAC-SHA256");
 
-    private String algorithm;
-    private String oauth1SignatureMethod;
+    private final String algorithm;
+    private final String oauth1SignatureMethod;
 
     SignatureMethod(String alg, String method) {
         this.algorithm = alg;
