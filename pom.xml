@@ -10,10 +10,13 @@
 
     <modules>
         <module>here-oauth-client</module>
+        <module>examples/here-oauth-client-example</module>
         <module>here-oauth-client-dist</module>
     </modules>
 
     <properties>
+        <my.version>0.3.0-SNAPSHOT</my.version>
+
         <!-- Begin From prior parent -->
         <general.encoding>UTF-8</general.encoding>
         <java.version>1.8</java.version>

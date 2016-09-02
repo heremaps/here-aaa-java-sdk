@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>HERE OAuth Client</name>
-    <artifactId>here-oauth-client</artifactId>
+    <artifactId>here-oauth-client-example</artifactId>
     <packaging>jar</packaging>
-    <description>here-oauth-client is for clients of the HERE AAA, and supports OAuth2.0 grant_types=client_credentials</description>
+    <description>here-oauth-client-example is for examples which use here-oauth-client</description>
 
     <parent>
         <groupId>com.here.account</groupId>
         <artifactId>here-aaa-sdk</artifactId>
         <version>${my.version}</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <licenses>
@@ -25,7 +25,7 @@
         <resources>
             <resource>
                 <filtering>true</filtering>
-                <directory>src/main/resources</directory>
+                <directory>src/main/scripts</directory>
             </resource>
         </resources>
 
@@ -34,17 +34,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -74,6 +63,11 @@
 
     <dependencies>
         <!-- compile dependencies -->
+        <dependency>
+            <groupId>com.here.account</groupId>
+            <artifactId>here-oauth-client</artifactId>
+            <version>${my.version}</version>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

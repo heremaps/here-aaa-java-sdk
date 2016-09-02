@@ -51,5 +51,25 @@
                 <include>com.here.account:here-oauth-client:jar:javadoc</include>
             </includes>
         </dependencySet>
-    </dependencySets>
+        <!-- include the main here-oauth-client-example jar artifact -->
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>com.here.account:here-oauth-client-example:jar</include>
+            </includes>
+        </dependencySet>
+<!--
+         <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>com.here.account:here-oauth-client-example</include>
+            </includes>
+            <excludes>
+                <exclude>com.here.account:here-oauth-client-example:jar:javadoc</exclude>
+            </excludes>
+        </dependencySet>
+-->
+   </dependencySets>
 </assembly>
