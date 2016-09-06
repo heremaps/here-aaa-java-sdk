@@ -25,7 +25,100 @@ import com.here.account.oauth2.Fresh;
 import com.here.account.oauth2.HereAccount;
 import com.here.account.oauth2.TokenEndpoint;
 
+/**
+ * A tutorial class providing example code for always obtaining a fresh 
+ * HERE Access Token, from the HERE Account authorization server, 
+ * using the client_credentials grant_type.
+ * 
+ * @author kmccrack
+ *
+ */
 public class GetHereClientCredentialsAccessTokenTuturial {
+
+    /**
+     * The main method includes the bulk of the code integration, 
+     * for always obtaining a fresh 
+     * HERE Access Token, from the HERE Account authorization server, 
+     * using the client_credentials grant_type.
+     * 
+     * @param argv the arguments to main; see usage output for details.
+     */
+    public static void main(String[] argv) {
+        Args args = parseArgs(argv);
+        try {
+            File file = getCredentialsFile(args);
+            TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                    ApacheHttpClientProvider.builder().build(), 
+                    new OAuth1ClientCredentialsProvider.FromFile(file));
+            Fresh<AccessTokenResponse> fresh = 
+                    tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+            String accessToken = fresh.get().getAccessToken();
+            if (args.isVerbose()) {
+                System.out.println("HERE Access Token: " + accessToken);
+            } else {
+                System.out.println("HERE Access Token: " + accessToken.substring(0, 20) + "..." + accessToken.substring(accessToken.length() - 4));
+            }
+        } catch (Exception e) {
+            System.err.println("trouble getting Here client_credentials Access Token: " + e);
+            e.printStackTrace();
+            System.exit(2);
+        }
+    }
+    
+    ////////
+    // a possible default path to credentials properties file
+    ////////
+    
+    private static final String USER_DOT_HOME = "user.home";
+    private static final String DOT_HERE_SUBDIR = ".here";
+    private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
+    
+    protected static File getDefaultCredentialsFile() {
+        String userDotHome = System.getProperty(USER_DOT_HOME);
+        if (userDotHome != null && userDotHome.length() > 0) {
+            File dir = new File(userDotHome, DOT_HERE_SUBDIR);
+            if (dir.exists() && dir.isDirectory()) {
+                File file = new File(dir, CREDENTIALS_DOT_PROPERTIES_FILENAME);
+                if (file.exists() && file.isFile()) {
+                    return file;
+                }
+            }
+        }
+        return null;
+    }
+    
+    ////////
+    // an approach to parsing input args
+    ////////
+    protected static Args parseArgs(String[] argv) {
+        if (null == argv || argv.length > 3) {
+            printUsageAndExit();
+        }
+        int i = 0;
+        boolean verbose = false;
+        String filePathString = null;
+        while (i < argv.length) {
+            String arg = argv[i++];
+            if (arg.equals("-v")) {
+                System.out.println("INFO: Running in verbose mode.");
+                verbose = true;
+            } else if (arg.equals("-help")) {
+                System.out.println("INFO: in help mode, will print usage and exit.");
+                printUsageAndExit();
+            } else if (null == filePathString) {
+                filePathString = arg;
+            } else {
+                System.out.println("unrecognized option or more than one path_to_credentials_property_file");
+                printUsageAndExit();
+            }
+        }
+        if (!verbose) {
+            System.out.println("INFO: Running in quiet mode; to enable verbose mode add '-v' as your first argument.");
+            System.out.println("WARNING: verbose mode will display an actual valid HERE Access Token to stdout.");
+        }
+        return new Args(verbose, filePathString);
+    }
+
     
     private static class Args {
         private final boolean verbose;
@@ -47,56 +140,40 @@ public class GetHereClientCredentialsAccessTokenTuturial {
         
     }
 
-    public static void main(String[] argv) {
-        Args args = parseArgs(argv);
-        try {
-            File file = new File(args.getFilePathString());
-            TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                    ApacheHttpClientProvider.builder().build(), 
-                    new OAuth1ClientCredentialsProvider.FromFile(file));
-            Fresh<AccessTokenResponse> fresh = 
-                    tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
-            String accessToken = fresh.get().getAccessToken();
-            if (args.isVerbose()) {
-                System.out.println("HERE Access Token: " + accessToken);
-            } else {
-                System.out.println("HERE Access Token: " + accessToken.substring(0, 20) + "..." + accessToken.substring(accessToken.length() - 4));
-            }
-        } catch (Exception e) {
-            System.err.println("trouble getting Here client_credentials Access Token: " + e);
-            e.printStackTrace();
-            System.exit(2);
-        }
-    }
+    ////////
+    // get credentials file, either command-line override, or default file location
+    ////////
     
+    protected static File getCredentialsFile(Args args) {
+        File file;
+        String filePathString = args.getFilePathString();
+        if (null != filePathString) {
+            file = new File(filePathString);
+        } else {
+            file = getDefaultCredentialsFile();
+        }
+        return file;
+    }
+
+    ////////
+    // print usage and exit
+    ////////
+    
+    /**
+     * Usage is displayed to stderr, along with exiting the process with a non-zero exit code.
+     */
     private static void printUsageAndExit() {
         System.err.println("Usage: java "
                 + GetHereClientCredentialsAccessTokenTuturial.class.getName()
+                + " [-help]"
                 + " [-v]"
-                + " <path_to_credentials_property_file>");
+                + " [path_to_credentials_property_file]");
+        System.err.println("where:");
+        System.err.println("  -help: means print this message and exit");
+        System.err.println("  -v: sets verbose mode; WARNING: HERE Access Token will be displayed to stdout.");
+        System.err.println("  path_to_credentials_property_file: optionally override the default path of ");
+        System.err.println("     ~/.here/credentials.properties, to point to any file on your filesystem.");;
         System.exit(1);
     }
     
-    public static Args parseArgs(String[] argv) {
-        if (null == argv || 0 == argv.length || argv.length > 2) {
-            printUsageAndExit();
-        }
-        int i = 0;
-        boolean verbose = false;
-        if (2 == argv.length) {
-            String verboseArg = argv[i++];
-            if (verboseArg.equals("-v")) {
-                System.out.println("INFO: Running in verbose mode.");
-                verbose = true;
-            } else {
-                printUsageAndExit();
-            }
-        } else {
-            System.out.println("INFO: Running in quiet mode; to enable verbose mode add '-v' as your first argument.");
-            System.out.println("WARNING: verbose mode will display an actual valid HERE Access Token to stdout.");
-        }
-        String filePathString = argv[i++];
-        return new Args(verbose, filePathString);
-    }
-
 }
