@@ -13,9 +13,27 @@
                 <include>README*</include>
                 <include>LICENSE*</include>
                 <include>NOTICE*</include>
+                <include>${project.basedir}/../examples/here-oauth-client-example/target/classes/run-GetHereClientCredentialsAccessTokenTuturial.sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../examples/here-oauth-client-example/target/classes</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>run-GetHereClientCredentialsAccessTokenTuturial.sh</include>
             </includes>
         </fileSet>
     </fileSets>
+    <moduleSets>
+        <moduleSet>
+            <binaries>
+                <outputDirectory>/examples</outputDirectory>
+                <includes>
+                    <include>${project.basedir}/../examples/here-oauth-client-example/target/classes/run-GetHereClientCredentialsAccessTokenTuturial.sh</include>
+                </includes>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
     <dependencySets>
         <!-- include the main here-oauth-client jar artifact -->
         <dependencySet>
@@ -53,7 +71,7 @@
         </dependencySet>
         <!-- include the main here-oauth-client-example jar artifact -->
         <dependencySet>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/examples</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>com.here.account:here-oauth-client-example:jar</include>
