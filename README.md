@@ -34,6 +34,14 @@ Here is an overview of the top-level files contained in the repository:
           |
           +- test             # Test code
     |
+    +- examples               # Examples across all projects; these are tutorials intended to be adapted into or inform design of applications
+       |
+       +- here-oauth-client-example # Tutorial example for here-oauth-client JAR
+          |
+          +- src              # Source and test code
+             |
+             +- main          # Source code for the tutorial example
+    |
     +- here-oauth-client-dist # Descriptions of how to build the .tar.gz distribution bundle
 
 Functionality
