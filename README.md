@@ -104,13 +104,22 @@ Open a command prompt at the working tree's root directory and type:
 
 Substitute your Staging here.access.key.id, here.access.key.secret above, to achieve success.
 
+Examples instructions
+---------------------
+1. Download and place your HERE Account authorization server credentials.properties file to 
+   ~/.here/credentials.properties.
+2.  $ chmod 400 ~/.here/credentials.properties
+3.  
+
 Developer Usage
 ===============
 
-Read the javadocs for details.  The mvn commands above will create javadocs locally, which you can open via 
+Read the javadocs for details.  The mvn commands above will create javadocs locally, which you can 
+open via 
 
     $ open here-oauth-client/target/apidocs/index.html
 
-If you are just getting started, go to com.here.account.oauth2.HereAccount javadocs for the overview of two options:
+If you are just getting started, go to com.here.account.oauth2.HereAccount javadocs for the overview 
+of two options:
 - get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach

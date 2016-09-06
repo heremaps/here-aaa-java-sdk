@@ -37,10 +37,27 @@ Developer Setup
 Configuration
 =============
 
+The simplest option is to place your credentials.properties file obtained from the HERE Account 
+authorization server, on your filesystem, and chmod it to 600 or 400.  Then (if it is in the current 
+working directory), load it via 
+  OAuth1ClientCredentialsProvider creds = 
+      new OAuth1ClientCredentialsProvider.FromFile("credentials.properties");
+other options are covered in the OAuth1ClientCredentialsProvider javadocs.
+
 Manual usage
 ============
 
-Using the SDK simply requires including the included here-oauth-client JAR file in your project's classpath.
+The examples directory contains an example.  To run it first place your credentials.properties file 
+obtained from the HERE Account authorization server, at ~/.here/credentials.properties, and chmod to 
+600 or 400.  Next, run
+  ./examples/run-GetHereClientCredentialsAccessTokenTuturial.sh ~/.here/credentials.properties
+and working code will execute with portions of an actual HERE Access Token printed to stdout.  If in 
+a secure location, re-run with '-v' flag to print a complete HERE Access Token to stdout.  The 
+examples are for tutorial purposes only and MUST NOT be used in your deployed application.
+
+Within your deployed application, using the SDK in your application simply requires including the 
+included here-oauth-client JAR file in your project's classpath.  Load configurations according to 
+your application's standard configuration methods.
 
 NOTE: This library requires the here-oauth-client JAR file as well as the JAR files
 in the /lib directory to be available on your classpath.  By default, the /lib JARs
@@ -50,7 +67,8 @@ Documentation
 =============
 
 Read the javadocs for details, included in the /javadoc directory.  Open the /javadoc/index.html
-to get started.  To skip ahead, go to com.here.account.oauth2.HereAccountjavadocs for the overview of two options:
+to get started.  To skip ahead, go to com.here.account.oauth2.HereAccount javadocs for the overview 
+of two options:
 - get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 

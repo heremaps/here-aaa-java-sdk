@@ -26,18 +26,42 @@ import com.here.account.oauth2.HereAccount;
 import com.here.account.oauth2.TokenEndpoint;
 
 public class GetHereClientCredentialsAccessTokenTuturial {
+    
+    private static class Args {
+        private final boolean verbose;
+        private final String filePathString;
+        
+        public Args(boolean verbose, String filePathString) {
+            this.verbose = verbose;
+            this.filePathString = filePathString;
+        }
+
+        public boolean isVerbose() {
+            return verbose;
+        }
+
+        public String getFilePathString() {
+            return filePathString;
+        }
+        
+        
+    }
 
     public static void main(String[] argv) {
-        usage(argv);
+        Args args = parseArgs(argv);
         try {
-            File file = new File(argv[0]);
+            File file = new File(args.getFilePathString());
             TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                     ApacheHttpClientProvider.builder().build(), 
                     new OAuth1ClientCredentialsProvider.FromFile(file));
             Fresh<AccessTokenResponse> fresh = 
                     tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
             String accessToken = fresh.get().getAccessToken();
-            System.out.println("HERE Access Token: " + accessToken.substring(0, 25) + "..." + accessToken.substring(accessToken.length() - 4));
+            if (args.isVerbose()) {
+                System.out.println("HERE Access Token: " + accessToken);
+            } else {
+                System.out.println("HERE Access Token: " + accessToken.substring(0, 20) + "..." + accessToken.substring(accessToken.length() - 4));
+            }
         } catch (Exception e) {
             System.err.println("trouble getting Here client_credentials Access Token: " + e);
             e.printStackTrace();
@@ -45,13 +69,34 @@ public class GetHereClientCredentialsAccessTokenTuturial {
         }
     }
     
-    public static void usage(String[] argv) {
-        if (null == argv || 1 != argv.length) {
-            System.err.println("Usage: java "
-                    + GetHereClientCredentialsAccessTokenTuturial.class.getName()
-                    + " <path_to_credentials_property_file>");
-            System.exit(1);
+    private static void printUsageAndExit() {
+        System.err.println("Usage: java "
+                + GetHereClientCredentialsAccessTokenTuturial.class.getName()
+                + " [-v]"
+                + " <path_to_credentials_property_file>");
+        System.exit(1);
+    }
+    
+    public static Args parseArgs(String[] argv) {
+        if (null == argv || 0 == argv.length || argv.length > 2) {
+            printUsageAndExit();
         }
+        int i = 0;
+        boolean verbose = false;
+        if (2 == argv.length) {
+            String verboseArg = argv[i++];
+            if (verboseArg.equals("-v")) {
+                System.out.println("INFO: Running in verbose mode.");
+                verbose = true;
+            } else {
+                printUsageAndExit();
+            }
+        } else {
+            System.out.println("INFO: Running in quiet mode; to enable verbose mode add '-v' as your first argument.");
+            System.out.println("WARNING: verbose mode will display an actual valid HERE Access Token to stdout.");
+        }
+        String filePathString = argv[i++];
+        return new Args(verbose, filePathString);
     }
 
 }
