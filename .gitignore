@@ -8,3 +8,4 @@
 target
 /bin/
 pom.xml.versionsBackup
+examples/here-oauth-client-example/dependency-reduced-pom.xml
