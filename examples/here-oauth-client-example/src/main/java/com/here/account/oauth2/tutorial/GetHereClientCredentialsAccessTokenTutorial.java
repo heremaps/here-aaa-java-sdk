@@ -33,7 +33,7 @@ import com.here.account.oauth2.TokenEndpoint;
  * @author kmccrack
  *
  */
-public class GetHereClientCredentialsAccessTokenTuturial {
+public class GetHereClientCredentialsAccessTokenTutorial {
 
     /**
      * The main method includes the bulk of the code integration, 
@@ -44,6 +44,16 @@ public class GetHereClientCredentialsAccessTokenTuturial {
      * @param argv the arguments to main; see usage output for details.
      */
     public static void main(String[] argv) {
+        GetHereClientCredentialsAccessTokenTutorial tutorial = new GetHereClientCredentialsAccessTokenTutorial(argv);
+        tutorial.getAccessToken();
+    }
+    
+    private String[] argv;
+    public GetHereClientCredentialsAccessTokenTutorial(String[] argv) {
+        this.argv = argv;
+    }
+    
+    public String getAccessToken() {
         Args args = parseArgs(argv);
         try {
             File file = getCredentialsFile(args);
@@ -58,17 +68,23 @@ public class GetHereClientCredentialsAccessTokenTuturial {
             } else {
                 System.out.println("HERE Access Token: " + accessToken.substring(0, 20) + "..." + accessToken.substring(accessToken.length() - 4));
             }
+            return accessToken;
         } catch (Exception e) {
             System.err.println("trouble getting Here client_credentials Access Token: " + e);
             e.printStackTrace();
-            System.exit(2);
+            exit(2);
+            return null;
         }
+    }
+    
+    protected void exit(int status) {
+        System.exit(status);
     }
     
     ////////
     // an approach to parsing input args
     ////////
-    protected static Args parseArgs(String[] argv) {
+    protected Args parseArgs(String[] argv) {
         if (null == argv || argv.length > 3) {
             printUsageAndExit();
         }
@@ -98,7 +114,7 @@ public class GetHereClientCredentialsAccessTokenTuturial {
     }
 
     
-    private static class Args {
+    private class Args {
         private final boolean verbose;
         private final String filePathString;
         
@@ -124,9 +140,9 @@ public class GetHereClientCredentialsAccessTokenTuturial {
     /**
      * Usage is displayed to stderr, along with exiting the process with a non-zero exit code.
      */
-    private static void printUsageAndExit() {
+    private void printUsageAndExit() {
         System.err.println("Usage: java "
-                + GetHereClientCredentialsAccessTokenTuturial.class.getName()
+                + GetHereClientCredentialsAccessTokenTutorial.class.getName()
                 + " [-help]"
                 + " [-v]"
                 + " [path_to_credentials_property_file]");
@@ -135,14 +151,14 @@ public class GetHereClientCredentialsAccessTokenTuturial {
         System.err.println("  -v: sets verbose mode; WARNING: HERE Access Token will be displayed to stdout.");
         System.err.println("  path_to_credentials_property_file: optionally override the default path of ");
         System.err.println("     "+DEFAULT_CREDENTIALS_FILE_PATH+", to point to any file on your filesystem.");;
-        System.exit(1);
+        exit(1);
     }
     
     ////////
     // get credentials file, either command-line override, or default file location
     ////////
     
-    protected static File getCredentialsFile(Args args) {
+    protected File getCredentialsFile(Args args) {
         File file;
         String filePathString = args.getFilePathString();
         if (null != filePathString) {
