@@ -66,28 +66,6 @@ public class GetHereClientCredentialsAccessTokenTuturial {
     }
     
     ////////
-    // a possible default path to credentials properties file
-    ////////
-    
-    private static final String USER_DOT_HOME = "user.home";
-    private static final String DOT_HERE_SUBDIR = ".here";
-    private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
-    
-    protected static File getDefaultCredentialsFile() {
-        String userDotHome = System.getProperty(USER_DOT_HOME);
-        if (userDotHome != null && userDotHome.length() > 0) {
-            File dir = new File(userDotHome, DOT_HERE_SUBDIR);
-            if (dir.exists() && dir.isDirectory()) {
-                File file = new File(dir, CREDENTIALS_DOT_PROPERTIES_FILENAME);
-                if (file.exists() && file.isFile()) {
-                    return file;
-                }
-            }
-        }
-        return null;
-    }
-    
-    ////////
     // an approach to parsing input args
     ////////
     protected static Args parseArgs(String[] argv) {
@@ -137,24 +115,8 @@ public class GetHereClientCredentialsAccessTokenTuturial {
             return filePathString;
         }
         
-        
     }
-
-    ////////
-    // get credentials file, either command-line override, or default file location
-    ////////
     
-    protected static File getCredentialsFile(Args args) {
-        File file;
-        String filePathString = args.getFilePathString();
-        if (null != filePathString) {
-            file = new File(filePathString);
-        } else {
-            file = getDefaultCredentialsFile();
-        }
-        return file;
-    }
-
     ////////
     // print usage and exit
     ////////
@@ -172,8 +134,60 @@ public class GetHereClientCredentialsAccessTokenTuturial {
         System.err.println("  -help: means print this message and exit");
         System.err.println("  -v: sets verbose mode; WARNING: HERE Access Token will be displayed to stdout.");
         System.err.println("  path_to_credentials_property_file: optionally override the default path of ");
-        System.err.println("     ~/.here/credentials.properties, to point to any file on your filesystem.");;
+        System.err.println("     "+DEFAULT_CREDENTIALS_FILE_PATH+", to point to any file on your filesystem.");;
         System.exit(1);
+    }
+    
+    ////////
+    // get credentials file, either command-line override, or default file location
+    ////////
+    
+    protected static File getCredentialsFile(Args args) {
+        File file;
+        String filePathString = args.getFilePathString();
+        if (null != filePathString) {
+            file = new File(filePathString);
+            if (!isFileAndExists(file)) {
+                System.err.println("WARNING: credentials properties file does not exist: " + file);
+                printUsageAndExit();
+            }
+        } else {
+            file = getDefaultCredentialsFile();
+            if (null == file) {
+                System.err.println("WARNING: " + DEFAULT_CREDENTIALS_FILE_PATH
+                        + " default credentials file location does not exist, please specify a location");
+                printUsageAndExit();
+            }
+        }
+        return file;
+    }
+    
+    ////////
+    // a possible default path to credentials properties file
+    ////////
+    
+    private static final String USER_DOT_HOME = "user.home";
+    private static final String DOT_HERE_SUBDIR = ".here";
+    private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
+    private static final String DEFAULT_CREDENTIALS_FILE_PATH = "~" + File.separatorChar + DOT_HERE_SUBDIR 
+            + File.separatorChar + CREDENTIALS_DOT_PROPERTIES_FILENAME;
+    
+    protected static File getDefaultCredentialsFile() {
+        String userDotHome = System.getProperty(USER_DOT_HOME);
+        if (userDotHome != null && userDotHome.length() > 0) {
+            File dir = new File(userDotHome, DOT_HERE_SUBDIR);
+            if (dir.exists() && dir.isDirectory()) {
+                File file = new File(dir, CREDENTIALS_DOT_PROPERTIES_FILENAME);
+                if (isFileAndExists(file)) {
+                    return file;
+                }
+            }
+        }
+        return null;
+    }
+    
+    protected static boolean isFileAndExists(File file) {
+        return file.exists() && file.isFile();
     }
     
 }
