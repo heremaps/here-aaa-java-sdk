@@ -16,6 +16,7 @@
 package com.here.account.oauth2.tutorial;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
@@ -49,6 +50,8 @@ public class GetHereClientCredentialsAccessTokenTutorial {
     }
     
     private String[] argv;
+    private OAuth1ClientCredentialsProvider testCreds = null;
+    
     public GetHereClientCredentialsAccessTokenTutorial(String[] argv) {
         this.argv = argv;
     }
@@ -56,10 +59,10 @@ public class GetHereClientCredentialsAccessTokenTutorial {
     public String getAccessToken() {
         Args args = parseArgs(argv);
         try {
-            File file = getCredentialsFile(args);
+            OAuth1ClientCredentialsProvider credentials = getCredentials(args);
             TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                    ApacheHttpClientProvider.builder().build(), 
-                    new OAuth1ClientCredentialsProvider.FromFile(file));
+                    ApacheHttpClientProvider.builder().build(),
+                    credentials);
             Fresh<AccessTokenResponse> fresh = 
                     tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
             String accessToken = fresh.get().getAccessToken();
@@ -75,6 +78,15 @@ public class GetHereClientCredentialsAccessTokenTutorial {
             exit(2);
             return null;
         }
+    }
+    
+    protected OAuth1ClientCredentialsProvider getCredentials(Args args) throws IOException {
+        if (null != testCreds) {
+            return testCreds;
+        }
+        
+        File file = getCredentialsFile(args);
+        return new OAuth1ClientCredentialsProvider.FromFile(file);
     }
     
     protected void exit(int status) {
@@ -113,8 +125,7 @@ public class GetHereClientCredentialsAccessTokenTutorial {
         return new Args(verbose, filePathString);
     }
 
-    
-    private class Args {
+    protected class Args {
         private final boolean verbose;
         private final String filePathString;
         
