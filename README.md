@@ -108,9 +108,9 @@ fail the test phase otherwise.  Another way to get passing tests, or to override
 
 Open a command prompt at the working tree's root directory and type:
 
-    $ mvn -DargLine='-Dhere.token.endpoint.url=https://stg.account.api.here.com/oauth2/token -Dhere.access.key.id=myclientid -Dhere.access.key.secret=myfailingsecret' clean package
+    $ mvn -DargLine='-DhereCredentialsFile=/path/to/your/creds' clean package
 
-Substitute your Staging here.access.key.id, here.access.key.secret above, to achieve success.
+Substitute your /path/to/your/creds above, to achieve success.
 
 Examples instructions
 ---------------------

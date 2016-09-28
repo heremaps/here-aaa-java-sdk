@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -57,7 +59,20 @@ public abstract class AbstractCredentialTezt {
     
     @Before
     public void setUp() throws Exception {
-        File file = getDefaultCredentialsFile();
+        // -DhereCredentialsFile
+        File file = null;
+        String hereCredentialsFile = System.getProperty("hereCredentialsFile");
+        if (null != hereCredentialsFile) {
+            file = new File(hereCredentialsFile);
+            if (!file.exists()) {
+                fail("file does not exist");
+            }
+        }
+
+        if (null == file) {
+            // default ~/.here/credentials.properties
+            file = getDefaultCredentialsFile();
+        }
         if (null != file) {
             OAuth1ClientCredentialsProvider propertiesCredentialsProvider = 
                     new OAuth1ClientCredentialsProvider.FromFile(file);
@@ -74,6 +89,7 @@ public abstract class AbstractCredentialTezt {
             accessKeySecret = (String) field.get(oauth1Signer);
         }
         
+        // jenkins CI
         String url = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY
                 );
         String accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
@@ -86,12 +102,10 @@ public abstract class AbstractCredentialTezt {
             hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
         }
         
-        /*
         // verify some credentials will be available
         assertTrue("no credentials configs were available, try populating "
                 + getDefaultCredentialsFilePathString(), 
                 null != hereCredentialsProvider);
-                */
     }
 
     protected boolean isNotBlank(String str) {
