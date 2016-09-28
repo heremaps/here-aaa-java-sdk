@@ -38,23 +38,22 @@ public class HereAccountTest extends AbstractCredentialTezt {
     /**
      * We expect FileNotFoundException because we expect the current working directory 
      * not to contain credentials.properties.
-     * Clients are free to put their "credentials.properties" File anywhere on their filesystem, 
-     * for positive outcomes.
-     * This test verifies the Javadoc sample compiles; 
-     * it would not throw any Exception if the File existed.
-     * 
+     *
      * @throws IOException
+     * @throws AccessTokenException
+     * @throws RequestExecutionException
+     * @throws ResponseParsingException
      */
     @Test(expected=FileNotFoundException.class) 
-    public void test_file_javadocs() throws IOException {
-        // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
+    public void test_simpleUseCase_javadocs() throws IOException, AccessTokenException, RequestExecutionException, ResponseParsingException {
+        // use your provided credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
-        // choose 
-        //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
-        // or 
-        //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+        
+        String hereAccessToken = tokenEndpoint.requestToken(
+                new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
     }
 
     @Test
@@ -85,6 +84,30 @@ public class HereAccountTest extends AbstractCredentialTezt {
         String hereAccessToken = freshToken.get().getAccessToken();
         // use hereAccessToken on your request...
     }
+    
+    /**
+     * We expect FileNotFoundException because we expect the current working directory 
+     * not to contain credentials.properties.
+     * Clients are free to put their "credentials.properties" File anywhere on their filesystem, 
+     * for positive outcomes.
+     * This test verifies the Javadoc sample compiles; 
+     * it would not throw any Exception if the File existed.
+     * 
+     * @throws IOException
+     */
+    @Test(expected=FileNotFoundException.class) 
+    public void test_file_javadocs() throws IOException {
+        // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        // choose 
+        //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+        // or 
+        //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+    }
+    
+
     
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullUrl() throws Exception {

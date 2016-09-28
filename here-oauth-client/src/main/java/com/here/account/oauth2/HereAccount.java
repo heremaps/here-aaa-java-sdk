@@ -15,17 +15,14 @@
  */
 package com.here.account.oauth2;
 
-import java.io.File;
 import java.io.IOException;
-
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
-import com.here.account.http.HttpException;
-import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
-import com.here.account.util.JsonSerializer;
-import com.here.account.util.RefreshableResponseProvider;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+
+import com.here.account.http.HttpException;
+import com.here.account.http.HttpProvider;
+import com.here.account.util.JsonSerializer;
+import com.here.account.util.RefreshableResponseProvider;
 
 /**
  * Static entry point to access HERE Account via the OAuth2.0 API.  This class
@@ -34,6 +31,21 @@ import java.io.UncheckedIOException;
  * <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>.
  * See also the OAuth2.0 
  * <a href="https://tools.ietf.org/html/rfc6749#section-1.4">Access Token</a> spec.
+ * 
+ * <p>
+ * To use your provided credentials.properties to get a one-time use token:
+ * <pre>
+ * {@code
+        // use your provided credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        
+        String hereAccessToken = tokenEndpoint.requestToken(
+                new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
+   }
+ * </pre>
  * 
  * <p>
  * Specific use cases currently supported include:
