@@ -9,9 +9,6 @@
     <parent>
         <groupId>com.here.account</groupId>
         <artifactId>here-aaa-sdk</artifactId>
-<!--
-        <version>${my.version}</version>
--->
         <version>0.3.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -81,7 +78,7 @@
         <dependency>
             <groupId>com.here.account</groupId>
             <artifactId>here-oauth-client</artifactId>
-            <version>${my.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
