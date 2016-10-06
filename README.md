@@ -1,8 +1,3 @@
-  _  _ ___ ___ ___     _    _    _
- | || | __| _ \ __|   /_\  /_\  /_\
- | __ | _||   / _|   / _ \/ _ \/ _ \
- |_||_|___|_|_\___| /_/ \_\/ \_\/ \_\
-
 HERE Authentication, Authorization, and Accounting
 
 Copyright (c) 2016 HERE Europe B.V.
