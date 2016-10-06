@@ -133,9 +133,7 @@ Developer Usage
 ===============
 
 Read the javadocs for details.  The mvn commands above will create javadocs locally, which you can 
-open via 
-
-    $ open here-oauth-client/target/apidocs/index.html
+have a look at `here-oauth-client/target/apidocs/index.html`.
 
 If you are just getting started, go to com.here.account.oauth2.HereAccount javadocs for the overview 
 of two options:
