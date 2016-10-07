@@ -15,12 +15,16 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -144,8 +148,16 @@ public class HereAccountTest extends AbstractCredentialTezt {
         }
     }
     
+    /**
+     * Confirms InvalidCredentials => AccessTokenException whose 
+     * ErrorResponse object has error="invalid_client", so clients 
+     * could potentially write code against the RFC6749 using these 
+     * business objects.
+     * 
+     * @throws Exception if an unexpected Exception is thrown by the test.
+     */
     @Test
-    public void testGetTokenInvalidCredentials() throws Exception {
+    public void testGetToken_InvalidCredentials() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
@@ -154,9 +166,59 @@ public class HereAccountTest extends AbstractCredentialTezt {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
             Assert.fail("Expected AccessTokenException");
         } catch (AccessTokenException ate) {
-            
+            ErrorResponse errorResponse = ate.getErrorResponse();
+            assertTrue("errorResponse was null", null != errorResponse);
+            String error = errorResponse.getError();
+            final String expectedError = "invalid_client";
+            assertTrue("\"error\" in JSON error response body was expected "
+                    +expectedError+", actual "+error, 
+                    expectedError.equals(error));
         }
     }
+    
+    /**
+     * Confirms MissingRequiredParameter => AccessTokenException whose 
+     * ErrorResponse object has error="invalid_request", so clients 
+     * could potentially write code against the RFC6749 using these 
+     * business objects.
+     * 
+     * @throws Exception if an unexpected Exception is thrown by the test.
+     */
+    @Test
+    public void testGetToken_MissingRequiredParameter() throws Exception {
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+        
+        AccessTokenRequest missingParameterRequest = new AccessTokenRequest(null) {
+
+            @Override
+            public String toJson() {
+                return "{}";
+            }
+
+            @Override
+            public Map<String, List<String>> toFormParams() {
+                Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+                //addFormParam(formParams, "grant_type", getGrantType());
+                return formParams;
+            }
+            
+        };
+        try {
+            tokenEndpoint.requestToken(missingParameterRequest);
+            Assert.fail("Expected AccessTokenException");
+        } catch (AccessTokenException ate) {
+            ErrorResponse errorResponse = ate.getErrorResponse();
+            assertTrue("errorResponse was null", null != errorResponse);
+            String error = errorResponse.getError();
+            final String expectedError = "invalid_request";
+            assertTrue("\"error\" in JSON error response body was expected "
+                    +expectedError+", actual "+error, 
+                    expectedError.equals(error));
+        }
+    }
+
     
     @Test
     public void testGetTokenInvalidResponseBody() throws Exception {
