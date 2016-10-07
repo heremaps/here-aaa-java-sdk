@@ -31,9 +31,6 @@ com.here.account.AccessTokenException: HTTP status code 401, body
 public class ErrorResponse {
     
     /**
-     * Not yet implemented.
-     * To be populated when HEREACCT-3541 is implemented and released.
-     * 
      * The error value.
      * From OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
      * section, the following parameter: 
@@ -128,9 +125,6 @@ public class ErrorResponse {
     }
     
     /**
-     * Not yet implemented.
-     * To be populated when HEREACCT-3541 is implemented and released.
-     * 
      * The error value.
      * From OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
      * section, the following parameter: 
