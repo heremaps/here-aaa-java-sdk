@@ -34,6 +34,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <excludes>
                 <exclude>com.here.account:here-oauth-client:*</exclude>
+                <exclude>com.here.account:here-oauth-client-example:*</exclude>
             </excludes>
         </dependencySet>
         <!-- include the javadocs -->
