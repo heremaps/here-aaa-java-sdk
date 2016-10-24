@@ -110,9 +110,9 @@ public abstract class AccessTokenRequest {
      * @return the JSON body, for use with application/json bodies
      */
     public String toJson() {
-        return "{\"" + GRANT_TYPE_JSON + "\":\"" + getGrantType()
+        return "{\"" + GRANT_TYPE_JSON + "\":\"" + getGrantType() + "\""
             + (null != expiresIn ? ",\"" + EXPIRES_IN_JSON + "\":" + expiresIn : "")
-            + "\"}";
+            + "}";
     }
 
     /**

@@ -33,7 +33,7 @@ public class ClientCredentialsGrantRequest extends AccessTokenRequest {
      * {@inheritDoc}
      */
     @Override
-    public AccessTokenRequest setExpiresIn(Long expiresIn) {
+    public ClientCredentialsGrantRequest setExpiresIn(Long expiresIn) {
         super.setExpiresIn(expiresIn);
         return this;
     }
