@@ -15,10 +15,6 @@
  */
 package com.here.account.oauth2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * An {@link AccessTokenRequest} for grant_type=client_credentials.
  * 
@@ -27,24 +23,19 @@ import java.util.Map;
  */
 public class ClientCredentialsGrantRequest extends AccessTokenRequest {
     
-    public ClientCredentialsGrantRequest() {
-        super("client_credentials");
-    }
+    public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
     
+    public ClientCredentialsGrantRequest() {
+        super(CLIENT_CREDENTIALS_GRANT_TYPE);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public String toJson() {
-        return "{\"grantType\":\"" + getGrantType()
-            + "\"}";
+    public ClientCredentialsGrantRequest setExpiresIn(Long expiresIn) {
+        super.setExpiresIn(expiresIn);
+        return this;
     }
-
-    @Override
-    public Map<String, List<String>> toFormParams() {
-        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
-        addFormParam(formParams, "grant_type", getGrantType());
-        return formParams;
-    }
-
+    
 }

@@ -183,15 +183,12 @@ public class ApacheHttpClientProvider implements HttpProvider {
             throw new IllegalArgumentException("malformed URL: " + e, e);
         }
         HttpRequestBase apacheRequest = null;
-        HttpEntityEnclosingRequestBase apacheRequestSupportsEntity = null;
         if (method.equals(HttpGet.METHOD_NAME)) {
             apacheRequest = new HttpGet(uri);
         } else if (method.equals(HttpPost.METHOD_NAME)) {
-            apacheRequestSupportsEntity = new HttpPost(uri);
-            apacheRequest = apacheRequestSupportsEntity;
+            apacheRequest = new HttpPost(uri);
         } else if (method.equals(HttpPut.METHOD_NAME)) {
-            apacheRequestSupportsEntity = new HttpPut(uri);
-            apacheRequest = apacheRequestSupportsEntity;
+            apacheRequest = new HttpPut(uri);
         } else if (method.equals(HttpDelete.METHOD_NAME)) {
             apacheRequest = new HttpDelete(uri);
         } else if (method.equals(HttpHead.METHOD_NAME)) {
@@ -201,8 +198,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
         } else if (method.equals(HttpTrace.METHOD_NAME)) {
             apacheRequest = new HttpTrace(uri);
         } else if (method.equals(HttpPatch.METHOD_NAME)) {
-            apacheRequestSupportsEntity = new HttpPatch(uri);
-            apacheRequest = apacheRequestSupportsEntity;
+            apacheRequest = new HttpPatch(uri);
         } else {
             throw new IllegalArgumentException("no support for request method=" + method);
         }
@@ -227,6 +223,18 @@ public class ApacheHttpClientProvider implements HttpProvider {
         }
         */
         
+        return apacheRequest;
+    }
+    
+    private void addApacheRequestEntity(HttpRequestBase apacheRequest, 
+            String method,
+            String requestBodyJson,
+            Map<String, List<String>> formParams) {
+        HttpEntityEnclosingRequestBase apacheRequestSupportsEntity = 
+                apacheRequest instanceof HttpEntityEnclosingRequestBase 
+                ? (HttpEntityEnclosingRequestBase) apacheRequest 
+                        : null;
+
         // body support
         if (null != formParams && formParams.size() > 0) {
             if (null == apacheRequestSupportsEntity) {
@@ -234,7 +242,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
             }
             // form parameters support
             // application/x-www-form-urlencoded only
-            apacheRequest.addHeader(HttpConstants.CONTENT_TYPE, HttpConstants.CONTENT_TYPE_FORM_URLENCODED);
+            apacheRequestSupportsEntity.addHeader(HttpConstants.CONTENT_TYPE, HttpConstants.CONTENT_TYPE_FORM_URLENCODED);
             List<NameValuePair> parameters = new ArrayList<NameValuePair>();
             for (Entry<String, List<String>> entry : formParams.entrySet()) {
                 String key = entry.getKey();
@@ -254,7 +262,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
                 throw new IllegalArgumentException("no JSON request body permitted for method "+method);
             }
             // JSON body support
-            apacheRequest.addHeader(HttpConstants.CONTENT_TYPE, HttpConstants.CONTENT_TYPE_JSON);
+            apacheRequestSupportsEntity.addHeader(HttpConstants.CONTENT_TYPE, HttpConstants.CONTENT_TYPE_JSON);
             byte[] bodyBytes = requestBodyJson.getBytes(HttpConstants.ENCODING_CHARSET);
             if (null != bodyBytes) {
                 BasicHttpEntity entity = new BasicHttpEntity();
@@ -263,28 +271,30 @@ public class ApacheHttpClientProvider implements HttpProvider {
                 apacheRequestSupportsEntity.setEntity(entity);
             }
         }
-        return apacheRequest;
+
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public HttpRequest getRequest(HttpRequestAuthorizer httpSigner, String method, String url,
+    public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             String requestBodyJson) {
-        HttpRequestBase requestBuilder = 
+        HttpRequestBase apacheRequest = 
                 /*String method, String url, 
             String requestBodyJson, Map<String, List<String>> formParams*/
                 getRequestNoAuth(method, url, requestBodyJson, null);
         
-        ApacheHttpClientRequest request = new ApacheHttpClientRequest(requestBuilder);
+        ApacheHttpClientRequest request = new ApacheHttpClientRequest(apacheRequest);
         
         // OAuth1
         // NOTE: because this example uses application/json, not forms, our request bodies are 
         // never part of the OAuth1 Authorization header.
         Map<String, List<String>> formParams = null;
-        httpSigner.authorize(request, method, url, formParams);
+        httpRequestAuthorizer.authorize(request, method, url, formParams);
 
+        addApacheRequestEntity(apacheRequest, method, requestBodyJson, null);
+        
         return request;
     }
     
@@ -292,20 +302,22 @@ public class ApacheHttpClientProvider implements HttpProvider {
      * {@inheritDoc}
      */
     @Override
-    public HttpRequest getRequest(HttpRequestAuthorizer httpSigner, String method, String url,
+    public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             Map<String, List<String>> formParams) {
-        HttpRequestBase requestBuilder = 
+        HttpRequestBase apacheRequest = 
                 /*String method, String url, 
             String requestBodyJson, Map<String, List<String>> formParams*/
                 getRequestNoAuth(method, url, null, formParams);
         
-        ApacheHttpClientRequest request = new ApacheHttpClientRequest(requestBuilder);
+        ApacheHttpClientRequest request = new ApacheHttpClientRequest(apacheRequest);
         
         // OAuth1
         // with application/x-www-form-urlencoded bodies, 
         // the request body is supposed to impact the signature.
-        httpSigner.authorize(request, method, url, formParams);
+        httpRequestAuthorizer.authorize(request, method, url, formParams);
 
+        addApacheRequestEntity(apacheRequest, method, null, formParams);
+        
         return request;
     }
 

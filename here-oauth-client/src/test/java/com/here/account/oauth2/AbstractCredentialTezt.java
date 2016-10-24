@@ -53,9 +53,9 @@ public abstract class AbstractCredentialTezt {
         return "~" + File.separatorChar + DOT_HERE_SUBDIR + File.separatorChar + CREDENTIALS_DOT_PROPERTIES_FILENAME;
     }
     
-    String url;
-    String accessKeyId;
-    String accessKeySecret;
+    protected String url;
+    protected String accessKeyId;
+    protected String accessKeySecret;
     
     @Before
     public void setUp() throws Exception {
