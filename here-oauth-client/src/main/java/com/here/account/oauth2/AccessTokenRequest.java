@@ -15,9 +15,11 @@
  */
 package com.here.account.oauth2;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.here.account.http.HttpUtil;
 
 /**
  * One of the OAuth2.0 
@@ -28,10 +30,30 @@ import java.util.Map;
  *
  */
 public abstract class AccessTokenRequest {
-
-    static final String GRANT_TYPE = "grantType";
+    
+    /**
+     * expiresIn; the parameter name for "expires in" when conveyed in a JSON body.
+     */
+    private static final String EXPIRES_IN_JSON = "expiresIn";
+    
+    /**
+     * expires_in; the parameter name for "expires in" when conveyed in a form body.
+     */
+    private static final String EXPIRES_IN_FORM = "expires_in";
+    
+    protected static final String GRANT_TYPE_JSON = "grantType";
+    protected static final String GRANT_TYPE_FORM = "grant_type";
     
     private final String grantType;
+
+    /**
+     * The optional lifetime in seconds of the access token returned by 
+     * this request.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private Long expiresIn;
     
     protected AccessTokenRequest(String grantType) {
         this.grantType = grantType;
@@ -42,31 +64,81 @@ public abstract class AccessTokenRequest {
     }
     
     /**
+     * Optionally set the lifetime in seconds of the access token returned by 
+     * this request.
+     * Must be a positive number.  Ignored if greater than the maximum expiration 
+     * for the client application.
+     * Typically you can set this from 1 to 86400, the latter representing 24 
+     * hours.
+     * 
+     * <p>
+     * While the OAuth2.0 RFC doesn't list this as a request parameter, 
+     * we add this so the client can request Access Token expirations within the 
+     * allowable range.  See also the response parameter
+     * <a href="https://tools.ietf.org/html/rfc6749#section-5.1">expires_in</a>.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     * 
+     * @param expiresIn desired lifetime in seconds of the access token
+     * @return this
+     * @see AccessTokenResponse#getExpiresIn()
+     * @see #getExpiresIn()
+     */
+    public AccessTokenRequest setExpiresIn(Long expiresIn) {
+        this.expiresIn = expiresIn;
+        return this;
+    }
+
+    /**
+     * Gets the expiresIn value, the desired lifetime in seconds of the access token 
+     * returned by this request.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     * 
+     * @return the expiresIn value, the desired lifetime in seconds of the access token 
+     *      returned by this request.
+     */
+    public Long getExpiresIn() {
+        return this.expiresIn;
+    }
+    
+    /**
      * Converts this request, into its JSON body representation.
      * 
      * @return the JSON body, for use with application/json bodies
      */
-    public abstract String toJson();
-    
+    public String toJson() {
+        return "{\"" + GRANT_TYPE_JSON + "\":\"" + getGrantType()
+            + (null != expiresIn ? ",\"" + EXPIRES_IN_JSON + "\":" + expiresIn : "")
+            + "\"}";
+    }
+
     /**
      * Converts this request, to its formParams Map representation.
      * 
      * @return the formParams, for use with application/x-www-form-urlencoded bodies.
      */
-    public abstract Map<String, List<String>> toFormParams();
+    public Map<String, List<String>> toFormParams() {
+        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+        addFormParam(formParams, GRANT_TYPE_FORM, getGrantType());
+        addFormParam(formParams, EXPIRES_IN_FORM, getExpiresIn());
+        return formParams;
+    }
 
     /**
+     * Adds the specified name and value to the form parameters.
      * If the value is non-null, the name and singleton-List of the value.toString() is 
      * added to the formParams Map.
      * 
+     * @see HttpUtil#addFormParam(Map, String, Object)
      * @param formParams the formParams Map, for use with application/x-www-form-urlencoded bodies
      * @param name the name of the form parameter
      * @param value the value of the form parameter
      */
     protected final void addFormParam(Map<String, List<String>> formParams, String name, Object value) {
-        if (null != value) {
-            formParams.put(name, Collections.singletonList(value.toString()));
-        }
+        HttpUtil.addFormParam(formParams, name, value);
     }
 
 }
