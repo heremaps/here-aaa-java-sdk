@@ -1,0 +1,13 @@
+language: java
+
+jdk: oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.m2
+
+# Override the default with doing nothing as this skips installing javadoc
+# and we need to install as part of the build to run tests anyway.
+install: true
+
+script: mvn -DskipTests install
