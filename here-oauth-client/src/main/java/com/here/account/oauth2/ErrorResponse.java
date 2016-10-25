@@ -117,16 +117,7 @@ public class ErrorResponse {
     private final String message;
     
     public ErrorResponse() {
-        this(null);
-    }
-    
-    public ErrorResponse(
-            String error) {
-        this.error = error;
-        this.errorId = null;
-        this.httpStatus = null;
-        this.errorCode = null;
-        this.message = null;
+        this(null, null, null, null, null);
     }
     
     public ErrorResponse(String error, 

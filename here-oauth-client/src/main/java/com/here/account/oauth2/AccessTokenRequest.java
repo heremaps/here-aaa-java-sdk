@@ -15,11 +15,10 @@
  */
 package com.here.account.oauth2;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.here.account.http.HttpUtil;
 
 /**
  * One of the OAuth2.0 
@@ -132,13 +131,15 @@ public abstract class AccessTokenRequest {
      * If the value is non-null, the name and singleton-List of the value.toString() is 
      * added to the formParams Map.
      * 
-     * @see HttpUtil#addFormParam(Map, String, Object)
      * @param formParams the formParams Map, for use with application/x-www-form-urlencoded bodies
      * @param name the name of the form parameter
      * @param value the value of the form parameter
      */
-    protected final void addFormParam(Map<String, List<String>> formParams, String name, Object value) {
-        HttpUtil.addFormParam(formParams, name, value);
+    protected final static void addFormParam(Map<String, List<String>> formParams, String name, Object value) {
+        if (null != formParams && null != name && null != value) {
+            formParams.put(name, Collections.singletonList(value.toString()));
+        }
     }
+
 
 }
