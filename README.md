@@ -78,13 +78,6 @@ Open a command prompt at the working tree's root directory and type:
 
     $ mvn -DskipTests clean package
 
-Install instructions
---------------------
-
-Open a command prompt at the working tree's root directory and type:
-
-    $ mvn -DskipTests clean install
-
 To build the package without testing it.
 
 Test instructions
