@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -26,7 +27,6 @@ import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
-import static org.junit.Assert.assertTrue;
 
 public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
@@ -79,4 +79,31 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
         }
 
     }
+    
+    @Test
+    public void test_signIn_expiresIn() throws Exception {
+        AccessTokenResponse accessTokenResponse = signIn.requestToken(new ClientCredentialsGrantRequest());
+        String hereAccessToken = accessTokenResponse.getAccessToken();
+        assertTrue("hereAccessToken was null or blank", 
+                null != hereAccessToken && hereAccessToken.length() > 0);
+        
+        AccessTokenResponse accessTokenResponse15 = signIn.requestToken(new ClientCredentialsGrantRequest().setExpiresIn(15L));
+        String hereAccessToken15 = accessTokenResponse15.getAccessToken();
+        assertTrue("hereAccessToken15 was null or blank", 
+                null != hereAccessToken15 && hereAccessToken15.length() > 0);
+    
+        long expiresIn = accessTokenResponse.getExpiresIn();
+        long expiresIn15 = accessTokenResponse15.getExpiresIn();
+        assertTrue("expiresIn15 "+expiresIn15+" !< expiresIn "+expiresIn, 
+                expiresIn15 < expiresIn);
+        
+        // Verification adds some tolerance to the exact number of seconds.
+        // The server should not think it's valid longer than 15 seconds.
+        // The client should have been successful telling the server this, 
+        // and the client should be able to deserialize the response properly 
+        // for this constraint to hold.
+        assertTrue("expiresIn15 "+expiresIn15+" not in range",
+                1 <= expiresIn15 && expiresIn15 <= 15);
+    }
+    
 }

@@ -15,10 +15,6 @@
  */
 package com.here.account.oauth2;
 
-/* Example:
-com.here.account.AccessTokenException: HTTP status code 401, body 
-{"errorId":"ERROR-905ffdd8-34b1-4fc7-ba98-775206d292f9","httpStatus":401,"hereErrorCode":401400,"errorCode":401400,"message":"Invalid Credentials for user:test4312@example.com"}
- */
 /**
  * The POJO representation of an OAuth2.0 HERE authorization server error response.
  * See also the 
@@ -81,30 +77,42 @@ public class ErrorResponse {
      * 
      */
     private final String error;
-
-    /**
-     * A unique error identifier, useful for support questions, 
-     * or tracking purposes.
-     */
-    private final String errorId;
     
     /**
      * The numeric HTTP status code.
      * See also the HTTP 
      * <a href="https://tools.ietf.org/html/rfc7231#section-6">Response Status Codes</a> 
      * section.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
      */
     private final Integer httpStatus;
     
     /**
+     * A unique error identifier, useful for support questions, 
+     * or tracking purposes.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String errorId;
+    
+    /**
      * A more detailed categorized code for the error, specific to the HERE authorization server 
      * semantics.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
      */
     private final Integer errorCode;
     
     /**
      * A potentially-human-readable message describing the error.
      * No machine or automated code should process or interpret this value.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
      */
     private final String message;
     
@@ -118,8 +126,8 @@ public class ErrorResponse {
           Integer errorCode,
           String message) {
         this.error = error;
-        this.errorId = errorId;
         this.httpStatus = httpStatus;
+        this.errorId = errorId;
         this.errorCode = errorCode;
         this.message = message;
     }
@@ -178,24 +186,16 @@ public class ErrorResponse {
     public String getError() {
         return error;
     }
-
+    
     /**
-     * the errorId.
-     * A unique error identifier, useful for support questions, 
-     * or tracking purposes.
-     * 
-     * @return the errorId
-     */
-    public String getErrorId() {
-        return errorId;
-    }
-
-    /**
-     * the httpStatus.
+     * The httpStatus.
      * The numeric HTTP status code.
      * See also the HTTP 
      * <a href="https://tools.ietf.org/html/rfc7231#section-6">Response Status Codes</a> 
      * section.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
      * 
      * @return the httpStatus
      */
@@ -204,10 +204,27 @@ public class ErrorResponse {
     }
 
     /**
-     * the errorCode.
+     * The errorId.
+     * A unique error identifier, useful for support questions, 
+     * or tracking purposes.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     * 
+     * @return the errorId
+     */
+    public String getErrorId() {
+        return errorId;
+    }
+
+    /**
+     * The errorCode.
      * A more detailed categorized code for the error, specific to the HERE authorization server 
      * semantics.
      * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     *
      * @return the errorCode
      */
     public Integer getErrorCode() {
@@ -215,9 +232,12 @@ public class ErrorResponse {
     }
 
     /**
-     * the message.
+     * The message.
      * A potentially-human-readable message describing the error.
      * No machine or automated code should process or interpret this value.
+     * 
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
      * 
      * @return the message
      */
@@ -225,10 +245,12 @@ public class ErrorResponse {
         return message;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-        return "ErrorResponse [errorId=" + errorId + ", httpStatus=" + httpStatus + ", errorCode=" + errorCode
-                + ", message=" + message + "]";
+        return "ErrorResponse [error=" + error + "]";
     }
         
 }
