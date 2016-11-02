@@ -15,7 +15,6 @@
     </modules>
 
     <properties>
-        <project.version>0.3.0-SNAPSHOT</project.version>
 
         <!-- Begin From prior parent -->
         <general.encoding>UTF-8</general.encoding>
