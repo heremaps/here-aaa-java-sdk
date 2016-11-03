@@ -4,7 +4,7 @@
     <name>HERE AAA Client SDK Parent POM</name>
     <groupId>com.here.account</groupId>
     <artifactId>here-aaa-sdk</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>here-aaa-sdk is for clients of the HERE AAA, and demos grant_type=client_credentials</description>
 
