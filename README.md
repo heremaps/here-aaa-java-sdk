@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/heremaps/here-aaa-java-sdk.svg?branch=master)](https://travis-ci.org/heremaps/here-aaa-java-sdk)
+
 HERE Authentication, Authorization, and Accounting
 
 Copyright (c) 2016 HERE Europe B.V.
