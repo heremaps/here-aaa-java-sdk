@@ -86,17 +86,6 @@
 
     </properties>
 
-    <!-- The following is to be removed for OSS deployment -->
-<!--
-    <repositories>
-        <repository>
-            <id>aaa-releases</id>
-            <name>${repositoryName}</name>
-            <url>${releaseServer}/${repositoryName}</url>
-        </repository>
-    </repositories>
- -->
-
 
     <distributionManagement>
 
@@ -113,17 +102,6 @@
         </snapshotRepository>
 
     </distributionManagement>
-
-    <!-- The following is to be removed for OSS deployment -->
-<!--
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype-releases</id>
-            <name>Sonatype Releases</name>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
-        </pluginRepository>
-    </pluginRepositories>
- -->
 
     <dependencyManagement>
         <dependencies>

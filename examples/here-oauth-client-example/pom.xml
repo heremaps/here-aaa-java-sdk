@@ -13,14 +13,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <licenses>
-        <license>
-          <name>Apache License, Version 2.0</name>
-          <url>https://github.com/heremaps/here-aaa-java-sdk/blob/master/LICENSE</url>
-          <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <build>
         <!-- activate these plugins in this build -->
         <plugins>
@@ -38,11 +30,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>${maven-gpg-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
