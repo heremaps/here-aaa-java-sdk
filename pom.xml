@@ -8,6 +8,29 @@
     <packaging>pom</packaging>
     <description>here-aaa-sdk is for clients of the HERE AAA, and demos grant_type=client_credentials</description>
 
+    <licenses>
+        <license>
+          <name>Apache License, Version 2.0</name>
+          <url>https://github.com/heremaps/here-aaa-java-sdk/blob/master/LICENSE</url>
+          <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+          <name>Riccardo Gulia</name>
+          <email>riccardo.gulia@here.com</email>
+          <organization>HERE Europe B.V.</organization>
+          <organizationUrl>https://github.com/heremaps</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+      <connection>scm:git:git://github.com/heremaps/here-aaa-java-sdk.git</connection>
+      <developerConnection>scm:git:ssh://github.com:heremaps/here-aaa-java-sdk.git</developerConnection>
+      <url>http://github.com/heremaps/here-aaa-java-sdk/tree/master</url>
+    </scm>
+
     <modules>
         <module>here-oauth-client</module>
         <module>examples/here-oauth-client-example</module>
@@ -31,6 +54,10 @@
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+
+
         <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 
@@ -55,33 +82,26 @@
         <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
         <argLine></argLine>
 
-        <repositoryName>crypto</repositoryName>
+        <repositoryName>aaa</repositoryName>
+
     </properties>
 
 
     <distributionManagement>
+
         <repository>
-            <id>crypto-releases</id>
+            <id>aaa-releases</id>
             <name>${repositoryName}</name>
-            <url>http://ncr.in.here.com/nexus/content/repositories/${repositoryName}</url>
+            <url>${releaseServer}/${repositoryName}</url>
         </repository>
 
         <snapshotRepository>
-            <id>crypto-snapshots</id>
+            <id>aaa-snapshots</id>
             <name>${repositoryName}</name>
-            <url>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories/${repositoryName}</url>
+            <url>${snapshotServer}/${repositoryName}</url>
         </snapshotRepository>
 
     </distributionManagement>
-
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype-releases</id>
-            <name>Sonatype Releases</name>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
@@ -178,6 +198,20 @@
                             <id>attach-javadocs</id>
                             <goals>
                                 <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -282,5 +316,32 @@
             </plugins>
         </pluginManagement>
     </build>
-
+    <profiles>
+        <profile>
+            <id>gpg-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>gpg.passphrase</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                  <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -13,13 +13,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <licenses>
-        <license>
-            <name>HERE Proprietary</name>
-            <url>http://www.here.com</url>
-        </license>
-    </licenses> 
-
     <build>
 
         <!-- activate these plugins in this build -->
@@ -60,7 +53,7 @@
             <url>http://dchiub07.rnd.in.here.com:9090/nexus/content/repositories/${repositoryName}</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.here.account</groupId>

@@ -13,13 +13,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <licenses>
-        <license>
-            <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
-
     <build>
         <!-- activate these plugins in this build -->
         <plugins>
@@ -33,6 +26,10 @@
                 <configuration>
                     <bottom>Copyright &#169; {currentYear} HERE Europe B.V.  All Rights Reserved.</bottom>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
