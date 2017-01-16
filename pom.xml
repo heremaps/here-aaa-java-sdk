@@ -4,7 +4,7 @@
     <name>HERE AAA Client SDK Parent POM</name>
     <groupId>com.here.account</groupId>
     <artifactId>here-aaa-sdk</artifactId>
-    <version>0.4.6-SNAPSHOT</version>
+    <version>0.4.7</version>
     <packaging>pom</packaging>
     <description>here-aaa-sdk is for clients of the HERE AAA, and demos grant_type=client_credentials</description>
     <url>http://github.com/heremaps/here-aaa-java-sdk</url>
@@ -207,7 +207,6 @@
                     <executions>
                         <execution>
                             <id>attach-sources</id>
-                            <phase>deploy</phase>
                             <goals>
                                 <goal>jar-no-fork</goal>
                             </goals>
