@@ -82,8 +82,6 @@
         <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
         <argLine></argLine>
 
-        <repositoryName>aaa</repositoryName>
-
     </properties>
 
 
@@ -91,14 +89,12 @@
 
         <repository>
             <id>aaa-releases</id>
-            <name>${repositoryName}</name>
-            <url>${releaseServer}/${repositoryName}</url>
+            <url>${releaseServer}</url>
         </repository>
 
         <snapshotRepository>
             <id>aaa-snapshots</id>
-            <name>${repositoryName}</name>
-            <url>${snapshotServer}/${repositoryName}</url>
+            <url>${snapshotServer}</url>
         </snapshotRepository>
 
     </distributionManagement>
