@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * The POJO representation of an OAuth2.0 HERE authorization server error response.
  * See also the 
@@ -79,6 +81,20 @@ public class ErrorResponse {
     private final String error;
     
     /**
+     * The error_description value.
+     * From OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
+     * section, the following parameter: 
+     * error_description
+         OPTIONAL.  Human-readable ASCII [USASCII] text providing
+         additional information, used to assist the client developer in
+         understanding the error that occurred.
+         Values for the "error_description" parameter MUST NOT include
+         characters outside the set %x20-21 / %x23-5B / %x5D-7E.
+     */
+    @JsonProperty("error_description")
+    private final String errorDescription;
+    
+    /**
      * The numeric HTTP status code.
      * See also the HTTP 
      * <a href="https://tools.ietf.org/html/rfc7231#section-6">Response Status Codes</a> 
@@ -117,15 +133,17 @@ public class ErrorResponse {
     private final String message;
     
     public ErrorResponse() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
     
     public ErrorResponse(String error, 
+            String errorDescription,
           String errorId,
           Integer httpStatus,
           Integer errorCode,
           String message) {
         this.error = error;
+        this.errorDescription = errorDescription;
         this.httpStatus = httpStatus;
         this.errorId = errorId;
         this.errorCode = errorCode;
@@ -185,6 +203,23 @@ public class ErrorResponse {
      */
     public String getError() {
         return error;
+    }
+
+    /**
+     * The error_description value.
+     * From OAuth2.0 <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response</a> 
+     * section, the following parameter: 
+     * error_description
+         OPTIONAL.  Human-readable ASCII [USASCII] text providing
+         additional information, used to assist the client developer in
+         understanding the error that occurred.
+         Values for the "error_description" parameter MUST NOT include
+         characters outside the set %x20-21 / %x23-5B / %x5D-7E.
+     * 
+     * @return the error description
+     */
+    public String getErrorDescription() {
+        return errorDescription;
     }
     
     /**
@@ -250,7 +285,8 @@ public class ErrorResponse {
      */
     @Override
     public String toString() {
-        return "ErrorResponse [error=" + error + "]";
+        return "ErrorResponse [error=" + error + ", errorDescription=" + errorDescription + ", httpStatus=" + httpStatus
+                + ", errorId=" + errorId + ", errorCode=" + errorCode + ", message=" + message + "]";
     }
         
 }
