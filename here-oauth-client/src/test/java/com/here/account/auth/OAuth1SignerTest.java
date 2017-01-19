@@ -44,8 +44,8 @@ import com.here.account.util.OAuthConstants;
 
 public class OAuth1SignerTest {
 
-    private String clientId = "clientId";
-    private String clientSecret = "clientSecret";
+    private String accessKeyId = "access-key-id";
+    private String accessKeySecret = "access-key-secret";
     
     private OAuth1Signer oauth1Signer;
     
@@ -97,15 +97,15 @@ public class OAuth1SignerTest {
             }
             
         };
-        this.oauth1Signer = new MyOAuth1Signer(clock, clientId, clientSecret);
+        this.oauth1Signer = new MyOAuth1Signer(clock, accessKeyId, accessKeySecret);
         this.httpRequest = new MyHttpRequest();
         this.method = "GET";
         this.url = "http://localhost:8080/whatever";
     }
     
     protected static class MyOAuth1Signer extends OAuth1Signer {
-        public MyOAuth1Signer(Clock clock, String clientId, String clientSecret) {
-            super(clock, clientId, clientSecret);
+        public MyOAuth1Signer(Clock clock, String accessKeyId, String accessKeySecret) {
+            super(clock, accessKeyId, accessKeySecret);
         }
 
         /**
@@ -197,7 +197,7 @@ public class OAuth1SignerTest {
 
         String shaVariant = "SHA256";//"SHA1";
         
-        String requestParameters = "oauth_consumer_key="+clientId+"&oauth_nonce="+nonce+"&oauth_signature_method=HMAC-"+shaVariant+"&oauth_timestamp="+oauth_timestamp+"&oauth_version=1.0";
+        String requestParameters = "oauth_consumer_key="+accessKeyId+"&oauth_nonce="+nonce+"&oauth_signature_method=HMAC-"+shaVariant+"&oauth_timestamp="+oauth_timestamp+"&oauth_version=1.0";
         String signatureBaseString = "GET&"
                 +urlEncode(url)+"&"
                 + urlEncode(requestParameters); // no request parameters in this test case
@@ -205,7 +205,7 @@ public class OAuth1SignerTest {
 
         System.out.println("test       signatureBaseString "+signatureBaseString);
         
-        String key = urlEncode(clientSecret) + "&"; // no token shared-secret
+        String key = urlEncode(accessKeySecret) + "&"; // no token shared-secret
         
         String expectedSignature = HmacSHAN(key, "Hmac"+shaVariant, signatureBaseString);
 

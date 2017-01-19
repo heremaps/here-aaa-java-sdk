@@ -16,17 +16,25 @@
 package com.here.account.oauth2;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import com.here.account.auth.OAuth1Signer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.util.Clock;
 
 public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
 
@@ -59,6 +67,84 @@ public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
     public void test_signIn() throws Exception {
         String hereAccessToken = signIn.requestToken(new ClientCredentialsGrantRequest()).getAccessToken();
         assertTrue("hereAccessToken was null or blank", null != hereAccessToken && hereAccessToken.length() > 0);
+    }
+    
+    private Clock clock;
+    private OAuth1Signer oauth1Signer;
+    
+    private long clockCurrentTimeMillis = 0;
+    
+    protected void setUpCustomClock() throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException, ClassNotFoundException {
+        this.clock = new Clock() {
+
+            @Override
+            public long currentTimeMillis() {
+                // we can manipulate the clock via a simple member variable setter
+                return clockCurrentTimeMillis;
+            }
+
+            @Override
+            public void schedule(ScheduledExecutorService scheduledExecutorService, Runnable runnable,
+                    long millisecondsInTheFutureToSchedule) {
+                // no impl needed for this test
+            }
+            
+        };
+        this.oauth1Signer = new OAuth1Signer(clock, accessKeyId, accessKeySecret);
+        
+        ClientCredentialsProvider clientCredentialsProvider = new ClientCredentialsProvider() {
+
+            @Override
+            public String getTokenEndpointUrl() {
+                return url;
+            }
+
+            @Override
+            public HttpRequestAuthorizer getClientAuthorizer() {
+                return oauth1Signer;
+            }
+            
+        };
+        
+        this.signIn = HereAccount.getTokenEndpoint(
+                httpProvider,
+                clientCredentialsProvider
+        );
+    }
+
+    private static final int THIRTY_MINUTES_IN_MILLISECONDS = 30 * 60 * 1000;
+    
+    @Test
+    public void test_signIn_wrongClock() throws Exception {
+        setUpCustomClock();
+        this.clockCurrentTimeMillis = System.currentTimeMillis() + THIRTY_MINUTES_IN_MILLISECONDS;
+
+        try {
+            signIn.requestToken(new ClientCredentialsGrantRequest()).getAccessToken();
+            fail("expected an AccessTokenException for clock 30 minutes in the future");
+        } catch (AccessTokenException e) {
+            // httpStatus 401, errorCode 401204: Time stamp is outside the valid period.
+            int statusCode = e.getStatusCode();
+            final int expectedStatusCode = 401;
+            assertTrue("wrong clock test: expected statusCode " + expectedStatusCode + ", actual " + statusCode, 
+                    expectedStatusCode == statusCode);
+            ErrorResponse errorResponse = e.getErrorResponse();
+            int httpStatus = errorResponse.getHttpStatus();
+            assertTrue("wrong clock test: expected httpStatus " + expectedStatusCode + ", actual " + httpStatus, 
+                    expectedStatusCode == httpStatus);
+            String error = errorResponse.getError();
+            String expectedError = "invalid_request";
+            assertTrue("expected error " + expectedError + ", actual " + error, expectedError.equals(error));
+            String expectedErrorDescriptionContains = "timestamp";
+            String errorDescription = errorResponse.getErrorDescription();
+            assertTrue("expected error_description to contain " + errorDescription + ", actual " + errorDescription, 
+                    null != errorDescription && errorDescription.contains(expectedErrorDescriptionContains));
+            int expectedErrorCode = 401204;
+            Integer errorCode = errorResponse.getErrorCode();
+            assertTrue("expected errorCode " + expectedErrorCode + ", actual " + errorCode, 
+                    null != errorCode && errorCode.intValue() == expectedErrorCode);
+        }
+
     }
     
     @Test
