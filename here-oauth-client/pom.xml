@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.here.account</groupId>
         <artifactId>here-aaa-sdk</artifactId>
-        <version>0.4.6-SNAPSHOT</version>
+        <version>0.4.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -53,7 +53,6 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
-                        <phase>deploy</phase>
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
