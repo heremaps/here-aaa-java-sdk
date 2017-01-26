@@ -72,7 +72,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
     }
     
     /**
-     * Construct the OAuth signer based on clock, clientId, and clientSecret.
+     * Construct the OAuth signer based on clock, accessKeyId, and accessKeySecret.
      * Use this if you want to inject your own clock, such as during unit tests.
      * 
      * @param clock the implementation of a clock you want to use
@@ -81,7 +81,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * @param accessKeySecret the HERE clientSecret.  Used to calculate the oauth_signature 
      *      in the Authorization: OAuth header.
      */
-    OAuth1Signer(Clock clock, String accessKeyId, String accessKeySecret) {
+    public OAuth1Signer(Clock clock, String accessKeyId, String accessKeySecret) {
         this.clock = clock;
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
