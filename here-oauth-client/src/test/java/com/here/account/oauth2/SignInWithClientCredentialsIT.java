@@ -36,7 +36,7 @@ import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.Clock;
 
-public class SignInWithClientCredentialsTest extends AbstractCredentialTezt {
+public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
 
     HttpProvider httpProvider;
     TokenEndpoint signIn;

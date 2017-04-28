@@ -32,7 +32,7 @@ import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.RefreshableResponseProvider;
 import static org.junit.Assert.assertTrue;
 
-public class RefreshableTokenAuthenticationProviderTest extends AbstractCredentialTezt {
+public class RefreshableTokenAuthenticationProviderIT extends AbstractCredentialTezt {
 
     HttpProvider httpProvider;
     RefreshableResponseProvider<AccessTokenResponse> provider;

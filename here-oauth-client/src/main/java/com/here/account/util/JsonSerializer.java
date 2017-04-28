@@ -89,5 +89,16 @@ public class JsonSerializer {
     public static String toJson(Map<String, Object> mapObject) throws JsonProcessingException {
         return objectMapper.writeValueAsString(mapObject);
     }
+    
+    /**
+     * Converts the input POJO object to its JSON string.
+     * 
+     * @param object the object to serialize into a JSON string.
+     * @return the JSON string representation of the object.
+     * @throws JsonProcessingException 
+     */
+    public static String objectToJson(Object object) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(object);
+    }
 
 }

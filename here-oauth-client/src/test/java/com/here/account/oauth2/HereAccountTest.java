@@ -62,62 +62,6 @@ public class HereAccountTest extends AbstractCredentialTezt {
         // use hereAccessToken on requests until expires...
     }
 
-    @Test
-    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_getSignIn_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
-        // set up url, accessKeyId, and accessKeySecret.
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
-        
-        String hereAccessToken = tokenEndpoint.requestToken(
-                new ClientCredentialsGrantRequest()).getAccessToken();
-        // use hereAccessToken on requests until expires...
-    }
-    
-    @Test
-    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_getRefreshableClientAuthorizationProvider_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
-        // set up url, accessKeyId, and accessKeySecret.
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
-        // call this once and keep a reference to freshToken, such as in your beans
-        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(
-                new ClientCredentialsGrantRequest());
-        
-        // using your reference to freshToken, for each request, just ask for the token
-        // the same hereAccessToken is returned for most of the valid time; but as it nears 
-        // expiry the returned value will change.
-        String hereAccessToken = freshToken.get().getAccessToken();
-        // use hereAccessToken on your request...
-    }
-    
-    /**
-     * We expect FileNotFoundException because we expect the current working directory 
-     * not to contain credentials.properties.
-     * Clients are free to put their "credentials.properties" File anywhere on their filesystem, 
-     * for positive outcomes.
-     * This test verifies the Javadoc sample compiles; 
-     * it would not throw any Exception if the File existed.
-     * 
-     * @throws IOException
-     */
-    @Test(expected=FileNotFoundException.class) 
-    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_file_javadocs() throws IOException {
-        // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
-        // choose 
-        //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
-        // or 
-        //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
-    }
-    
-
-    
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullUrl() throws Exception {
         HereAccount.getTokenEndpoint(
@@ -150,34 +94,6 @@ public class HereAccountTest extends AbstractCredentialTezt {
             Assert.fail("Expected RequestExecutionException");
         } catch (RequestExecutionException ree) {
             
-        }
-    }
-    
-    /**
-     * Confirms InvalidCredentials => AccessTokenException whose 
-     * ErrorResponse object has error="invalid_client", so clients 
-     * could potentially write code against the RFC6749 using these 
-     * business objects.
-     * 
-     * @throws Exception if an unexpected Exception is thrown by the test.
-     */
-    @Test
-    public void testGetToken_InvalidCredentials() throws Exception {
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
-        
-        try {
-            tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
-            Assert.fail("Expected AccessTokenException");
-        } catch (AccessTokenException ate) {
-            ErrorResponse errorResponse = ate.getErrorResponse();
-            assertTrue("errorResponse was null", null != errorResponse);
-            String error = errorResponse.getError();
-            final String expectedError = "invalid_client";
-            assertTrue("\"error\" in JSON error response body was expected "
-                    +expectedError+", actual "+error, 
-                    expectedError.equals(error));
         }
     }
     
