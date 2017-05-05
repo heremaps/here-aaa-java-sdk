@@ -25,6 +25,8 @@ import org.junit.Before;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.auth.OAuth1Signer;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.java.JavaHttpProvider;
 
 
 public abstract class AbstractCredentialTezt {
@@ -35,6 +37,11 @@ public abstract class AbstractCredentialTezt {
     private static final String DOT_HERE_SUBDIR = ".here";
     private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
     
+    protected HttpProvider getHttpProvider() {
+        // default Java HttpProvider
+        return JavaHttpProvider.builder().build();
+    }
+
     protected File getDefaultCredentialsFile() {
         String userDotHome = System.getProperty(USER_DOT_HOME);
         if (userDotHome != null && userDotHome.length() > 0) {

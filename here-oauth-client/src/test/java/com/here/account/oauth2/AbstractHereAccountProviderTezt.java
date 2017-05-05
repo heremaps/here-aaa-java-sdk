@@ -69,6 +69,4 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
         assertTrue("accessToken was null or zero-length", null != accessToken && accessToken.length() > 0);
     }
 
-    protected abstract HttpProvider getHttpProvider();
-
 }

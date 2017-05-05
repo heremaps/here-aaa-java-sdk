@@ -19,8 +19,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -30,10 +28,8 @@ import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.auth.OAuth1Signer;
-import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.Clock;
 
 public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
@@ -45,10 +41,7 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
     public void setUp() throws Exception {
         super.setUp();
         
-        httpProvider = ApacheHttpClientProvider.builder()
-        .setConnectionTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS)
-        .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
-        .build();
+        httpProvider = getHttpProvider();
         
         this.signIn = HereAccount.getTokenEndpoint(
                 httpProvider,

@@ -15,7 +15,7 @@
  */
 package com.here.account.oauth2;
 
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -25,12 +25,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.here.account.http.HttpConstants;
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.RefreshableResponseProvider;
-import static org.junit.Assert.assertTrue;
 
 public class RefreshableTokenAuthenticationProviderIT extends AbstractCredentialTezt {
 
@@ -41,10 +39,7 @@ public class RefreshableTokenAuthenticationProviderIT extends AbstractCredential
     public void setUp() throws Exception {
         super.setUp();
         
-        httpProvider = ApacheHttpClientProvider.builder()
-        .setConnectionTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS)
-        .setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS)
-        .build();
+        httpProvider = getHttpProvider();
 
         TokenEndpoint tokenEndpoint = 
                 HereAccount.getTokenEndpoint(httpProvider,  

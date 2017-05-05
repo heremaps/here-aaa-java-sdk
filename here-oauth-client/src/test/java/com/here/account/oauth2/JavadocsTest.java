@@ -22,9 +22,15 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.java.JavaHttpProvider;
 
 public class JavadocsTest {
+    
+    protected HttpProvider getHttpProvider() {
+        // default Java HttpProvider
+        return JavaHttpProvider.builder().build();
+    }
 
     /**
      * We expect FileNotFoundException because we expect the current working directory 
@@ -41,7 +47,7 @@ public class JavadocsTest {
     public void test_file_javadocs() throws IOException {
         // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
         // choose 
         //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());

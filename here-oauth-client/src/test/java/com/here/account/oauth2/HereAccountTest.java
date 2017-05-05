@@ -36,10 +36,10 @@ import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
-import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.http.java.JavaHttpProvider;
 
 public class HereAccountTest extends AbstractCredentialTezt {
-
+    
     /**
      * We expect FileNotFoundException because we expect the current working directory 
      * not to contain credentials.properties.
@@ -54,7 +54,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void test_simpleUseCase_javadocs() throws IOException, AccessTokenException, RequestExecutionException, ResponseParsingException {
         // use your provided credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
         
         String hereAccessToken = tokenEndpoint.requestToken(
@@ -65,28 +65,28 @@ public class HereAccountTest extends AbstractCredentialTezt {
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullUrl() throws Exception {
         HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(null, accessKeyId, accessKeySecret));
     }
     
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullAccessKeyId() throws Exception {
         HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(url, null, accessKeySecret));
     }
     
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullAccessKeySecret() throws Exception {
         HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, null));
     }
     
     @Test
     public void testGetTokenInvalidUrl() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider("bogus", accessKeyId, accessKeySecret));
         
         try {
@@ -109,7 +109,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     @Ignore // TODO: un-Ignore.  integration test fails for now, needs server-side fix to re-activate
     public void testGetToken_MissingRequiredParameter() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         
         AccessTokenRequest missingParameterRequest = new AccessTokenRequest(null) {

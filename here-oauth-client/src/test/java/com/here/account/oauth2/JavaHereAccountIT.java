@@ -15,14 +15,7 @@
  */
 package com.here.account.oauth2;
 
-import com.here.account.http.HttpProvider;
-import com.here.account.http.java.JavaHttpProvider;
-
 public class JavaHereAccountIT extends AbstractHereAccountProviderTezt {
 
-    @Override
-    protected HttpProvider getHttpProvider() {
-        return JavaHttpProvider.builder().build();
-    }
-
+    // default impl of getHttpProvider() is already the Java one.
 }

@@ -18,16 +18,17 @@ package com.here.account.oauth2;
 import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.java.JavaHttpProvider;
 
 public class JavadocsIT extends AbstractCredentialTezt {
-
+    
     @Test
     @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
     public void test_getSignIn_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         
         String hereAccessToken = tokenEndpoint.requestToken(
@@ -40,7 +41,7 @@ public class JavadocsIT extends AbstractCredentialTezt {
     public void test_getRefreshableClientAuthorizationProvider_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                getHttpProvider(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         // call this once and keep a reference to freshToken, such as in your beans
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(
