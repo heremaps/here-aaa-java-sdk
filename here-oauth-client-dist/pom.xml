@@ -68,17 +68,6 @@
         </dependency>
         <dependency>
             <groupId>com.here.account</groupId>
-            <artifactId>here-apache-httpprovider</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.here.account</groupId>
-            <artifactId>here-apache-httpprovider</artifactId>
-            <classifier>javadoc</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.here.account</groupId>
             <artifactId>here-oauth-client-example</artifactId>
             <version>${project.version}</version>
         </dependency>

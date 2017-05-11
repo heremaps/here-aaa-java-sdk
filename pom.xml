@@ -34,7 +34,6 @@
 
     <modules>
         <module>here-oauth-client</module>
-        <module>here-apache-httpprovider</module>
         <module>examples/here-oauth-client-example</module>
         <module>here-oauth-client-dist</module>
     </modules>
