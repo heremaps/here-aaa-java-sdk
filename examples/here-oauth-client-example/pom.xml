@@ -87,11 +87,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.here.account</groupId>
-            <artifactId>here-apache-httpprovider</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
