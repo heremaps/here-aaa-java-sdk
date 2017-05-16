@@ -109,6 +109,13 @@ public abstract class AbstractCredentialTezt {
             hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
         }
         
+        if (null == hereCredentialsProvider) {
+            this.url = "http://mock.example.com";
+            this.accessKeyId = "testAccessKeyId";
+            this.accessKeySecret = "testAccessKeySecret";
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(this.url, this.accessKeyId, this.accessKeySecret);
+        }
+        
         // verify some credentials will be available
         assertTrue("no credentials configs were available, try populating "
                 + getDefaultCredentialsFilePathString(), 
