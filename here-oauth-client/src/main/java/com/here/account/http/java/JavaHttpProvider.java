@@ -116,7 +116,7 @@ public class JavaHttpProvider implements HttpProvider {
             try {
                 if (null != formParams) {
                     contentType = HttpConstants.CONTENT_TYPE_FORM_URLENCODED;
-                    body = getBody2(formParams);
+                    body = getFormBody(formParams);
                     contentLength = String.valueOf(body.length);
                 } else if (null != requestBodyJson) {
                     contentType = HttpConstants.CONTENT_TYPE_JSON;
@@ -207,13 +207,17 @@ public class JavaHttpProvider implements HttpProvider {
         String contentLengthString = connection.getHeaderField(HttpConstants.CONTENT_LENGTH_HEADER);
         return Long.parseLong(contentLengthString);
     }
+    
+    protected HttpURLConnection getHttpUrlConnection(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        return (HttpURLConnection) url.openConnection();
+    }
 
     @Override
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
         JavaHttpRequest javaHttpRequest = (JavaHttpRequest) httpRequest;
                  
-        URL url = new URL(javaHttpRequest.getUrl());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection connection = getHttpUrlConnection(javaHttpRequest.getUrl());
         connection.setDoOutput(true);
         connection.setRequestMethod(javaHttpRequest.getMethod());
 
@@ -256,7 +260,7 @@ public class JavaHttpProvider implements HttpProvider {
         return new JavaHttpResponse(statusCode, responseContentLength, inputStream);
     }
 
-    protected static byte[] getBody2(Map<String, List<String>> formParams) throws UnsupportedEncodingException {
+    protected static byte[] getFormBody(Map<String, List<String>> formParams) throws UnsupportedEncodingException {
         StringBuilder formBuf = new StringBuilder();
         boolean first = true;
         Set<Entry<String, List<String>>> formEntrySet = formParams.entrySet();
