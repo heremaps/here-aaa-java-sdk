@@ -35,4 +35,10 @@ public class OAuthConstants {
      */
     public static final Charset UTF_8_CHARSET = Charset.forName(UTF_8_STRING);
 
+    /**
+     * This is the constant for Elliptic Curve algorithm
+     */
+    public static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
+
+
 }
