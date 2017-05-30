@@ -7,9 +7,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +21,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.here.account.auth.OAuth2Authorizer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.HttpProvider.HttpResponse;
 import com.here.account.util.JsonSerializer;
 
@@ -31,6 +36,7 @@ public class JavaHttpProviderTest {
     private String authorizationHeader;
     private Map<String, List<String>> formParams;
     private String jsonBody;
+    boolean callGetRequest = false;
 
     @Before
     public void setUp() throws IOException {
@@ -40,6 +46,15 @@ public class JavaHttpProviderTest {
     public void test_example() throws HttpException, IOException {
         doRequest();
     }
+    
+    @Test
+    public void test_example_callGetRequest() throws HttpException, IOException {
+        callGetRequest = true;
+        jsonBody = "foo";
+        
+        doRequest();
+    }
+
     
     String expectedContentType;
     
@@ -77,6 +92,14 @@ public class JavaHttpProviderTest {
 
     }
 
+    protected boolean bytesMatch(byte[] actualBody, byte[] expectedBody) {
+        try {
+            verifyBytes(actualBody, expectedBody);
+            return true;
+        } catch (AssertionError e) {
+            return false;
+        }
+    }
     
     protected void verifyBytes(byte[] actualBody, byte[] expectedBody) {
         assertTrue("nullness didn't match", !(null != actualBody ^ null != expectedBody));
@@ -97,14 +120,79 @@ public class JavaHttpProviderTest {
         JavaHttpProvider mock = Mockito.spy(javaHttpProvider);
         Mockito.doReturn(getMockHttpUrlConnection()).when(mock).getHttpUrlConnection(Mockito.anyString());
 
-        JavaHttpProvider.JavaHttpRequest httpRequest = new JavaHttpProvider.JavaHttpRequest(method, urlString, jsonBody, formParams);
-        if (null != authorizationHeader) {
-            httpRequest.addAuthorizationHeader(authorizationHeader);
+        HttpProvider.HttpRequest httpRequest;
+        if (callGetRequest) {
+            HttpRequestAuthorizer httpRequestAuthorizer = new OAuth2Authorizer("my-accessToken");
+            httpRequest = mock.getRequest(httpRequestAuthorizer, method, urlString, jsonBody);
+        } else {
+            httpRequest = new JavaHttpProvider.JavaHttpRequest(method, urlString, jsonBody, formParams);
+            if (null != authorizationHeader) {
+                httpRequest.addAuthorizationHeader(authorizationHeader);
+            }
         }
 
         HttpResponse httpResponse = mock.execute(httpRequest);
         assertTrue("httpResponse was null", null != httpResponse);
     }
+    
+    @Test
+    public void test_getFormBody_keyOnly() throws UnsupportedEncodingException {
+        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+        List<String> valueList= new ArrayList<String>();
+        formParams.put("ant", valueList);
+        formParams.put("bar", null);
+
+        byte[] formBody = JavaHttpProvider.getFormBody(formParams);
+        String expectedOption1 = "ant&bar";
+        String expectedOption2 = "bar&ant";
+        byte[] expectedBodyOption1 = expectedOption1.getBytes("UTF-8");
+        byte[] expectedBodyOption2 = expectedOption2.getBytes("UTF-8");
+        assertTrue("formBody "+formBody+" didn't match one of expected "+expectedBodyOption1+" or "+expectedBodyOption2, 
+                bytesMatch(formBody, expectedBodyOption1) || bytesMatch(formBody, expectedBodyOption2));
+    }
+    
+    @Test
+    public void test_getFormBody_second() throws UnsupportedEncodingException {
+        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+        List<String> valueList= Collections.singletonList("bar");
+        formParams.put("foo", valueList);
+        List<String> valueList2 = Collections.singletonList("dog");
+        formParams.put("ant", valueList2);
+        byte[] formBody = JavaHttpProvider.getFormBody(formParams);
+        String expectedOption1 = "foo=bar&ant=dog";
+        String expectedOption2 = "ant=dog&foo=bar";
+        byte[] expectedBodyOption1 = expectedOption1.getBytes("UTF-8");
+        byte[] expectedBodyOption2 = expectedOption2.getBytes("UTF-8");
+        assertTrue("formBody "+formBody+" didn't match one of expected "+expectedBodyOption1+" or "+expectedBodyOption2, 
+                bytesMatch(formBody, expectedBodyOption1) || bytesMatch(formBody, expectedBodyOption2));
+    }
+    
+    @Test
+    public void test_getFormBody_second2() throws UnsupportedEncodingException {
+        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+        List<String> valueList= Collections.singletonList("bar");
+        formParams.put("foo", valueList);
+        List<String> valueList2 = new ArrayList<String>();
+        valueList2.add("dog");
+        valueList2.add("cat");
+        formParams.put("ant", valueList2);
+        byte[] formBody = JavaHttpProvider.getFormBody(formParams);
+        String expectedOption1 = "foo=bar&ant=dog&ant=cat";
+        String expectedOption2 = "foo=bar&ant=cat&ant=dog";
+        String expectedOption3 = "ant=dog&foo=bar&ant=cat";
+        String expectedOption4 = "ant=dog&ant=cat&foo=bar";
+        String expectedOption5 = "ant=cat&foo=bar&ant=dog";
+        String expectedOption6 = "ant=cat&ant=dog&foo=bar";
+        assertTrue("formBody "+formBody+" didn't match one of expected",
+                bytesMatch(formBody, expectedOption1.getBytes("UTF-8")) 
+                || bytesMatch(formBody, expectedOption2.getBytes("UTF-8"))
+                || bytesMatch(formBody, expectedOption3.getBytes("UTF-8"))
+                || bytesMatch(formBody, expectedOption4.getBytes("UTF-8"))
+                || bytesMatch(formBody, expectedOption5.getBytes("UTF-8"))
+                || bytesMatch(formBody, expectedOption6.getBytes("UTF-8"))
+                );
+    }
+
     
     @Test
     public void test_404() throws HttpException, IOException {

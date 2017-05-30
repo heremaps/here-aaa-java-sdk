@@ -267,20 +267,25 @@ public class JavaHttpProvider implements HttpProvider {
         for (Entry<String, List<String>> formEntry : formEntrySet) {
             String key = formEntry.getKey();
             List<String> values = formEntry.getValue();
-            if (first) {
-                first = false;
-            } else {
-                formBuf.append('&');
-            }
             String encodedKey = URLEncoder.encode(key, HttpConstants.CHARSET_STRING);
             if (null != values && !values.isEmpty()) {
                 for (String value : values) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        formBuf.append('&');
+                    }
                     formBuf
                         .append(encodedKey)
                         .append('=')
                         .append(URLEncoder.encode(value, HttpConstants.CHARSET_STRING));
                 }
             } else {
+                if (first) {
+                    first = false;
+                } else {
+                    formBuf.append('&');
+                }
                 formBuf.append(encodedKey);
             }
         }
