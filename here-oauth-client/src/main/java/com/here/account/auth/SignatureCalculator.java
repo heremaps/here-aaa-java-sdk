@@ -15,19 +15,26 @@
  */
 package com.here.account.auth;
 
+import com.here.account.util.OAuthConstants;
+import org.apache.commons.codec.binary.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
-
-import com.here.account.util.OAuthConstants;
+import static com.here.account.auth.SignatureMethod.ES512;
 
 /**
  * Compute OAuth1.0 signature using the given parameters.
@@ -54,7 +61,7 @@ public class SignatureCalculator {
      * @param baseURL         the base url including the protocol, host and port.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
-     * @param signatureMethod signature method to be used - supported are HMAC-SHA1 and HMAC-SHA256
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
      * @param formParams      the list of form parameters
      * @param queryParams     list of query parameters
      * @return computed signature using the requested signature method.
@@ -76,7 +83,7 @@ public class SignatureCalculator {
      * @param baseURL         the base url including the protocol, host and port.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
-     * @param signatureMethod signature method to be used - supported are HMAC-SHA1 and HMAC-SHA256
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
      * @param oauthVersion    the oauth_version value; 
      *                        OPTIONAL.  If present, MUST be set to "1.0".  Provides the
      *                        version of the authentication process as defined in RFC5849.
@@ -89,7 +96,103 @@ public class SignatureCalculator {
             String oauthVersion,
             Map<String, List<String>> formParams, 
             Map<String, List<String>> queryParams) {
+        String signatureBaseString = computeSignatureBaseString(this.consumerKey, method, baseURL, oauthTimestamp, nonce, signatureMethod,
+                oauthVersion,
+                formParams,
+                queryParams);
+        return generateSignature(signatureBaseString.toString(), this.consumerSecret, signatureMethod);
+    }
 
+    /**
+     * Construct the OAuth 1.0 authorization header with the given parameters.
+     *
+     * @param signature       the computed signature
+     * @param nonce           nonce parameter
+     * @param oauthTimestamp  timestamp parameter
+     * @param signatureMethod signature method used to compute this header.
+     * @return the Authorization header for OAuth 1.0 calls.
+     */
+    public String constructAuthHeader(String signature, String nonce, long oauthTimestamp, SignatureMethod signatureMethod) {
+        return new StringBuilder().append("OAuth ")
+                .append("oauth_consumer_key").append("=\"").append(consumerKey)
+                .append("\", ").append("oauth_signature_method").append("=\"").append(signatureMethod.getOauth1SignatureMethod())
+                .append("\", ").append("oauth_signature").append("=\"").append(urlEncode(signature))
+                .append("\", ").append("oauth_timestamp").append("=\"").append(oauthTimestamp)
+                .append("\", ").append("oauth_nonce").append("=\"").append(urlEncode(nonce))
+                .append("\", ").append("oauth_version").append("=\"").append("1.0").append("\"").toString();
+    }
+
+    /**
+     * Verify the signature. Compute the cipher text based on the given parameters and verify if the given signature is valid
+     *
+     * @param consumerKey     the consumer key
+     * @param method          the HTTP method
+     * @param baseURL         the base url including the protocol, host and port.
+     * @param oauthTimestamp  the time stamp
+     * @param nonce           nonce
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
+     * @param formParams      the list of form parameters
+     * @param queryParams     list of query parameters
+     * @param signatureToVerify the signature bytes to be verified.
+     * @param verificationKey  the key used to verify the signature. This will be the consumer key for HMAC-SHAn signature
+     *                         method and is the public key for ES512 signature method.
+     *
+     * @return true if the signature was verified, false if not.
+     */
+    public static boolean verifySignature(String consumerKey, String method, String baseURL, long oauthTimestamp,
+                                     String nonce, SignatureMethod signatureMethod,
+                                     Map<String, List<String>> formParams,
+                                     Map<String, List<String>> queryParams,
+                                     String signatureToVerify,
+                                     String verificationKey) {
+        String signatureBaseString = computeSignatureBaseString(consumerKey, method, baseURL, oauthTimestamp, nonce, signatureMethod,
+                "1.0",
+                formParams,
+                queryParams);
+        return verifySignature(signatureBaseString, signatureMethod, signatureToVerify, verificationKey);
+
+    }
+
+    /**
+     * Verify the signature.
+     *
+     * @param cipherText    the original text that was signed.
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
+     * @param signatureToVerify the signature bytes to be verified.
+     * @param verificationKey  the key used to verify the signature. This will be the consumer key for HMAC-SHAn signature
+     *                         method and is the public key for ES512 signature method.
+     *
+     * @return true if the signature was verified, false if not.
+     */
+    public static boolean verifySignature(String cipherText, SignatureMethod signatureMethod, String signatureToVerify, String verificationKey) {
+        if (signatureMethod.equals(SignatureMethod.ES512))
+            return verifyECDSASignature(cipherText, signatureToVerify, verificationKey, signatureMethod);
+        else
+            return (generateSignature(cipherText, verificationKey, signatureMethod).equals(signatureToVerify));
+    }
+
+
+    /**
+     * Calculate the OAuth 1.0 signature base string based on the given parameters
+     *
+     * @param consumerKey     the consumer key
+     * @param method          the HTTP method
+     * @param baseURL         the base url including the protocol, host and port.
+     * @param oauthTimestamp  the time stamp
+     * @param nonce           nonce
+     * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
+     * @param oauthVersion    the oauth_version value;
+     *                        OPTIONAL.  If present, MUST be set to "1.0".  Provides the
+     *                        version of the authentication process as defined in RFC5849.
+     * @param formParams      the list of form parameters
+     * @param queryParams     list of query parameters
+     * @return computed OAuth 1.0 signature base string.
+     */
+    private static String computeSignatureBaseString(String consumerKey, String method, String baseURL, long oauthTimestamp,
+                                     String nonce, SignatureMethod signatureMethod,
+                                     String oauthVersion,
+                                     Map<String, List<String>> formParams,
+                                     Map<String, List<String>> queryParams) {
         //Create signature base with the http method and base url
         StringBuilder signatureBaseString = new StringBuilder(100);
         signatureBaseString.append(method.toUpperCase());
@@ -98,7 +201,7 @@ public class SignatureCalculator {
 
         //create parameter set with OAuth parameters
         OAuthParameterSet parameterSet = new OAuthParameterSet();
-        parameterSet.add("oauth_consumer_key", this.consumerKey);
+        parameterSet.add("oauth_consumer_key", consumerKey);
         parameterSet.add("oauth_nonce", nonce);
         parameterSet.add("oauth_signature_method", signatureMethod.getOauth1SignatureMethod());
         parameterSet.add("oauth_timestamp", String.valueOf(oauthTimestamp));
@@ -131,45 +234,28 @@ public class SignatureCalculator {
         //combine the signature base and parameters
         signatureBaseString.append('&');
         signatureBaseString.append(urlEncode(parameterString));
-        return generateSignature(signatureBaseString.toString(), signatureMethod.getAlgorithm());
-    }
-
-    private String generateSignature(String signatureBaseString, String signatureMethod) {
-        try {
-            //get the bytes from the signature base string
-            byte[] bytesToSign = signatureBaseString.getBytes(OAuthConstants.UTF_8_CHARSET);
-
-            //create the signing key from the clientSecret
-            byte[] keyBytes = (urlEncode(consumerSecret) + "&").getBytes(OAuthConstants.UTF_8_CHARSET);
-            SecretKeySpec signingKey = new SecretKeySpec(keyBytes, signatureMethod);
-
-            //generate signature based on the requested signature method
-            Mac mac = Mac.getInstance(signatureMethod);
-            mac.init(signingKey);
-            byte[] signedBytes = mac.doFinal(bytesToSign);
-            return Base64.encodeBase64String(signedBytes);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return signatureBaseString.toString();
     }
 
     /**
-     * Construct the OAuth 1.0 authorization header with the given parameters.
-     *
-     * @param signature       the computed signature
-     * @param nonce           nonce parameter
-     * @param oauthTimestamp  timestamp parameter
-     * @param signatureMethod signature method used to compute this header.
-     * @return the Authorization header for OAuth 1.0 calls.
+     * Sign the cipher text using the given key and the specified algorithm
+     * @param signatureBaseString the cipher text to be signed
+     * @param key the signing key
+     * @param signatureMethod signature method
+     * @return signed cipher text
      */
-    public String constructAuthHeader(String signature, String nonce, long oauthTimestamp, SignatureMethod signatureMethod) {
-        return new StringBuilder().append("OAuth ")
-                .append("oauth_consumer_key").append("=\"").append(consumerKey)
-                .append("\", ").append("oauth_signature_method").append("=\"").append(signatureMethod.getOauth1SignatureMethod())
-                .append("\", ").append("oauth_signature").append("=\"").append(urlEncode(signature))
-                .append("\", ").append("oauth_timestamp").append("=\"").append(oauthTimestamp)
-                .append("\", ").append("oauth_nonce").append("=\"").append(urlEncode(nonce))
-                .append("\", ").append("oauth_version").append("=\"").append("1.0").append("\"").toString();
+    private static String generateSignature(String signatureBaseString, String key, SignatureMethod signatureMethod) {
+        //get the bytes from the signature base string
+        byte[] bytesToSign = signatureBaseString.getBytes(OAuthConstants.UTF_8_CHARSET);
+
+        try {
+            if (signatureMethod.equals(ES512))
+                return computeECDSASignature(bytesToSign, key, signatureMethod.getAlgorithm());
+            else
+                return computeHMACSignature(bytesToSign, key, signatureMethod.getAlgorithm());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
@@ -185,9 +271,61 @@ public class SignatureCalculator {
     }
 
     /**
+     * Compute elliptic curve digital signature
+     * @param bytesToSign bytes to be signed
+     * @param algorithm elliptic curve algorithm to be used.
+     * @return signed cipher text
+     */
+    private static String computeECDSASignature(byte[] bytesToSign, String key, String algorithm) {
+        try {
+            Signature s = Signature.getInstance(algorithm);
+            s.initSign(consumerSecretToEllipticCurvePrivateKey(key));
+            s.update(bytesToSign);
+            return Base64.encodeBase64String(s.sign());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Compute HMAC digital signature
+     * @param bytesToSign bytes to be signed
+     * @param algorithm HMAC algorithm to be used.
+     * @return signed cipher text
+     */
+    private static String computeHMACSignature(byte[] bytesToSign, String key, String algorithm) {
+        try {
+            byte[] keyBytes = (urlEncode(key) + "&").getBytes(OAuthConstants.UTF_8_CHARSET);
+            SecretKeySpec signingKey = new SecretKeySpec(keyBytes, algorithm);
+
+            //generate signature based on the requested signature method
+            Mac mac = Mac.getInstance(algorithm);
+            mac.init(signingKey);
+            byte[] signedBytes = mac.doFinal(bytesToSign);
+            return Base64.encodeBase64String(signedBytes);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Convert the consumer key to the elliptic curve private key
+     */
+    private static PrivateKey consumerSecretToEllipticCurvePrivateKey(String key) {
+        try {
+            byte[] keyBytes = Base64.decodeBase64(key);
+            PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("EC");
+            return kf.generatePrivate(privateSpec);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Remove the default port from the baseURL
      */
-    private String normalizeBaseURL(String baseURL) {
+    private static String normalizeBaseURL(String baseURL) {
         int index;
         if (baseURL.startsWith("http:")) {
             index = baseURL.indexOf(":80/", 4);
@@ -205,6 +343,27 @@ public class SignatureCalculator {
     }
 
     /**
+     * Verify the Elliptic Curve signature.
+     */
+    private static boolean verifyECDSASignature(String cipherText, String signature, String verificationKey, SignatureMethod signatureMethod) {
+        try {
+            //convert the verification key to EC public key
+            byte[] keyBytes = Base64.decodeBase64(verificationKey);
+            X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance(OAuthConstants.ELLIPTIC_CURVE_ALGORITHM);
+            PublicKey pubKey = kf.generatePublic(publicSpec);
+
+            byte[] signatureBytes = Base64.decodeBase64(signature.getBytes(OAuthConstants.UTF_8_STRING));
+            Signature s = Signature.getInstance(signatureMethod.getAlgorithm());
+            s.initVerify(pubKey);
+            s.update(cipherText.getBytes(OAuthConstants.UTF_8_STRING));
+            return s.verify(signatureBytes);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Container class for Parameters.
      */
     private static final class OAuthParameterSet {
@@ -218,7 +377,7 @@ public class SignatureCalculator {
          * @param value the parameter value
          * @return the list with new parameter added.
          */
-        public List<Parameter> add(String key, String value) {
+        private List<Parameter> add(String key, String value) {
             allParameters.add(new Parameter(urlEncode(key), urlEncode(value)));
             return allParameters;
         }
@@ -228,7 +387,7 @@ public class SignatureCalculator {
          *
          * @return the concatinated parameters in the sorted order.
          */
-        public String sortAndConcat() {
+        private String sortAndConcat() {
             Parameter[] params = new Parameter[allParameters.size()];
             allParameters.toArray(params);
             Arrays.sort(params);
@@ -252,16 +411,16 @@ public class SignatureCalculator {
         private final String key;
         private final String value;
 
-        public Parameter(String key, String value) {
+        private Parameter(String key, String value) {
             this.key = key;
             this.value = value;
         }
 
-        public String getKey() {
+        private String getKey() {
             return key;
         }
 
-        public String getValue() {
+        private String getValue() {
             return value;
         }
 

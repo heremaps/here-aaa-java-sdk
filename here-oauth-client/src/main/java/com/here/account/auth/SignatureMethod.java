@@ -22,7 +22,8 @@ package com.here.account.auth;
  */
 public enum SignatureMethod {
     HMACSHA1("HmacSHA1", "HMAC-SHA1"),
-    HMACSHA256("HmacSHA256", "HMAC-SHA256");
+    HMACSHA256("HmacSHA256", "HMAC-SHA256"),
+    ES512("SHA512withECDSA", "ES512");
 
     private final String algorithm;
     private final String oauth1SignatureMethod;
