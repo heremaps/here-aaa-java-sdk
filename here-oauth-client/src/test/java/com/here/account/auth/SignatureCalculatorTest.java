@@ -20,7 +20,6 @@ import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.oauth.ConsumerKey;
 import com.ning.http.client.oauth.OAuthSignatureCalculator;
 import com.ning.http.client.oauth.RequestToken;
-import org.apache.commons.codec.binary.*;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
