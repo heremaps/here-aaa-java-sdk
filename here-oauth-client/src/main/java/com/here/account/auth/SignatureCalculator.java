@@ -26,7 +26,6 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -45,6 +44,11 @@ import static com.here.account.auth.SignatureMethod.ES512;
 public class SignatureCalculator {
     private final String consumerKey;
     private final String consumerSecret;
+
+    /**
+     * This is the constant for Elliptic Curve algorithm
+     */
+    public static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
 
     public SignatureCalculator(String clientAccessKeyId, String clientAccessKeySecret) {
         this.consumerKey = clientAccessKeyId;
@@ -104,7 +108,7 @@ public class SignatureCalculator {
     }
 
     /**
-     * Construct the OAuth 1.0 authorization header with the given parameters.
+     * Construct the OAuth 1.0 authorization header with the given parameters. The oauth_version is set to "1.0"
      *
      * @param signature       the computed signature
      * @param nonce           nonce parameter
@@ -123,7 +127,8 @@ public class SignatureCalculator {
     }
 
     /**
-     * Verify the signature. Compute the cipher text based on the given parameters and verify if the given signature is valid
+     * Verify the signature. Compute the cipher text based on the given parameters and verify if the given signature is valid.
+     * The oauth_version is set to "1.0" when computing the base string.
      *
      * @param consumerKey     the consumer key
      * @param method          the HTTP method
@@ -164,7 +169,7 @@ public class SignatureCalculator {
      *
      * @return true if the signature was verified, false if not.
      */
-    public static boolean verifySignature(String cipherText, SignatureMethod signatureMethod, String signatureToVerify, String verificationKey) {
+    protected static boolean verifySignature(String cipherText, SignatureMethod signatureMethod, String signatureToVerify, String verificationKey) {
         if (signatureMethod.equals(SignatureMethod.ES512))
             return verifyECDSASignature(cipherText, signatureToVerify, verificationKey, signatureMethod);
         else
@@ -350,7 +355,7 @@ public class SignatureCalculator {
             //convert the verification key to EC public key
             byte[] keyBytes = Base64.decodeBase64(verificationKey);
             X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory kf = KeyFactory.getInstance(OAuthConstants.ELLIPTIC_CURVE_ALGORITHM);
+            KeyFactory kf = KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM);
             PublicKey pubKey = kf.generatePublic(publicSpec);
 
             byte[] signatureBytes = Base64.decodeBase64(signature.getBytes(OAuthConstants.UTF_8_STRING));

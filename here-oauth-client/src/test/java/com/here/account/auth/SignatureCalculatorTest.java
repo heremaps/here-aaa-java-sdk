@@ -15,7 +15,6 @@
  */
 package com.here.account.auth;
 
-import com.here.account.util.OAuthConstants;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.oauth.ConsumerKey;
 import com.ning.http.client.oauth.OAuthSignatureCalculator;
@@ -27,6 +26,7 @@ import java.security.*;
 import java.security.spec.*;
 import java.util.*;
 
+import static com.here.account.auth.SignatureCalculator.ELLIPTIC_CURVE_ALGORITHM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -215,7 +215,7 @@ public class SignatureCalculatorTest {
     private static KeyPair generateES512KeyPair()  {
         try {
             ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp521r1");
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance(OAuthConstants.ELLIPTIC_CURVE_ALGORITHM);
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM);
             kpg.initialize(ecGenParameterSpec);
             return kpg.generateKeyPair();
         } catch (Exception e) {
