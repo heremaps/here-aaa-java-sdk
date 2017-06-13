@@ -38,7 +38,7 @@ import com.here.account.util.RefreshableResponseProvider;
  * {@code
         // use your provided credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
         
         String hereAccessToken = tokenEndpoint.requestToken(
@@ -56,7 +56,7 @@ import com.here.account.util.RefreshableResponseProvider;
  * {@code
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         
         String hereAccessToken = tokenEndpoint.requestToken(
@@ -71,7 +71,7 @@ import com.here.account.util.RefreshableResponseProvider;
  * {@code
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         // call this once and keep a reference to freshToken, such as in your beans
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(
@@ -86,20 +86,6 @@ import com.here.account.util.RefreshableResponseProvider;
  * </pre>
  * </li>
  * </ul>
- * 
- * <p>
- * The above examples require an implementation of getHttpProvider() method.
- * An example HttpProvider from this project below uses pure-Java.  Another 
- * sub-project here-apache-httpprovider contains HERE's recommended implementation, 
- * for organizations willing to take the Apache HttpClient dependency.
- * <pre>
- * {@code 
-        protected HttpProvider getHttpProvider() {
-            // default Java HttpProvider
-            return JavaHttpProvider.builder().build();
-        }
- * }
- * </pre>
  * 
  * <p>
  * Convenience {@link ClientCredentialsProvider} implementations are also available to
@@ -121,8 +107,19 @@ import com.here.account.util.RefreshableResponseProvider;
    }
  * </pre>
  * </li>
- * 
  * </ul>
+ * 
+ * <p>
+ * The above examples use the JavaHttpProvider.
+ * Another example HttpProvider from this project below uses pure-Java.  
+ * <pre>
+ * {@code 
+        protected HttpProvider getHttpProvider() {
+            // default Java HttpProvider
+            return JavaHttpProvider.builder().build();
+        }
+ * }
+ * </pre>
  */
 public class HereAccount {
     
