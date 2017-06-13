@@ -36,32 +36,10 @@ import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
-import com.here.account.http.java.JavaHttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 
 public class HereAccountTest extends AbstractCredentialTezt {
     
-    /**
-     * We expect FileNotFoundException because we expect the current working directory 
-     * not to contain credentials.properties.
-     *
-     * @throws IOException
-     * @throws AccessTokenException
-     * @throws RequestExecutionException
-     * @throws ResponseParsingException
-     */
-    @Test(expected=FileNotFoundException.class) 
-    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_simpleUseCase_javadocs() throws IOException, AccessTokenException, RequestExecutionException, ResponseParsingException {
-        // use your provided credentials.properties
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
-        
-        String hereAccessToken = tokenEndpoint.requestToken(
-                new ClientCredentialsGrantRequest()).getAccessToken();
-        // use hereAccessToken on requests until expires...
-    }
-
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullUrl() throws Exception {
         HereAccount.getTokenEndpoint(

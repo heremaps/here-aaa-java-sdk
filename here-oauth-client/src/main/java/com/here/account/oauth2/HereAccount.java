@@ -114,10 +114,9 @@ import com.here.account.util.RefreshableResponseProvider;
  * Another example HttpProvider from this project below uses pure-Java.  
  * <pre>
  * {@code 
-        protected HttpProvider getHttpProvider() {
-            // default Java HttpProvider
-            return JavaHttpProvider.builder().build();
-        }
+        // create a Java HttpProvider
+        HttpProvider httpProvider = JavaHttpProvider.builder().build();
+        // use httpProvider
  * }
  * </pre>
  */

@@ -15,20 +15,47 @@
  */
 package com.here.account.oauth2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
-import com.here.account.http.HttpProvider;
-import com.here.account.http.java.JavaHttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 
 public class JavadocsIT extends AbstractCredentialTezt {
     
+    /**
+     * We expect FileNotFoundException because we expect the current working directory 
+     * not to contain credentials.properties.
+     *
+     * @throws IOException
+     * @throws AccessTokenException
+     * @throws RequestExecutionException
+     * @throws ResponseParsingException
+     */
+    // To use your provided credentials.properties to get a one-time use token:
+    @Test(expected=FileNotFoundException.class) 
+    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
+    public void test_simpleUseCase_javadocs() throws IOException, AccessTokenException, RequestExecutionException, ResponseParsingException {
+        // use your provided credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        
+        String hereAccessToken = tokenEndpoint.requestToken(
+                new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
+    }
+
+    // Get a one time use HERE Access Token:
     @Test
     @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_getSignIn_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+    public void test_getSingleAccessToken_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         
         String hereAccessToken = tokenEndpoint.requestToken(
@@ -36,12 +63,13 @@ public class JavadocsIT extends AbstractCredentialTezt {
         // use hereAccessToken on requests until expires...
     }
     
+    // Get an auto refreshing HERE Access Token:
     @Test
     @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_getRefreshableClientAuthorizationProvider_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+    public void test_getRefreshableAccessTokenProvider_javadocs() throws AccessTokenException, RequestExecutionException, ResponseParsingException {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
         // call this once and keep a reference to freshToken, such as in your beans
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(

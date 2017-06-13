@@ -23,15 +23,11 @@ import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.http.java.JavaHttpProvider;
 
 public class JavadocsTest {
     
-    protected HttpProvider getHttpProvider() {
-        // default Java HttpProvider
-        return JavaHttpProvider.builder().build();
-    }
-
     /**
      * We expect FileNotFoundException because we expect the current working directory 
      * not to contain credentials.properties.
@@ -42,17 +38,26 @@ public class JavadocsTest {
      * 
      * @throws IOException
      */
+    // Get configuration from properties file:
     @Test(expected=FileNotFoundException.class) 
     @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
-    public void test_file_javadocs() throws IOException {
+    public void test_credentialsPropertiesFile_javadocs() throws IOException {
         // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                getHttpProvider(), 
+                ApacheHttpClientProvider.builder().build(), 
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
         // choose 
         //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
         // or 
         //   tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+    }
+    
+    // Another example HttpProvider from this project below uses pure-Java.
+    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
+    public void test_JavaHttpProvider_javadocs() throws IOException {
+        // create a Java HttpProvider
+        HttpProvider httpProvider = JavaHttpProvider.builder().build();
+        // use httpProvider
     }
     
 }
