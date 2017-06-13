@@ -19,27 +19,32 @@ import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.oauth.ConsumerKey;
 import com.ning.http.client.oauth.OAuthSignatureCalculator;
 import com.ning.http.client.oauth.RequestToken;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
+import java.security.*;
+import java.security.spec.*;
 import java.util.*;
 
+import static com.here.account.auth.SignatureCalculator.ELLIPTIC_CURVE_ALGORITHM;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SignatureCalculatorTest {
-    static final String consumerKey = "testKey";
-    static final  String consumerSecret = "testSecret";
-    static final  String nonce = "ab1Xo3";
-    static final  Long timestamp = 123456789L;
-    static final  String method = "POST";
-    static final  String baseURL = "https://www.sampleurl.com/some/path";
-    static final String baseURLWithPort = "https://www.sampleurl.com:443/some/path";
-    static final String baseURLWithNonStandardPort = "https://www.sampleurl.com:9000/some/path";
-    static final Map<String, List<String>> params = createParamsList();
+    static final private String consumerKey = "testKey";
+    static final private String consumerSecret = "testSecret";
+    static final private String nonce = "ab1Xo3";
+    static final private Long timestamp = 123456789L;
+    static final private String method = "POST";
+    static final private String baseURL = "https://www.sampleurl.com/some/path";
+    static final private String baseURLWithPort = "https://www.sampleurl.com:443/some/path";
+    static final private String baseURLWithNonStandardPort = "https://www.sampleurl.com:9000/some/path";
+    static final private Map<String, List<String>> params = createParamsList();
 
     //expected signatures from SHA256 - obtained using the same parameters via postman.
-    static final String simpleSha256 = "FeKRSQawLAt3GwVBYCJqY2lawFkEHs2u78MfT7m1P+A=";
-    static final String withFormParamSha256 = "THFhaWB1Lbp/SVU+FSc/ix4CS6LpNY1suaZBSKQ4na4=";
-    static final String withFormAndQueryParamSha256 = "bw5G7oIjsicO2Lp8rNa1H0bNj3Pkv+5aP2g9EedRpxI=";
+    static final private String simpleSha256 = "FeKRSQawLAt3GwVBYCJqY2lawFkEHs2u78MfT7m1P+A=";
+    static final private String withFormParamSha256 = "THFhaWB1Lbp/SVU+FSc/ix4CS6LpNY1suaZBSKQ4na4=";
+    static final private String withFormAndQueryParamSha256 = "bw5G7oIjsicO2Lp8rNa1H0bNj3Pkv+5aP2g9EedRpxI=";
 
     /////////////////////////////// HMAC-SHA1 //////////////////////////////////////////
     @Test
@@ -121,6 +126,15 @@ public class SignatureCalculatorTest {
     }
 
     @Test
+    public void testVerifySha1Signature() {
+        String expectedSignature = computeSHA1SignatureUsingLibrary(baseURLWithNonStandardPort, params, params);
+
+        boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithNonStandardPort, timestamp, nonce,
+                SignatureMethod.HMACSHA1, params, params, expectedSignature, consumerSecret);
+        assertTrue(verified);
+    }
+
+    @Test
     public void testSignatureHmacSha256() {
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
         String actual = sc.calculateSignature(method, baseURL, timestamp, nonce, SignatureMethod.HMACSHA256, null, null);
@@ -150,6 +164,63 @@ public class SignatureCalculatorTest {
         String actual = sc.calculateSignature(method, baseURLWithPort, timestamp, nonce, SignatureMethod.HMACSHA256, params, params);
 
         assertEquals(withFormAndQueryParamSha256, actual);
+    }
+
+    @Test
+    public void testVerifySha256Signature() {
+        boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce,
+                SignatureMethod.HMACSHA256, params, params, withFormAndQueryParamSha256, consumerSecret);
+        assertTrue(verified);
+    }
+
+    /////////////////////////////////////// ES512 Tests //////////////////////////////////////////////////////////////////
+
+    @Test
+    public void testSignatureES512() {
+        KeyPair pair = generateES512KeyPair();
+
+        final byte[] keyBytes = pair.getPrivate().getEncoded();
+        String keyBase64 = Base64.encodeBase64String(keyBytes);
+
+        SignatureCalculator sc = new SignatureCalculator(consumerKey, keyBase64);
+        String signature = sc.calculateSignature(method, baseURL, timestamp, nonce, SignatureMethod.ES512, null, null);
+
+        String publicKeyBase64 = Base64.encodeBase64String(pair.getPublic().getEncoded());
+        assertTrue(SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, null, null, signature, publicKeyBase64));
+    }
+
+    @Test
+    public void testSignatureES512WithBaseUrlWithPort(){
+        KeyPair pair = generateES512KeyPair();
+
+        final byte[] keyBytes = pair.getPrivate().getEncoded();
+        String keyBase64 = Base64.encodeBase64String(keyBytes);
+
+        SignatureCalculator sc = new SignatureCalculator(consumerKey, keyBase64);
+        String signature = sc.calculateSignature(method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, params, params);
+
+        String publicKeyBase64 = Base64.encodeBase64String(pair.getPublic().getEncoded());
+        boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, params, params, signature, publicKeyBase64);
+        assertTrue(verified);
+    }
+
+    @Test
+    public void testVerifyES512() {
+        String cipherText = "testing public key and signature encryption";
+        String publicKeyBase64 = "MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQA2GcrZ94UbrYCsJo6sHOCnw4r5t5xSuX0x3LZPlRxA8dXziN1f1z2qUnudmI69JeEeX8JAfuu8kvRx4bjYnTVIasAO9P2V9eWWOxgfzGaC09JGBFN48XgI++9JNuS50DiHtSeSuM2kYTehHhj22Bj5iNlju1j1BbsAc1PS79G2pOpoFs=";
+        String signature = "MIGIAkIAz0ZVhsjWnbmdZkBHP7wl5u5q4qN1K5bFgHNRvZeh4lYxpuUg60vncYZLwBM4zHev1F4bSkLqudhtAt8arwrLs1YCQgFQrQXvoSsAfO/gK7IEQXEFK1UGN4RDnVQRpKaZiKDbOCY2qZ3AyGeaydrnoc6o0RdHzeuJaj9Or2YjqE7PjnwvSg==";
+        assertTrue(SignatureCalculator.verifySignature(cipherText, SignatureMethod.ES512, signature, publicKeyBase64));
+    }
+
+    private static KeyPair generateES512KeyPair()  {
+        try {
+            ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp521r1");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM);
+            kpg.initialize(ecGenParameterSpec);
+            return kpg.generateKeyPair();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private static String computeSHA1SignatureUsingLibrary(String url, Map<String, List<String>> formParams, Map<String, List<String>> queryParams) {
