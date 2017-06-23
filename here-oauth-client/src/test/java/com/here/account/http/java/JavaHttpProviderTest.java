@@ -40,6 +40,7 @@ import com.here.account.auth.OAuth2Authorizer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.HttpProvider.HttpResponse;
 import com.here.account.util.JsonSerializer;
@@ -48,7 +49,6 @@ public class JavaHttpProviderTest {
     
     private final String urlString = "http://www.example.com/";
     private String method = "GET";
-    private String authorizationHeader;
     private Map<String, List<String>> formParams;
     private String jsonBody;
     boolean callGetRequest = false;
@@ -106,7 +106,7 @@ public class JavaHttpProviderTest {
         verifyContentType();
 
     }
-
+    
     protected boolean bytesMatch(byte[] actualBody, byte[] expectedBody) {
         try {
             verifyBytes(actualBody, expectedBody);
@@ -130,6 +130,22 @@ public class JavaHttpProviderTest {
         }
     }
 
+    @Test(expected = IllegalArgumentException.class) 
+    public void test_wrongRequestClass() throws HttpException, IOException {
+        JavaHttpProvider javaHttpProvider = (JavaHttpProvider) JavaHttpProvider.builder().build();
+        HttpRequest httpRequest = new HttpRequest() {
+
+            @Override
+            public void addAuthorizationHeader(String value) {
+                // no-op
+            }
+            
+        };
+        javaHttpProvider.execute(httpRequest);
+    }
+    
+    HttpRequestAuthorizer httpRequestAuthorizer = new OAuth2Authorizer("my-accessToken");
+
     protected void doRequest() throws MalformedURLException, IOException, HttpException {
         JavaHttpProvider javaHttpProvider = (JavaHttpProvider) JavaHttpProvider.builder().build();
         JavaHttpProvider mock = Mockito.spy(javaHttpProvider);
@@ -137,12 +153,12 @@ public class JavaHttpProviderTest {
 
         HttpProvider.HttpRequest httpRequest;
         if (callGetRequest) {
-            HttpRequestAuthorizer httpRequestAuthorizer = new OAuth2Authorizer("my-accessToken");
             httpRequest = mock.getRequest(httpRequestAuthorizer, method, urlString, jsonBody);
         } else {
-            httpRequest = new JavaHttpProvider.JavaHttpRequest(method, urlString, jsonBody, formParams);
-            if (null != authorizationHeader) {
-                httpRequest.addAuthorizationHeader(authorizationHeader);
+            if (null != jsonBody) {
+                httpRequest = javaHttpProvider.getRequest(httpRequestAuthorizer, method, urlString, jsonBody);
+            } else {
+                httpRequest = javaHttpProvider.getRequest(httpRequestAuthorizer, method, urlString, formParams);
             }
         }
 
@@ -217,7 +233,6 @@ public class JavaHttpProviderTest {
     
     @Test
     public void test_authorizationHeader() throws HttpException, IOException {
-        authorizationHeader = "Bearer my-token";
         doRequest();
     }
     @Test
@@ -226,7 +241,30 @@ public class JavaHttpProviderTest {
         doRequest();
     }
     
- 
+    @Test
+    public void test_openConnection() throws IOException {
+        JavaHttpProvider javaHttpProvider = (JavaHttpProvider) JavaHttpProvider.builder().build();
+        String urlString = "http://localhost:8080/foo";
+        HttpURLConnection httpUrlConnection = javaHttpProvider.getHttpUrlConnection(urlString);
+        // not actually connected, unless you call .open
+        assertTrue("httpUrlConnection was null", null != httpUrlConnection);
+    }
+    
+    @Test
+    public void test_noAuthorizationHeader() throws IOException, HttpException {
+        httpRequestAuthorizer = new HttpRequestAuthorizer() {
+
+            @Override
+            public void authorize(HttpRequest httpRequest, String method, String url,
+                    Map<String, List<String>> formParams) {
+                // intentionally don't add any authorization header for this test
+            }
+            
+        };
+        doRequest();
+    }
+
+
 
     int statusCode = 200;
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

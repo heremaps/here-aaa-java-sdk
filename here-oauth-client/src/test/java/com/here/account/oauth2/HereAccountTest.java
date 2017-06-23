@@ -18,10 +18,10 @@ package com.here.account.oauth2;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,6 @@ import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 
 public class HereAccountTest extends AbstractCredentialTezt {
     
@@ -152,6 +151,70 @@ public class HereAccountTest extends AbstractCredentialTezt {
         }
     }
     
+    @Test
+    public void testGetTokenValidErrorResponse() throws Exception {
+        final String error = "unauthorized_client";
+        final String responseBody = "{\"error\":\""+error+"\"}";
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockHttpProvider(dummyResponse(400, 
+                                               responseBody.getBytes().length, 
+                                               new ByteArrayInputStream(responseBody.getBytes("UTF-8")))),
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "mySecret"));
+        
+        try {
+            tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+            Assert.fail("Expected AccessTokenException");
+        } catch (AccessTokenException e) {
+            ErrorResponse errorResponse = e.getErrorResponse();
+            assertTrue("errorResponse was null", null != errorResponse);
+            String actualError = errorResponse.getError();
+            assertTrue("error was expected "+error+", actual "+actualError, 
+                    error.equals(actualError));
+        }
+    }
+    
+    @Test
+    public void test_nullSafeCloseThrowingUnchecked_null() {
+        HereAccount.nullSafeCloseThrowingUnchecked(null);
+    }
+
+    @Test
+    public void test_nullSafeCloseThrowingUnchecked_noException() {
+        Closeable closeable = new Closeable() {
+
+            @Override
+            public void close() throws IOException {
+                // no exceptions thrown
+            }
+            
+        };
+        HereAccount.nullSafeCloseThrowingUnchecked(closeable);
+    }
+    
+    @Test
+    public void test_nullSafeCloseThrowingUnchecked_withException() {
+        final String message = "test I/O trouble!";
+        Closeable closeable = new Closeable() {
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException(message);
+            }
+            
+        };
+        try {
+            HereAccount.nullSafeCloseThrowingUnchecked(closeable);
+            Assert.fail("should have thrown UncheckedIOException");
+        } catch (UncheckedIOException unchecked) {
+            IOException ioe = unchecked.getCause();
+            assertTrue("ioe was null", null != ioe);
+            String actualMessage = ioe.getMessage();
+            assertTrue("message was expected "+message+", actual "+actualMessage, 
+                    message.equals(actualMessage));
+        }
+    }
+
+
     @Test
     public void testGetTokenHttpExceptionExecuting() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(

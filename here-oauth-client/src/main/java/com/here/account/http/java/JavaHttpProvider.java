@@ -98,7 +98,7 @@ public class JavaHttpProvider implements HttpProvider {
         }
     }
     
-    static class JavaHttpRequest implements HttpRequest {
+    private static class JavaHttpRequest implements HttpRequest {
         
         private final String method;
         private final String url;
@@ -108,25 +108,35 @@ public class JavaHttpProvider implements HttpProvider {
         private final String contentType;
         private final String contentLength;
         
-        public JavaHttpRequest(String method, String url, 
-                String requestBodyJson, Map<String, List<String>> formParams) {
+        private JavaHttpRequest(String method, String url) {
+            this.method = method;
+            this.url = url;
+
+            contentType = null;
+            body = null;
+            contentLength = null;
+        }
+        
+        private JavaHttpRequest(String method, String url, 
+                String requestBodyJson) {
+            this.method = method;
+            this.url = url;
+            
+            contentType = HttpConstants.CONTENT_TYPE_JSON;
+            body = requestBodyJson.getBytes(HttpConstants.ENCODING_CHARSET);
+            contentLength = String.valueOf(body.length);
+        }
+
+        
+        private JavaHttpRequest(String method, String url, 
+                Map<String, List<String>> formParams) {
             this.method = method;
             this.url = url;
             
             try {
-                if (null != formParams) {
-                    contentType = HttpConstants.CONTENT_TYPE_FORM_URLENCODED;
-                    body = getFormBody(formParams);
-                    contentLength = String.valueOf(body.length);
-                } else if (null != requestBodyJson) {
-                    contentType = HttpConstants.CONTENT_TYPE_JSON;
-                    body = requestBodyJson.getBytes(HttpConstants.ENCODING_CHARSET);
-                    contentLength = String.valueOf(body.length);
-                } else {
-                    contentType = null;
-                    body = null;
-                    contentLength = null;
-                }
+                contentType = HttpConstants.CONTENT_TYPE_FORM_URLENCODED;
+                body = getFormBody(formParams);
+                contentLength = String.valueOf(body.length);
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException(e);
             }
@@ -186,19 +196,27 @@ public class JavaHttpProvider implements HttpProvider {
     @Override
     public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             String requestBodyJson) {
-        Map<String, List<String>> formParams = null;
-        HttpRequest httpRequest = new JavaHttpRequest( method,  url, 
-                 requestBodyJson,  formParams);
-        httpRequestAuthorizer.authorize(httpRequest, method, url, formParams);
+        HttpRequest httpRequest;
+        if (null == requestBodyJson) {
+            httpRequest = new JavaHttpRequest( method,  url);
+        } else {
+            httpRequest = new JavaHttpRequest( method,  url, 
+                 requestBodyJson);
+        }
+        httpRequestAuthorizer.authorize(httpRequest, method, url, null);
         return httpRequest;
     }
 
     @Override
     public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             Map<String, List<String>> formParams) {
-        String requestBodyJson = null;
-        HttpRequest httpRequest = new JavaHttpRequest( method,  url, 
-                 requestBodyJson,  formParams);
+        HttpRequest httpRequest;
+        if (null == formParams) {
+            httpRequest = new JavaHttpRequest(method, url);
+        } else {
+            httpRequest = new JavaHttpRequest( method,  url, 
+                 formParams);
+        }
         httpRequestAuthorizer.authorize(httpRequest, method, url, formParams);
         return httpRequest;
     }
@@ -215,6 +233,10 @@ public class JavaHttpProvider implements HttpProvider {
 
     @Override
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
+        if (!(httpRequest instanceof JavaHttpRequest)) {
+            throw new IllegalArgumentException("httpRequest is not of expected type; use "
+                    +getClass()+".getRequest(..) to get a request of the expected type");
+        }
         JavaHttpRequest javaHttpRequest = (JavaHttpRequest) httpRequest;
                  
         HttpURLConnection connection = getHttpUrlConnection(javaHttpRequest.getUrl());
