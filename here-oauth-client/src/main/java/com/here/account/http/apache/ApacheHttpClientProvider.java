@@ -342,6 +342,10 @@ public class ApacheHttpClientProvider implements HttpProvider {
 
     @Override
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
+        if (!(httpRequest instanceof ApacheHttpClientRequest)) {
+            throw new IllegalArgumentException("httpRequest is not of expected type; use "
+                    +getClass()+".getRequest(..) to get a request of the expected type");
+        }
         HttpRequestBase httpRequestBase = ((ApacheHttpClientRequest) httpRequest).getHttpRequestBase();
         
         // we are stateless

@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -107,8 +108,18 @@ import com.here.account.util.RefreshableResponseProvider;
    }
  * </pre>
  * </li>
- * 
  * </ul>
+ * 
+ * <p>
+ * The above examples use the JavaHttpProvider.
+ * Another example HttpProvider from this project below uses pure-Java.  
+ * <pre>
+ * {@code 
+        // create a Java HttpProvider
+        HttpProvider httpProvider = JavaHttpProvider.builder().build();
+        // use httpProvider
+ * }
+ * </pre>
  */
 public class HereAccount {
     
@@ -233,16 +244,10 @@ public class HereAccount {
                     }
                 }
             } finally {
-                if (null != jsonInputStream) {
-                    try {
-                        jsonInputStream.close();
-                    } catch (IOException ioe) {
-                        throw new UncheckedIOException(ioe);
-                    }
-                }
+                nullSafeCloseThrowingUnchecked(jsonInputStream);
             }
         }
-
+        
         @Override
         public Fresh<AccessTokenResponse> requestAutoRefreshingToken(AccessTokenRequest request) 
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {
@@ -251,5 +256,24 @@ public class HereAccount {
         }
         
     }
+   
+    /**
+     * A null-safe invocation of closeable.close(), such that if an IOException is 
+     * triggered, it is wrapped instead in an UncheckedIOException.
+     * 
+     * @param closeable the closeable to be closed
+     */
+    static void nullSafeCloseThrowingUnchecked(Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (IOException ioe) {
+                throw new UncheckedIOException(ioe);
+            }
+        }
+
+    }
+
+
     
 }

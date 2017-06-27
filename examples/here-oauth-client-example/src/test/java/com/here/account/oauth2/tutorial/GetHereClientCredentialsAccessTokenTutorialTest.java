@@ -28,15 +28,15 @@ public class GetHereClientCredentialsAccessTokenTutorialTest {
     
     private static class MyException extends Exception {
         public MyException() {
-            super();
+            super("in tests, this is used to prevent System.exit(..) from running");
         }
     }
     
-    protected boolean isNotBlank(String str) {
+    static boolean isNotBlank(String str) {
         return null != str && str.trim().length() > 0;
     }
     
-    protected OAuth1ClientCredentialsProvider getSystemCredentials() {
+    static OAuth1ClientCredentialsProvider getSystemCredentials() {
         OAuth1ClientCredentialsProvider credentials = null;
         String url = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY
                 );
@@ -52,24 +52,12 @@ public class GetHereClientCredentialsAccessTokenTutorialTest {
     /**
      * Build a mock HttpProvider that always returns the provided response body.
      */
-    private GetHereClientCredentialsAccessTokenTutorial mockTutorial(String[] args) {
+    static GetHereClientCredentialsAccessTokenTutorial mockTutorial(String[] args) {
         GetHereClientCredentialsAccessTokenTutorial mock = Mockito.spy(new GetHereClientCredentialsAccessTokenTutorial(args));
         Mockito.doThrow(MyException.class).when(mock).exit(Mockito.anyInt());
         return mock;
     }
 
-    @Test
-    public void test_noArgs_defaultCredentialsFile() {
-        File file = GetHereClientCredentialsAccessTokenTutorial.getDefaultCredentialsFile();
-        String[] args = {
-        };
-        GetHereClientCredentialsAccessTokenTutorial tutorial = mockTutorial(args);
-        if (null == file) {
-            setTestCreds(tutorial, getSystemCredentials());
-        }
-        tutorial.getAccessToken();
-    }
-    
     @Test(expected = MyException.class)
     public void test_help() {
         String[] args = {
@@ -107,22 +95,7 @@ public class GetHereClientCredentialsAccessTokenTutorialTest {
         tutorial.getAccessToken();
     }
 
-    @Test
-    public void test_explicit_defaultCredentialsFile() {
-        File file = GetHereClientCredentialsAccessTokenTutorial.getDefaultCredentialsFile();
-        String path = null != file ? file.getAbsolutePath() : "broken";
-        String[] args = {
-                path
-        };
-        GetHereClientCredentialsAccessTokenTutorial tutorial = mockTutorial(args);
-        if (null == file) {
-            setTestCreds(tutorial, getSystemCredentials());
-        }
-        tutorial.getAccessToken();
-    }
-    
-    
-    private void setTestCreds(GetHereClientCredentialsAccessTokenTutorial tutorial,
+    static void setTestCreds(GetHereClientCredentialsAccessTokenTutorial tutorial,
             OAuth1ClientCredentialsProvider systemCredentials) {
         if (null == systemCredentials) {
             throw new RuntimeException("no credentials available for test");

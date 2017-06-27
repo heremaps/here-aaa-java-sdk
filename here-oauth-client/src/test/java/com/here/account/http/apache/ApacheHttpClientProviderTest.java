@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
@@ -83,6 +84,20 @@ public class ApacheHttpClientProviderTest {
     String url;
     Map<String, List<String>> formParams;
     
+    @Test(expected = IllegalArgumentException.class) 
+    public void test_wrongRequestClass() throws HttpException, IOException {
+        httpProvider = (ApacheHttpClientProvider) ApacheHttpClientProvider.builder().build();
+        HttpRequest httpRequest = new HttpRequest() {
+
+            @Override
+            public void addAuthorizationHeader(String value) {
+                // no-op
+            }
+            
+        };
+        httpProvider.execute(httpRequest);
+    }
+
     @Test
     public void test_badUri() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         url = "htp:/ asdf8080:a:z";

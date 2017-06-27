@@ -121,7 +121,7 @@ public interface HttpProvider extends Closeable {
      * The Authorization header has already been set according to the 
      * httpRequestAuthorizer implementation.
      * 
-     * @param httpSigner for adding the Authorization header value
+     * @param httpRequestAuthorizer for adding the Authorization header value
      * @param method HTTP method value
      * @param url HTTP request URL
      * @param formParams the 
@@ -129,7 +129,7 @@ public interface HttpProvider extends Closeable {
      *      form parameters.
      * @return the HttpRequest object you can {@link #execute(HttpRequest)}.
      */
-    HttpRequest getRequest(HttpRequestAuthorizer httpSigner, String method, String url,
+    HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             Map<String, List<String>> formParams);
     
     /**
