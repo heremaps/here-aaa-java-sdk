@@ -68,19 +68,23 @@ public class AccessTokenResponse implements ExpiringResponse {
      * constructed.
      */
     private final Long startTimeMilliseconds;
-    
+
+    @JsonProperty("id_token")
+    private final String idToken;
+
     public AccessTokenResponse() {
-        this(null, null, null, null);
+        this(null, null, null, null,  null);
     }
     
     public AccessTokenResponse(String accessToken, 
             String tokenType,
-            Long expiresIn, String refreshToken) {
+            Long expiresIn, String refreshToken, String idToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
         this.refreshToken = refreshToken;
         this.startTimeMilliseconds = System.currentTimeMillis();
+        this.idToken = idToken;
     }
 
     /**
@@ -156,6 +160,10 @@ public class AccessTokenResponse implements ExpiringResponse {
     @Override
     public Long getStartTimeMilliseconds() {
         return startTimeMilliseconds;
+    }
+
+    public String getIdToken() {
+        return idToken;
     }
 
 }

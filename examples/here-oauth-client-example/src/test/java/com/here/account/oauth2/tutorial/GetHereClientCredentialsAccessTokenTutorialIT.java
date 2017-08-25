@@ -32,9 +32,9 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
             GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
-                    GetHereClientCredentialsAccessTokenTutorialTest.getSystemCredentials());
+                    Helper.getSystemCredentials());
         }
-        tutorial.getAccessToken();
+        tutorial.getToken();
     }
     
     @Test
@@ -46,11 +46,8 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
             GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
-                    GetHereClientCredentialsAccessTokenTutorialTest.getSystemCredentials());
+                    Helper.getSystemCredentials());
         }
-        tutorial.getAccessToken();
+        tutorial.getToken();
     }
-    
-
-
 }
