@@ -33,18 +33,24 @@ public class ClientCredentialsGrantRequestTest {
 
     @Test
     public void test_ClientCredentialsGrantRequest_json() {
+        String scope = "scope";
         ClientCredentialsGrantRequest clientCredentialsGrantRequest = new ClientCredentialsGrantRequest();
+        clientCredentialsGrantRequest.setScope(scope);
         String json = clientCredentialsGrantRequest.toJson();
-        String expectedJson = "{\"grantType\":\"client_credentials\"}";
+        String expectedJson = "{\"grantType\":\"client_credentials\"," +
+                "\"scope\":\"" + scope + "\"}";
         assertTrue("expected json "+expectedJson+", actual "+json, expectedJson.equals(json));
     }
     
     @Test
     public void test_ClientCredentialsGrantRequest_json_expiresIn() throws IOException {
         long expiresIn = 15;
+        String scope = "scope";
         ClientCredentialsGrantRequest clientCredentialsGrantRequest = new ClientCredentialsGrantRequest().setExpiresIn(expiresIn);
+        clientCredentialsGrantRequest.setScope(scope);
         String json = clientCredentialsGrantRequest.toJson();
-        String expectedJson = "{\"grantType\":\"client_credentials\",\"expiresIn\":"+expiresIn+"}";
+        String expectedJson = "{\"grantType\":\"client_credentials\"," +
+                "\"expiresIn\":"+expiresIn+", \"scope\":\"" + scope + "\"}";
         Map<String, Object> jsonMap = toMap(json);
         Map<String, Object> expectedMap = toMap(expectedJson);
         assertTrue("expected json "+expectedMap+", actual "+jsonMap, expectedMap.equals(jsonMap));
@@ -62,11 +68,15 @@ public class ClientCredentialsGrantRequestTest {
     @Test
     public void test_ClientCredentialsGrantRequest_form_expiresIn() throws IOException {
         long expiresIn = 15;
-        ClientCredentialsGrantRequest clientCredentialsGrantRequest = new ClientCredentialsGrantRequest().setExpiresIn(expiresIn);
+        String scope = "test scope";
+        ClientCredentialsGrantRequest clientCredentialsGrantRequest = new
+                ClientCredentialsGrantRequest().setExpiresIn(expiresIn);
+        clientCredentialsGrantRequest.setScope(scope);
         Map<String, List<String>> form = clientCredentialsGrantRequest.toFormParams();
         Map<String, List<String>> expectedForm = new HashMap<String, List<String>>();
         expectedForm.put("grant_type", Collections.singletonList("client_credentials"));
         expectedForm.put("expires_in", Collections.singletonList(""+expiresIn));
+        expectedForm.put("scope", Collections.singletonList(scope));
         assertTrue("expected form "+expectedForm+", actual "+form, expectedForm.equals(form));
     }
 

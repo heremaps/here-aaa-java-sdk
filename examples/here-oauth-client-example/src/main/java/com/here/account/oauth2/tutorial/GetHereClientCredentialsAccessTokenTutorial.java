@@ -17,14 +17,11 @@ package com.here.account.oauth2.tutorial;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
-import com.here.account.oauth2.AccessTokenResponse;
-import com.here.account.oauth2.ClientCredentialsGrantRequest;
-import com.here.account.oauth2.Fresh;
-import com.here.account.oauth2.HereAccount;
-import com.here.account.oauth2.TokenEndpoint;
+import com.here.account.oauth2.*;
 
 /**
  * A tutorial class providing example code for always obtaining a fresh 
@@ -55,7 +52,42 @@ public class GetHereClientCredentialsAccessTokenTutorial {
     public GetHereClientCredentialsAccessTokenTutorial(String[] argv) {
         this.argv = argv;
     }
-    
+
+    /**
+     * Get Access token and Open Id by setting the  scope in the request
+     */
+    public HashMap<String , String> getAccessTokenAndIdToken() {
+        Args args = parseArgs(argv);
+        try {
+            OAuth1ClientCredentialsProvider credentials = getCredentials(args);
+            TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                    ApacheHttpClientProvider.builder().build(),
+                    credentials);
+            AccessTokenRequest accessTokenRequest  =  new
+                    ClientCredentialsGrantRequest();
+            accessTokenRequest.setScope("openid");
+            AccessTokenResponse token =
+                    tokenEndpoint.requestToken(accessTokenRequest);
+            String accessToken = token.getAccessToken();
+            String idToken = token.getIdToken();
+            if (args.isVerbose()) {
+                System.out.println("HERE Access Token: " + accessToken);
+            } else {
+                System.out.println("HERE Access Token: " + accessToken.substring(0, 20) + "..." + accessToken.substring(accessToken.length() - 4));
+            }
+            System.out.println("Id Token: " + idToken);
+            HashMap<String,  String> tokenMap  =  new HashMap<>();
+            tokenMap.put("accessToken", accessToken);
+            tokenMap.put("idToken", idToken);
+            return tokenMap;
+        } catch (Exception e) {
+            System.err.println("trouble getting Here client_credentials Access Token: " + e);
+            e.printStackTrace();
+            exit(2);
+            return null;
+        }
+    }
+
     public String getAccessToken() {
         Args args = parseArgs(argv);
         try {
