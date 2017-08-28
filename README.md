@@ -14,9 +14,36 @@ questions contact HERE_ACCOUNT_SUPPORT@here.com.
 
 Deliverables
 ============
-The here-aaa-sdk project produces here-oauth-client artifacts distributed via Nexus repository,
-as well as the here-oauth-client-dist-<version>.tar.gz bundle.  External developers currently
-receive the here-oauth-client-dist-<version>.tar.gz bundle as part of onboarding.
+The here-aaa-sdk project produces artifacts distributed in two ways:
+* The `here-oauth-client-dist-<version>.tar.gz` bundle.  External developers currently
+receive this bundle as part of onboarding.
+* via the [Maven Central Repository](https://search.maven.org/)
+
+The following artifacts are published to Maven Central:
+
+HERE OAuth Client
+------
+Contains code to assist developers to obtain authorization from the HERE OAuth2.0 Authorization
+Server, for use with HERE Services.
+```
+<dependency>
+  <groupId>com.here.account</groupId>
+  <artifactId>here-oauth-client</artifactId>
+  <version>0.4.9</version>
+</dependency>
+```
+HERE OAuth Client Examples
+------
+Example usage of the HERE OAuth Client library; these are tutorials intended to be adapted into or
+inform design of applications
+```
+<dependency>
+  <groupId>com.here.account</groupId>
+  <artifactId>here-oauth-client-example</artifactId>
+  <version>0.4.9</version>
+</dependency>
+```
+
 
 Directory Layout
 ================
