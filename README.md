@@ -125,8 +125,7 @@ adapt the integration to your environment.
 
 You can use  the -idToken option to output the id token(Open  Id) instead of the Here Access Token.
 
- Example:  $ java -jar examples/here-oauth-client-example/target/here-oauth
- -client-example-*[!javadoc].jar -v -idToken
+ $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar -v -idToken
 
  The -v option is used to print the full valid Id Token to stdout.
 

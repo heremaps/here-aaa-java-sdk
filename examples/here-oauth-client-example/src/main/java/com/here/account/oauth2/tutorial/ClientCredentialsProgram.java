@@ -17,7 +17,7 @@ package com.here.account.oauth2.tutorial;
 
 import java.util.Arrays;
 
-public class Program {
+public class ClientCredentialsProgram {
 
     /**
      * The main method includes the bulk of the code integration,
