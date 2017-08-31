@@ -15,10 +15,6 @@
  */
 package com.here.account.oauth2.tutorial;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.*;

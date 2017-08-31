@@ -16,7 +16,6 @@
 package com.here.account.oauth2.tutorial;
 
 import java.io.File;
-
 import org.junit.Test;
 
 public class GetHereClientCredentialsAccessTokenTutorialIT {
