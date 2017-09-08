@@ -23,7 +23,7 @@ import java.io.IOException;
     public abstract class HereClientCredentialsTokenTutorial {
 
         protected String[] argv;
-        private OAuth1ClientCredentialsProvider testCreds = null;
+        protected OAuth1ClientCredentialsProvider testCreds = null;
 
         public HereClientCredentialsTokenTutorial(String[] argv) {
             this.argv = argv;
