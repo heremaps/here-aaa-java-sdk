@@ -16,13 +16,10 @@
 package com.here.account.oauth2.tutorial;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
 
 public class GetHereClientCredentialsAccessTokenTutorialTest {
 
@@ -73,20 +70,6 @@ public class GetHereClientCredentialsAccessTokenTutorialTest {
         tutorial.getToken();
     }
 
-    static void setTestCreds(GetHereClientCredentialsAccessTokenTutorial tutorial,
-            OAuth1ClientCredentialsProvider systemCredentials) {
-        if (null == systemCredentials) {
-            throw new RuntimeException("no credentials available for test");
-        }
-        Class<?> clazz = GetHereClientCredentialsAccessTokenTutorial.class;
-        try {
-            Field field = clazz.getDeclaredField("testCreds");
-            field.setAccessible(true);
-            field.set(tutorial, systemCredentials);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            throw new RuntimeException("fail to get testCreds declared field: " + e, e);
-        }
-    }
 
     @Test(expected = Helper.MyException.class)
     public void test_broken_defaultCredentialsFile() {

@@ -30,7 +30,7 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
         GetHereClientCredentialsAccessTokenTutorial tutorial = 
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
-            GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
+            Helper.setTestCreds(tutorial,
                     Helper.getSystemCredentials());
         }
         tutorial.getToken();
@@ -44,7 +44,7 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
         GetHereClientCredentialsAccessTokenTutorial tutorial = 
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
-            GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
+            Helper.setTestCreds(tutorial,
                     Helper.getSystemCredentials());
         }
         tutorial.getToken();

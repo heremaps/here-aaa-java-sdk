@@ -16,14 +16,15 @@
 package com.here.account.oauth2.tutorial;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
 
-    public abstract class HereClientCredentialsTokenTutorial {
+    public class HereClientCredentialsTokenTutorial {
 
         protected String[] argv;
-        protected OAuth1ClientCredentialsProvider testCreds = null;
+        private OAuth1ClientCredentialsProvider testCreds = null;
 
         public HereClientCredentialsTokenTutorial(String[] argv) {
             this.argv = argv;
@@ -61,9 +62,13 @@ import java.io.IOException;
 
         }
 
-        public abstract String getToken();
+        public String getToken() {
+            throw new NotImplementedException();
+        }
 
-        abstract protected  void printUsageAndExit();
+        protected  void printUsageAndExit() {
+            throw new NotImplementedException();
+        }
         ////////
         // get credentials file, either command-line override, or default file location
         ////////

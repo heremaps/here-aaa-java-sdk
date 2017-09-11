@@ -16,9 +16,6 @@
 package com.here.account.oauth2.tutorial;
 
 import java.io.File;
-import java.lang.reflect.Field;
-
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import org.junit.Test;
 import org.junit.Assert;
 import org.mockito.Mockito;
@@ -31,21 +28,6 @@ public class GetHereClientCredentialsIdTokenTutorialTest {
         Mockito.doThrow(Helper.MyException.class).when(mock).exit(Mockito.anyInt
                 ());
         return mock;
-    }
-    static void setTestCreds(GetHereClientCredentialsIdTokenTutorial tutorial,
-
-                             OAuth1ClientCredentialsProvider systemCredentials) {
-        if (null == systemCredentials) {
-            throw new RuntimeException("no credentials available for test");
-        }
-        Class<?> clazz = GetHereClientCredentialsIdTokenTutorial.class;
-        try {
-            Field field = clazz.getDeclaredField("testCreds");
-            field.setAccessible(true);
-            field.set(tutorial, systemCredentials);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            throw new RuntimeException("fail to get testCreds declared field: " + e, e);
-        }
     }
 
     @Test(expected = Helper.MyException.class)
@@ -81,9 +63,9 @@ public class GetHereClientCredentialsIdTokenTutorialTest {
                 path
         };
         GetHereClientCredentialsIdTokenTutorial tutorial = mockTutorial(args);
+        file =  null;
         if (null == file) {
-            setTestCreds(tutorial,
-                    Helper.getSystemCredentials());
+            Helper.setTestCreds(tutorial, Helper.getSystemCredentials());
         }
         String idToken = tutorial.getToken();
         Assert.assertNotNull(idToken);

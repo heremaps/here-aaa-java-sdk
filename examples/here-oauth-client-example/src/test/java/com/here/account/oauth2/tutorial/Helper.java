@@ -17,10 +17,27 @@ package com.here.account.oauth2.tutorial;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 
+import java.lang.reflect.Field;
+
 public class Helper {
     public static class MyException extends Exception {
         public MyException() {
             super("in tests, this is used to prevent System.exit(..) from running");
+        }
+    }
+
+    public static void setTestCreds(HereClientCredentialsTokenTutorial tutorial,
+                                    OAuth1ClientCredentialsProvider systemCredentials) {
+        if (null == systemCredentials) {
+            throw new RuntimeException("no credentials available for test");
+        }
+        Class<?> clazz = HereClientCredentialsTokenTutorial.class;
+        try {
+            Field field = clazz.getSuperclass().getDeclaredField("testCreds");
+            field.setAccessible(true);
+            field.set(tutorial, systemCredentials);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException("fail to get testCreds declared field: " + e, e);
         }
     }
 
