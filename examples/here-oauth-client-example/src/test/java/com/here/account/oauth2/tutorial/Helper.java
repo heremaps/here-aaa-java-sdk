@@ -33,7 +33,7 @@ public class Helper {
         }
         Class<?> clazz = HereClientCredentialsTokenTutorial.class;
         try {
-            Field field = clazz.getSuperclass().getDeclaredField("testCreds");
+            Field field = clazz.getDeclaredField("testCreds");
             field.setAccessible(true);
             field.set(tutorial, systemCredentials);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
