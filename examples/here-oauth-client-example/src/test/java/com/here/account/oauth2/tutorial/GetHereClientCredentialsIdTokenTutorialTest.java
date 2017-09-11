@@ -63,7 +63,6 @@ public class GetHereClientCredentialsIdTokenTutorialTest {
                 path
         };
         GetHereClientCredentialsIdTokenTutorial tutorial = mockTutorial(args);
-        file =  null;
         if (null == file) {
             Helper.setTestCreds(tutorial, Helper.getSystemCredentials());
         }
