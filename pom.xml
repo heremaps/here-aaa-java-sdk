@@ -27,9 +27,9 @@
     </developers>
 
     <scm>
-      <connection>scm:git:git://github.com/heremaps/here-aaa-java-sdk.git</connection>
-      <developerConnection>scm:git:ssh://github.com:heremaps/here-aaa-java-sdk.git</developerConnection>
-      <url>http://github.com/heremaps/here-aaa-java-sdk/tree/master</url>
+      <connection>scm:git:https://github.com/heremaps/here-aaa-java-sdk.git</connection>
+      <developerConnection>scm:git:git@github.com:heremaps/here-aaa-java-sdk.git</developerConnection>
+      <url>https://github.com/heremaps/here-aaa-java-sdk</url>
     </scm>
 
     <modules>
