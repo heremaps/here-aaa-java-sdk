@@ -174,8 +174,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
 
     }
 
-    private HttpRequestBase getRequestNoAuth(String method, String url, 
-            String requestBodyJson, Map<String, List<String>> formParams) {
+    private HttpRequestBase getRequestNoAuth(String method, String url) {
         URI uri;
         try {
             uri = new URI(url);
@@ -281,9 +280,8 @@ public class ApacheHttpClientProvider implements HttpProvider {
     public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             String requestBodyJson) {
         HttpRequestBase apacheRequest = 
-                /*String method, String url, 
-            String requestBodyJson, Map<String, List<String>> formParams*/
-                getRequestNoAuth(method, url, requestBodyJson, null);
+                /*String method, String url*/
+                getRequestNoAuth(method, url);
         
         ApacheHttpClientRequest request = new ApacheHttpClientRequest(apacheRequest);
         
@@ -305,9 +303,8 @@ public class ApacheHttpClientProvider implements HttpProvider {
     public HttpRequest getRequest(HttpRequestAuthorizer httpRequestAuthorizer, String method, String url,
             Map<String, List<String>> formParams) {
         HttpRequestBase apacheRequest = 
-                /*String method, String url, 
-            String requestBodyJson, Map<String, List<String>> formParams*/
-                getRequestNoAuth(method, url, null, formParams);
+                /*String method, String url*/
+                getRequestNoAuth(method, url);
         
         ApacheHttpClientRequest request = new ApacheHttpClientRequest(apacheRequest);
         

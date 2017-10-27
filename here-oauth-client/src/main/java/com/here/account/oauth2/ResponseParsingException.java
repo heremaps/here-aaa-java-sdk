@@ -19,7 +19,7 @@ package com.here.account.oauth2;
  * A ResponseParsingException occurs when there is a problem parsing a response
  * received from an HTTP request.
  */
-public class ResponseParsingException extends Exception {
+public class ResponseParsingException extends RuntimeException {
 
     /**
      * Creates a new instance of <code>ResponseParsingException</code> without

@@ -212,7 +212,7 @@ public class SignatureCalculatorTest {
         assertTrue(SignatureCalculator.verifySignature(cipherText, SignatureMethod.ES512, signature, publicKeyBase64));
     }
 
-    private static KeyPair generateES512KeyPair()  {
+    public static KeyPair generateES512KeyPair()  {
         try {
             ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp521r1");
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM);

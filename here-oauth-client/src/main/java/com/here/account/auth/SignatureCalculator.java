@@ -50,9 +50,9 @@ public class SignatureCalculator {
      */
     public static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
 
-    public SignatureCalculator(String clientAccessKeyId, String clientAccessKeySecret) {
-        this.consumerKey = clientAccessKeyId;
-        this.consumerSecret = clientAccessKeySecret;
+    public SignatureCalculator(String consumerKey, String consumerSecret) {
+        this.consumerKey = consumerKey;
+        this.consumerSecret = consumerSecret;
     }
 
     /**
@@ -139,7 +139,7 @@ public class SignatureCalculator {
      * @param formParams      the list of form parameters
      * @param queryParams     list of query parameters
      * @param signatureToVerify the signature bytes to be verified.
-     * @param verificationKey  the key used to verify the signature. This will be the consumer key for HMAC-SHAn signature
+     * @param verificationKey  the key used to verify the signature. This will be the shared secret key for HMAC-SHAn signature
      *                         method and is the public key for ES512 signature method.
      *
      * @return true if the signature was verified, false if not.
@@ -161,7 +161,7 @@ public class SignatureCalculator {
     /**
      * Verify the signature.
      *
-     * @param cipherText    the original text that was signed.
+     * @param signedText    the original text that was signed.
      * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
      * @param signatureToVerify the signature bytes to be verified.
      * @param verificationKey  the key used to verify the signature. This will be the consumer key for HMAC-SHAn signature
@@ -169,11 +169,11 @@ public class SignatureCalculator {
      *
      * @return true if the signature was verified, false if not.
      */
-    protected static boolean verifySignature(String cipherText, SignatureMethod signatureMethod, String signatureToVerify, String verificationKey) {
+    protected static boolean verifySignature(String signedText, SignatureMethod signatureMethod, String signatureToVerify, String verificationKey) {
         if (signatureMethod.equals(SignatureMethod.ES512))
-            return verifyECDSASignature(cipherText, signatureToVerify, verificationKey, signatureMethod);
+            return verifyECDSASignature(signedText, signatureToVerify, verificationKey, signatureMethod);
         else
-            return (generateSignature(cipherText, verificationKey, signatureMethod).equals(signatureToVerify));
+            return (generateSignature(signedText, verificationKey, signatureMethod).equals(signatureToVerify));
     }
 
 

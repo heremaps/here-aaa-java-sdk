@@ -157,6 +157,11 @@ HERE Access Token.
 
 You can optionally add the `-v` option to print a full valid Id Token to stdout.
 
+HereAccessTokenProviderTutorial:
+
+In order to run the HereAccessTokenProviderTutorial class, run the following in terminal
+      $ java -cp examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar com.here.account.oauth2.tutorial.HereAccessTokenProviderTutorial
+
 Developer Usage
 ===============
 
@@ -169,3 +174,5 @@ of two options:
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
 - get Id Token via TokenEndpoint.requestToken(..) approach by setting the
 scope field in the request.
+
+- get

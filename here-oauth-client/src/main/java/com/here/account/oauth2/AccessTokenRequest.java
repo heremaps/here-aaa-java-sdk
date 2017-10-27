@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.here.account.util.JacksonSerializer;
+
 /**
  * One of the OAuth2.0 
  * <a href="https://tools.ietf.org/html/rfc6749#section-1.3">Authorization Grant</a> Request 
@@ -32,16 +34,26 @@ public abstract class AccessTokenRequest {
     
     /**
      * expiresIn; the parameter name for "expires in" when conveyed in a JSON body.
+     * @deprecated use {@link JacksonSerializer} instead
      */
     private static final String EXPIRES_IN_JSON = "expiresIn";
     
     /**
      * expires_in; the parameter name for "expires in" when conveyed in a form body.
      */
-    private static final String EXPIRES_IN_FORM = "expires_in";
+    protected static final String EXPIRES_IN_FORM = "expires_in";
     
+    /**
+     * grantType; the parameter name for "grant type" when conveyed in a JSON body.
+     * @deprecated use {@link JacksonSerializer} instead
+     */
     protected static final String GRANT_TYPE_JSON = "grantType";
     protected static final String GRANT_TYPE_FORM = "grant_type";
+    
+    /**
+     * scope; the parameter name for "scope" when conveyed in a JSON body.
+     * @deprecated use {@link JacksonSerializer} instead
+     */
     protected static final String SCOPE_JSON = "scope";
     protected static final String SCOPE_FORM = "scope";
     
@@ -108,22 +120,34 @@ public abstract class AccessTokenRequest {
     }
 
     /**
-     * Get the scope for the token.
+     * Get the scope for the token request.  See also 
+     * <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
+     * Requesting Claims using Scope Values</a>.
+     * 
+     * <p>
      * The example value is "openid
      * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
      * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
      * openid : Specifies the idToken is expected in the response
      * sdp:[List of groupId separated by ',']
+     * 
+     * @return the scope
      */
     public String getScope() {
         return this.scope;
     }
 
     /**
-     * Get the scope for the token.
+     * Set the scope for the token request.  See also 
+     * <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
+     * Requesting Claims using Scope Values</a>.
+     * 
+     * <p>
      * The example value is "openid
      * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
-     * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
+     * GROUP-84ba52de-f80b-4047-a024-33d81e6153df".
+     * 
+     * @param scope the scope to set
      */
     public AccessTokenRequest setScope(String scope) {
         this.scope = scope;
@@ -134,7 +158,9 @@ public abstract class AccessTokenRequest {
      * Converts this request, into its JSON body representation.
      * 
      * @return the JSON body, for use with application/json bodies
+     * @deprecated use {@link JacksonSerializer} instead
      */
+    @Deprecated
     public String toJson() {
         return "{\"" + GRANT_TYPE_JSON + "\":\"" + getGrantType() + "\""
             + (null != expiresIn ? ",\"" + EXPIRES_IN_JSON + "\":" + expiresIn : "")

@@ -51,14 +51,17 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * HERE client accessKeyId.  Becomes the value of oauth_consumer_key in the 
      * Authorization: OAuth header.
      */
-    private final String accessKeyId;
+    private final String consumerKey;
     
     /**
      * HERE client accessKeySecret.  Used to calculate the oauth_signature in the 
      * Authorization: OAuth header.
      */
-    private final String accessKeySecret;
+    private final String consumerSecret;
     
+    
+    private final SignatureMethod signatureMethod;
+        
     /**
      * Construct the OAuth signer based on accessKeyId and accessKeySecret.
      * 
@@ -82,9 +85,41 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      *      in the Authorization: OAuth header.
      */
     public OAuth1Signer(Clock clock, String accessKeyId, String accessKeySecret) {
+        this(clock, accessKeyId, accessKeySecret, SignatureMethod.HMACSHA256);
+    }
+    
+    /**
+     * 
+     * @param consumerKey the identity of the caller, sent in plaintext.  
+     *      Becomes the value of oauth_consumer_key in 
+     *      the Authorization: OAuth header.
+     * @param consumerSecret secret of the caller, or private key of the caller.  
+     *      Used to calculate the oauth_signature 
+     *      in the Authorization: OAuth header.
+     * @param signatureMethod the choice of signature algorithm to use.
+     */
+    public OAuth1Signer(String consumerKey, String consumerSecret, SignatureMethod signatureMethod) {
+        this(Clock.SYSTEM, consumerKey, consumerSecret, signatureMethod);
+    }
+    
+    /**
+     * Construct the OAuth signer based on clock, consumerKey, consumerSecret, 
+     * and signatureMethod.
+     * 
+     * @param clock the implementation of a clock you want to use
+     * @param consumerKey the identity of the caller, sent in plaintext.  
+     *      Becomes the value of oauth_consumer_key in 
+     *      the Authorization: OAuth header.
+     * @param consumerSecret secret of the caller, or private key of the caller.  
+     *      Used to calculate the oauth_signature 
+     *      in the Authorization: OAuth header.
+     * @param signatureMethod the choice of signature algorithm to use.
+     */
+    public OAuth1Signer(Clock clock, String consumerKey, String consumerSecret, SignatureMethod signatureMethod) {
         this.clock = clock;
-        this.accessKeyId = accessKeyId;
-        this.accessKeySecret = accessKeySecret;
+        this.consumerKey = consumerKey;
+        this.consumerSecret = consumerSecret;
+        this.signatureMethod = signatureMethod;
     }
 
     /**
@@ -130,12 +165,12 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         nextBytes(bytes);
         String nonce = Base64.encodeBase64URLSafeString(bytes).substring(0, NONCE_LENGTH);
         String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, 
-                SignatureMethod.HMACSHA256,
+                signatureMethod,
                 formParams,
                 null);
         
         return calculator.constructAuthHeader(computedSignature, nonce, timestamp, 
-                SignatureMethod.HMACSHA256);
+                signatureMethod);
     }
     
     /**
@@ -148,7 +183,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         // client accessKeyId is "Client Identifier" a.k.a. "oauth_consumer_key" in the OAuth1.0 spec
         // client accessKeySecret is "Client Shared-Secret" , which becomes the client shared-secret component 
         // of the HMAC-SHA1 key per http://tools.ietf.org/html/rfc5849#section-3.4.2.
-        SignatureCalculator calculator = new SignatureCalculator(accessKeyId, accessKeySecret);
+        SignatureCalculator calculator = new SignatureCalculator(consumerKey, consumerSecret);
         return calculator;
     }
 

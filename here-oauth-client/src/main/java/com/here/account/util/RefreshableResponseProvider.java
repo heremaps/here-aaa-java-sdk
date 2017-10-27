@@ -122,18 +122,24 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
   public RefreshableResponseProvider(
           final Clock clock,
           final Long refreshIntervalMillis,
-          final T initialToken,
+          final T initialResponse,
           final ResponseRefresher<T> refreshTokenFunction,
           final ScheduledExecutorService scheduledExecutorService
       ) {
       Objects.requireNonNull(clock, "clock cannot be null");
-      Objects.requireNonNull(initialToken, "initialToken cannot be null");
+      Objects.requireNonNull(initialResponse, "initialResponse cannot be null");
       Objects.requireNonNull(refreshTokenFunction, "refreshTokenFunction cannot be null");
       Objects.requireNonNull(scheduledExecutorService, "scheduledExecutorService cannot be null");
       
+      // expires_in cannot be null
+      Objects.requireNonNull(initialResponse.getExpiresIn(), 
+              "initialResponse.getExpiresIn() cannot be null");
+      Objects.requireNonNull(initialResponse.getStartTimeMilliseconds(), 
+              "initialResponse.getStartTimeMilliseconds() cannot be null");
+      
       this.clock = clock;
       this.refreshIntervalMillis = refreshIntervalMillis;
-      this.refreshToken = initialToken;
+      this.refreshToken = initialResponse;
       this.refreshTokenFunction = refreshTokenFunction;
 
       this.scheduledExecutorService = scheduledExecutorService;
