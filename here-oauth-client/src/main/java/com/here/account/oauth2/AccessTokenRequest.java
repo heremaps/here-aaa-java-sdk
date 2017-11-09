@@ -42,6 +42,8 @@ public abstract class AccessTokenRequest {
     
     protected static final String GRANT_TYPE_JSON = "grantType";
     protected static final String GRANT_TYPE_FORM = "grant_type";
+    protected static final String SCOPE_JSON = "scope";
+    protected static final String SCOPE_FORM = "scope";
     
     private final String grantType;
 
@@ -53,6 +55,8 @@ public abstract class AccessTokenRequest {
      * This property is a HERE extension to RFC6749 providing additional data.
      */
     private Long expiresIn;
+
+    private String scope;
     
     protected AccessTokenRequest(String grantType) {
         this.grantType = grantType;
@@ -102,7 +106,30 @@ public abstract class AccessTokenRequest {
     public Long getExpiresIn() {
         return this.expiresIn;
     }
-    
+
+    /**
+     * Get the scope for the token.
+     * The example value is "openid
+     * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
+     * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
+     * openid : Specifies the idToken is expected in the response
+     * sdp:[List of groupId separated by ',']
+     */
+    public String getScope() {
+        return this.scope;
+    }
+
+    /**
+     * Get the scope for the token.
+     * The example value is "openid
+     * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
+     * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
+     */
+    public AccessTokenRequest setScope(String scope) {
+        this.scope = scope;
+        return this;
+    }
+
     /**
      * Converts this request, into its JSON body representation.
      * 
@@ -111,7 +138,7 @@ public abstract class AccessTokenRequest {
     public String toJson() {
         return "{\"" + GRANT_TYPE_JSON + "\":\"" + getGrantType() + "\""
             + (null != expiresIn ? ",\"" + EXPIRES_IN_JSON + "\":" + expiresIn : "")
-            + "}";
+            + ",\"" + SCOPE_JSON + "\":\"" + getScope() + "\"}";
     }
 
     /**
@@ -123,6 +150,7 @@ public abstract class AccessTokenRequest {
         Map<String, List<String>> formParams = new HashMap<String, List<String>>();
         addFormParam(formParams, GRANT_TYPE_FORM, getGrantType());
         addFormParam(formParams, EXPIRES_IN_FORM, getExpiresIn());
+        addFormParam(formParams, SCOPE_FORM, getScope());
         return formParams;
     }
 
@@ -140,6 +168,4 @@ public abstract class AccessTokenRequest {
             formParams.put(name, Collections.singletonList(value.toString()));
         }
     }
-
-
 }

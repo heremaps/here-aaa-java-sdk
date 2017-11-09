@@ -144,11 +144,18 @@ If in a secure location, optionally re-run with
 
      $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar -v
 
-to print a full valid HERE Access Token to stdout.  You can also put the file in a different
+to print a full valid HERE Access Token to stdout. You can also put the file in a different
 location or give it a different name, just supply the file as input to the executable jar command
 line.  The examples are for tutorial purposes only and MUST NOT be used in your deployed
 application.  You might find it useful to start from the main(..) method's sample code, and
 adapt the integration to your environment.
+
+You can use  the -idToken option to output the id token(Open  Id) instead of the Here Access Token.
+
+ $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar -v -idToken
+
+ The -v option is used to print the full valid Id Token to stdout.
+
 
 Developer Usage
 ===============
@@ -160,3 +167,5 @@ If you are just getting started, go to com.here.account.oauth2.HereAccount javad
 of two options:
 - get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
 - get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
+- get Id Token via TokenEndpoint.requestToken(..) approach by setting the
+scope field in the request.

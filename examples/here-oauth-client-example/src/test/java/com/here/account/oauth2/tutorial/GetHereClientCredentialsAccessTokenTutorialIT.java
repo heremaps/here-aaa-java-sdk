@@ -16,7 +16,6 @@
 package com.here.account.oauth2.tutorial;
 
 import java.io.File;
-
 import org.junit.Test;
 
 public class GetHereClientCredentialsAccessTokenTutorialIT {
@@ -31,10 +30,10 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
         GetHereClientCredentialsAccessTokenTutorial tutorial = 
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
-            GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
-                    GetHereClientCredentialsAccessTokenTutorialTest.getSystemCredentials());
+            Helper.setTestCreds(tutorial,
+                    Helper.getSystemCredentials());
         }
-        tutorial.getAccessToken();
+        tutorial.getToken();
     }
     
     @Test
@@ -45,12 +44,9 @@ public class GetHereClientCredentialsAccessTokenTutorialIT {
         GetHereClientCredentialsAccessTokenTutorial tutorial = 
                 GetHereClientCredentialsAccessTokenTutorialTest.mockTutorial(args);
         if (null == file) {
-            GetHereClientCredentialsAccessTokenTutorialTest.setTestCreds(tutorial, 
-                    GetHereClientCredentialsAccessTokenTutorialTest.getSystemCredentials());
+            Helper.setTestCreds(tutorial,
+                    Helper.getSystemCredentials());
         }
-        tutorial.getAccessToken();
+        tutorial.getToken();
     }
-    
-
-
 }
