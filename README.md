@@ -136,13 +136,13 @@ The examples directory contains a tutorial example.  To run it
 1. Download and place your HERE Account authorization server credentials.properties file to
    ~/.here/credentials.properties.
 2.   $ chmod 400 ~/.here/credentials.properties
-3.   $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar
+3.   $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar
 
 This tutorial uses the recommended "always fresh" approach with the simplest FromFile properties
 loader.  The tutorial will obtain a valid HERE Access Token and print portions of it to stdout.
 If in a secure location, optionally re-run with
 
-     $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar -v
+     $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar -v
 
 to print a full valid HERE Access Token to stdout. You can also put the file in a different
 location or give it a different name, just supply the file as input to the executable jar command
@@ -150,12 +150,12 @@ line.  The examples are for tutorial purposes only and MUST NOT be used in your 
 application.  You might find it useful to start from the main(..) method's sample code, and
 adapt the integration to your environment.
 
-You can use  the -idToken option to output the id token(Open  Id) instead of the Here Access Token.
+You can use the `-idToken` option to output the HERE Id Token (in Open ID format) instead of the 
+HERE Access Token.
 
- $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc].jar -v -idToken
+     $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar -idToken
 
- The -v option is used to print the full valid Id Token to stdout.
-
+You can optionally add the `-v` option to print a full valid Id Token to stdout.
 
 Developer Usage
 ===============
