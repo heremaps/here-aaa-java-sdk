@@ -150,12 +150,12 @@ line.  The examples are for tutorial purposes only and MUST NOT be used in your 
 application.  You might find it useful to start from the main(..) method's sample code, and
 adapt the integration to your environment.
 
-You can use  the -idToken option to output the HERE Id Token (in Open ID format) instead of the 
+You can use the `-idToken` option to output the HERE Id Token (in Open ID format) instead of the 
 HERE Access Token.
 
      $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar -idToken
 
-You can optionally add the -v option to print a full valid Id Token to stdout.
+You can optionally add the `-v` option to print a full valid Id Token to stdout.
 
 Developer Usage
 ===============
