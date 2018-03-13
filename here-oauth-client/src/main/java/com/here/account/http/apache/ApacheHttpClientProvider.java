@@ -324,7 +324,7 @@ public class ApacheHttpClientProvider implements HttpProvider {
     private final CloseableHttpClient httpClient;
     private final boolean doCloseHttpClient;
 
-    private ApacheHttpClientProvider(CloseableHttpClient httpClient, boolean doCloseHttpClient) {
+    public ApacheHttpClientProvider(CloseableHttpClient httpClient, boolean doCloseHttpClient) {
         this.httpClient = httpClient;
         this.doCloseHttpClient = doCloseHttpClient;
     }
