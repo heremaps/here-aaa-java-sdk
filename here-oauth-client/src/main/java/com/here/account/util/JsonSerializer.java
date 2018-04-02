@@ -17,11 +17,13 @@ package com.here.account.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -100,6 +102,19 @@ public class JsonSerializer {
      */
     public static String objectToJson(Object object) throws JsonProcessingException {
         return objectMapper.writeValueAsString(object);
+    }
+    
+    /**
+     * Writes the object to the specified outputStream as JSON.
+     * 
+     * @param outputStream the OutputStream to which to write
+     * @param object the object to write to the stream
+     * @throws JsonGenerationException if trouble serializing
+     * @throws JsonMappingException if trouble serializing
+     * @throws IOException if I/O trouble writing to the stream
+     */
+    static void writeObjectToJson(OutputStream outputStream, Object object) throws JsonGenerationException, JsonMappingException, IOException {
+        objectMapper.writeValue(outputStream, object);
     }
 
 }

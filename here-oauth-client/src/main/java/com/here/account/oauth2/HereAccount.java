@@ -19,11 +19,15 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URL;
+import java.util.function.Supplier;
 
-import com.here.account.http.HttpException;
+import com.here.account.client.Client;
+import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
-import com.here.account.util.JsonSerializer;
+import com.here.account.util.JacksonSerializer;
 import com.here.account.util.RefreshableResponseProvider;
+import com.here.account.util.Serializer;
 
 /**
  * Static entry point to access HERE Account via the OAuth2.0 API.  This class
@@ -146,8 +150,14 @@ public class HereAccount {
      */
     public static TokenEndpoint getTokenEndpoint(
             HttpProvider httpProvider,
-            ClientCredentialsProvider clientCredentialsProvider) {
-        return new TokenEndpointImpl( httpProvider, clientCredentialsProvider);
+            ClientAuthorizationRequestProvider clientCredentialsProvider) {
+        return getTokenEndpoint(httpProvider, clientCredentialsProvider, new JacksonSerializer());
+    }
+    
+    public static TokenEndpoint getTokenEndpoint(HttpProvider httpProvider,
+            ClientAuthorizationRequestProvider clientCredentialsProvider,
+            Serializer serializer) {
+        return new TokenEndpointImpl(httpProvider, clientCredentialsProvider, serializer);
     }
     
     /**
@@ -165,14 +175,14 @@ public class HereAccount {
      * @throws ResponseParsingException if trouble parsing the response
      */
     private static RefreshableResponseProvider<AccessTokenResponse> getRefreshableClientTokenProvider(
-            TokenEndpoint tokenEndpoint) 
+            TokenEndpoint tokenEndpoint, Supplier<AccessTokenRequest> accessTokenRequestFactory) 
             throws AccessTokenException, RequestExecutionException, ResponseParsingException {
         return new RefreshableResponseProvider<>(
                 null,
-                tokenEndpoint.requestToken(new ClientCredentialsGrantRequest()),
+                tokenEndpoint.requestToken(accessTokenRequestFactory.get()),
                 (AccessTokenResponse previous) -> {
                     try {
-                        return tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
+                        return tokenEndpoint.requestToken(accessTokenRequestFactory.get());
                     } catch (AccessTokenException | RequestExecutionException | ResponseParsingException e) {
                         throw new RuntimeException("trouble refresh: " + e, e);
                     }
@@ -183,76 +193,117 @@ public class HereAccount {
      * Implementation of {@link TokenEndpoint}.
      */
     private static class TokenEndpointImpl implements TokenEndpoint {
+        /**
+         * @deprecated to be removed.
+         */
+        @Deprecated
         public static final String HTTP_METHOD_POST = "POST";
         
+        private final Client client;
         private final HttpProvider httpProvider;
+        private final HttpMethods httpMethod;
         private final String url;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
+        private final Serializer serializer;
         
         /**
          * Construct a new ability to obtain authorization from the HERE authorization server.
          * 
          * @param httpProvider the HTTP-layer provider implementation
-         * @param urlStart the protocol, host, and port portion of the HERE authorization server endpoint you want to call.
-         * @param clientId see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_id</a>; 
-         *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
-         * @param clientSecret see also <a href="https://tools.ietf.org/html/rfc6749#section-2.3.1">client_secret</a>; 
-         *     as recommended by the RFC, we don't provide this in the body, but make it part of the request signature.
+         * @param clientAuthorizationProvider identifies a token endpoint,
+         * provides a mechanism to use credentials to authorize access token requests,
+         * and provides access token request objects
+         * @param serializer used to serialize json To pojo and vice versa
          */
-        private TokenEndpointImpl(HttpProvider httpProvider, ClientCredentialsProvider clientCredentialsProvider) {
-            this.httpProvider = httpProvider;
-            this.url = clientCredentialsProvider.getTokenEndpointUrl();
-            this.clientAuthorizer = clientCredentialsProvider.getClientAuthorizer();
-        }
+        private TokenEndpointImpl(HttpProvider httpProvider, ClientAuthorizationRequestProvider clientAuthorizationProvider,
+                Serializer serializer) {
+            // these values are fixed once selected
+            this.url = clientAuthorizationProvider.getTokenEndpointUrl();
+            this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
+            this.httpMethod = clientAuthorizationProvider.getHttpMethod();
 
-        @Override
-        public AccessTokenResponse requestToken(AccessTokenRequest authorizationRequest) 
-                throws AccessTokenException, RequestExecutionException, ResponseParsingException {
-            String method = HTTP_METHOD_POST;
-            
-            // OAuth2.0 uses application/x-www-form-urlencoded
-            HttpProvider.HttpRequest apacheRequest = httpProvider.getRequest(
-                    clientAuthorizer, method, url, authorizationRequest.toFormParams());
-            
-            // blocking
-            HttpProvider.HttpResponse apacheResponse = null;
-            InputStream jsonInputStream = null;
-            try {
-                apacheResponse = httpProvider.execute(apacheRequest);
-                jsonInputStream = apacheResponse.getResponseBody();
-            } catch (IOException | HttpException e) {
+            this.client = Client.builder()
+                    .withHttpProvider(httpProvider)
+                    .withClientAuthorizer(clientAuthorizer)
+                    .withSerializer(serializer)
+                    .build();
+            this.httpProvider = httpProvider;
+            this.serializer = serializer;
+        }
+        
+        protected AccessTokenResponse requestTokenFromFile() 
+                throws RequestExecutionException {
+            try (InputStream is = new URL(url).openStream()){
+                return serializer.jsonToPojo(is,
+                        FileAccessTokenResponse.class);
+            } catch (IOException e) {
                 throw new RequestExecutionException(e);
             }
-            
-            int statusCode = apacheResponse.getStatusCode();
-            try {
-                if (200 == statusCode) {
-                    try {
-                        return JsonSerializer.toPojo(jsonInputStream,
-                                                     AccessTokenResponse.class);
-                    } catch (IOException ioe) {
-                        throw new ResponseParsingException(ioe);
-                    }
-                } else {
-                    try {
-                        // parse the error response
-                        ErrorResponse errorResponse = JsonSerializer.toPojo(jsonInputStream, ErrorResponse.class);
-                        throw new AccessTokenException(statusCode, errorResponse);
-                    } catch (IOException ioe) {
-                        // if there is trouble parsing the error
-                        throw new ResponseParsingException(ioe);
-                    }
-                }
-            } finally {
-                nullSafeCloseThrowingUnchecked(jsonInputStream);
+        }
+        
+        private static final String FILE_URL_START = "file://";
+        
+        protected boolean isRequestTokenFromFile() {
+            return null != url && url.startsWith(FILE_URL_START);
+        }
+        
+        @Override
+        public AccessTokenResponse requestToken(AccessTokenRequest authorizationRequest) 
+                throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
+            if (isRequestTokenFromFile()) {
+                return requestTokenFromFile();
+            } else {
+                return requestTokenHttp(authorizationRequest);
             }
+        }
+        
+        protected AccessTokenResponse requestTokenHttp(AccessTokenRequest authorizationRequest) 
+                throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
+            String method = httpMethod.getMethod();
+            
+            HttpProvider.HttpRequest httpRequest;
+            // OAuth2.0 uses application/x-www-form-urlencoded
+            httpRequest = httpProvider.getRequest(
+                clientAuthorizer, method, url, authorizationRequest.toFormParams());
+            
+            return client.sendMessage(httpRequest, AccessTokenResponse.class,
+                    ErrorResponse.class, (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);                        
+                    });
+        }
+        
+        //@Override
+        public Fresh<AccessTokenResponse> requestAutoRefreshingToken(Supplier<AccessTokenRequest> requestSupplier) 
+                throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+            final RefreshableResponseProvider<AccessTokenResponse> refresher = 
+                    HereAccount.getRefreshableClientTokenProvider(this, requestSupplier);
+            return new Fresh<AccessTokenResponse>() {
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public AccessTokenResponse get() {
+                    return refresher.getUnexpiredResponse();
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void close() throws IOException {
+                    refresher.shutdown();
+                }
+            };
+            
         }
         
         @Override
         public Fresh<AccessTokenResponse> requestAutoRefreshingToken(AccessTokenRequest request) 
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {
-            final RefreshableResponseProvider<AccessTokenResponse> refresher = HereAccount.getRefreshableClientTokenProvider(this);
-            return () -> refresher.getUnexpiredResponse();
+            return requestAutoRefreshingToken(() -> {
+                        return new ClientCredentialsGrantRequest();
+                    });
         }
         
     }
@@ -262,7 +313,9 @@ public class HereAccount {
      * triggered, it is wrapped instead in an UncheckedIOException.
      * 
      * @param closeable the closeable to be closed
+     * @deprecated use Client method of the same name
      */
+    @Deprecated
     static void nullSafeCloseThrowingUnchecked(Closeable closeable) {
         if (null != closeable) {
             try {
@@ -271,9 +324,5 @@ public class HereAccount {
                 throw new UncheckedIOException(ioe);
             }
         }
-
     }
-
-
-    
 }

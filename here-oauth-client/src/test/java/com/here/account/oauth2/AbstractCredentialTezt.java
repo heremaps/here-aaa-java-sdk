@@ -88,10 +88,10 @@ public abstract class AbstractCredentialTezt {
             Field field = OAuth1ClientCredentialsProvider.class.getDeclaredField("oauth1Signer");
             field.setAccessible(true);
             OAuth1Signer oauth1Signer = (OAuth1Signer) field.get(hereCredentialsProvider);
-            field = OAuth1Signer.class.getDeclaredField("accessKeyId");
+            field = OAuth1Signer.class.getDeclaredField("consumerKey");
             field.setAccessible(true);
             accessKeyId = (String) field.get(oauth1Signer);
-            field = OAuth1Signer.class.getDeclaredField("accessKeySecret");
+            field = OAuth1Signer.class.getDeclaredField("consumerSecret");
             field.setAccessible(true);
             accessKeySecret = (String) field.get(oauth1Signer);
         }

@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.oauth2;
 
 /**
- * A {@code ClientCredentialsProvider} identifies a token endpoint and provides
- * a mechanism to use credentials to authorize access token requests.
+ * Provider classes to pull credentials from different sources like system properties, ini and properties file
+ * and in an order of priority specified.
  */
-public interface ClientCredentialsProvider extends ClientAuthorizationRequestProvider {
-    
-}
+package com.here.account.auth.provider;

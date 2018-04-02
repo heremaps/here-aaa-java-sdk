@@ -23,6 +23,9 @@ import java.util.Objects;
 import java.util.Properties;
 
 import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpConstants.HttpMethods;
+import com.here.account.oauth2.AccessTokenRequest;
+import com.here.account.oauth2.ClientCredentialsGrantRequest;
 import com.here.account.oauth2.ClientCredentialsProvider;
 
 /**
@@ -54,11 +57,17 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         this.oauth1Signer = new OAuth1Signer(accessKeyId, accessKeySecret);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getTokenEndpointUrl() {
         return tokenEndpointUrl;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HttpProvider.HttpRequestAuthorizer getClientAuthorizer() {
         return oauth1Signer;
@@ -92,7 +101,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
                   properties.getProperty(ACCESS_KEY_SECRET_PROPERTY));
         }
     }
-    
+
     /**
      * An {@link FromProperties} that pulls credential values from the specified File.
      */
@@ -110,26 +119,44 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
             super(getPropertiesFromFile(file));
         }
         
-        /**
-         * Loads the File as an InputStream into a new Properties object, 
-         * and returns it.
-         * 
-         * @param file the File to use as input
-         * @return the Properties populated from the specified file's contents
-         * @throws IOException
-         */
-        private static Properties getPropertiesFromFile(File file) throws IOException {
-            InputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(file);
-                Properties properties = new Properties();
-                properties.load(inputStream);
-                return properties;
-            } finally {
-                if (null != inputStream) {
-                    inputStream.close();
-                }
+    }
+
+    /**
+     * Loads the File as an InputStream into a new Properties object,
+     * and returns it.
+     *
+     * @param file the File to use as input
+     * @return the Properties populated from the specified file's contents
+     * @throws IOException if there is trouble reading the properties from the file
+     */
+    public static Properties getPropertiesFromFile(File file) throws IOException {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties;
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
             }
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AccessTokenRequest getNewAccessTokenRequest() {
+        return new ClientCredentialsGrantRequest();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HttpMethods getHttpMethod() {
+        return HttpMethods.POST;
+    }
+
 }

@@ -15,13 +15,15 @@
  */
 package com.here.account.oauth2;
 
+import java.io.Closeable;
+
 /**
  * Wraps an object such that it is guaranteed to be "fresh" or always up to date.
  * The definition of "fresh" is implementation specific.
  * 
  * @param <T> the type of the represented object
  */
-public interface Fresh<T> {
+public interface Fresh<T> extends Closeable {
     
     /**
      * Get the most up to date version of the wrapped object.
@@ -29,4 +31,5 @@ public interface Fresh<T> {
      * @return a "fresh" version of the object
      */
     T get();
+
 }

@@ -120,8 +120,7 @@ public class OAuth1SignerTest {
             }
         }
     }
-    
-    
+
     @Test
     public void test_sign_formParams_impactsSignature() {
         Map<String, List<String>> formParams = null;
@@ -176,7 +175,6 @@ public class OAuth1SignerTest {
         assertTrue("sig256 was null for HmacSHA256", null != sig256);
         
         assertTrue("sig1 "+sig1+" wasn't smaller than sig256 "+sig256, sig1.length() < sig256.length());
-
     }
     
     @Test
@@ -253,6 +251,4 @@ public class OAuth1SignerTest {
         //return new Base64().encodeAsString(signatureBytes);
         return Base64.encodeBase64String(signatureBytes);
     }
-
-
 }

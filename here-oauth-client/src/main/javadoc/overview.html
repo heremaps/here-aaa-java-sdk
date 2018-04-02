@@ -18,9 +18,18 @@
         // use hereAccessToken on requests until expires...
    }
    </pre>
-        
+   <p>
+      See the {@link com.here.account.oauth2.HereAccount} entry point class for detailed usage instructions.
         <p>
-            See the {@link com.here.account.oauth2.HereAccount} entry point class for detailed usage instructions.
-            
+   To use your credentials in system properties, credentials.ini file or credentials.properties in that order, and get a token:
+        <pre>
+          {@code
+             HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+             String accessToken = accessTokens.getAccessToken();
+
+            }
+        </pre>
+        <p>
+            See the {@link com.here.account.oauth2.HereAccessTokenProvider} entry point class for detailed usage instructions.
     </body>
 </html>

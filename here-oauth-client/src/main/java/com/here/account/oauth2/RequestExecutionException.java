@@ -19,7 +19,7 @@ package com.here.account.oauth2;
  * A RequestExecutionException occurs when there is a problem processing a
  * request made to an HTTP endpoint.
  */
-public class RequestExecutionException extends Exception {
+public class RequestExecutionException extends RuntimeException {
 
     /**
      * Creates a new instance of <code>RequestExecutionException</code> without
