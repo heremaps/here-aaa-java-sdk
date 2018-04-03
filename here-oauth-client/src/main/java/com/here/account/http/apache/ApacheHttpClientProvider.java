@@ -69,45 +69,56 @@ import com.here.account.http.HttpProvider;
  *
  */
 public class ApacheHttpClientProvider implements HttpProvider {
-    
+
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private RequestConfig.Builder apacheConfigBuilder;
-    
+        private CloseableHttpClient httpClient;
+        private boolean doCloseHttpClient = true;
+
         private Builder() {
             apacheConfigBuilder = RequestConfig.custom();
             setConnectionTimeoutInMs(HttpConstants.DEFAULT_CONNECTION_TIMEOUT_IN_MS);
             setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS);
         }
-    
-        public Builder setConnectionTimeoutInMs(int connectionTimeoutInMs) {
-            this.apacheConfigBuilder
-                .setConnectTimeout(connectionTimeoutInMs)
-                .setConnectionRequestTimeout(connectionTimeoutInMs);
+
+        public Builder setHttpClient(final CloseableHttpClient httpClient) {
+            this.httpClient = httpClient;
             return this;
         }
-    
+
+        public Builder setDoCloseHttpClient(final boolean doCloseHttpClient) {
+            this.doCloseHttpClient = doCloseHttpClient;
+            return this;
+        }
+
         public Builder setRequestTimeoutInMs(int requestTimeoutInMs) {
-            this.apacheConfigBuilder
-                .setSocketTimeout(requestTimeoutInMs);
+            this.apacheConfigBuilder.setSocketTimeout(requestTimeoutInMs);
             return this;
         }
-    
+
+        public Builder setConnectionTimeoutInMs(int connectionTimeoutInMs) {
+            this.apacheConfigBuilder.setConnectTimeout(connectionTimeoutInMs)
+                    .setConnectionRequestTimeout(connectionTimeoutInMs);
+            return this;
+        }
+
         /**
          * Build using builders, builders, and more builders.
          * 
          * @return the built HttpProvider implementation for Apache httpclient.
          */
         public HttpProvider build() {
+
+            CloseableHttpClient client = this.httpClient != null ? this.httpClient :
             // uses PoolingHttpClientConnectionManager by default
-            return new ApacheHttpClientProvider(HttpClientBuilder.create()
-                    .setDefaultRequestConfig(apacheConfigBuilder
-                            .build())
-                    .build(), true);
-    
+                    HttpClientBuilder.create().setDefaultRequestConfig(apacheConfigBuilder.build()).build();
+
+            return new ApacheHttpClientProvider(client, this.doCloseHttpClient);
+
         }
     }
 
