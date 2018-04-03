@@ -213,38 +213,38 @@ public class ApacheHttpClientProviderTest {
     
     @Test
     public void test_assignHttpClientDirectly() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    	CloseableHttpClient mock = mock(CloseableHttpClient.class);
-    	ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder().setHttpClient(mock).build();
-    	CloseableHttpClient fromProvider = extractHttpClient(provider);
-    	assertTrue("client must be SAME object",mock==fromProvider);
+        CloseableHttpClient mock = mock(CloseableHttpClient.class);
+        ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder().setHttpClient(mock).build();
+        CloseableHttpClient fromProvider = extractHttpClient(provider);
+        assertTrue("client must be SAME object",mock==fromProvider);
     }
     
     @Test
     public void test_setDoCloseToFalse() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
-    	CloseableHttpClient mock = mock(CloseableHttpClient.class);
-    	ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder()
-    			.setHttpClient(mock)
-    			.setDoCloseHttpClient(false).build();
+        CloseableHttpClient mock = mock(CloseableHttpClient.class);
+        ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder()
+                .setHttpClient(mock)
+                .setDoCloseHttpClient(false).build();
 
-    	provider.close();
-    	verify(mock,times(0)).close();
+        provider.close();
+        verify(mock,times(0)).close();
     }
     
     @Test
     public void test_setDoCloseToTrue() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
-    	CloseableHttpClient mock = mock(CloseableHttpClient.class);
-    	ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder()
-    			.setHttpClient(mock).build();
-    	
-    	provider.close();
-    	verify(mock,times(1)).close();
+        CloseableHttpClient mock = mock(CloseableHttpClient.class);
+        ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder()
+                .setHttpClient(mock).build();
+        
+        provider.close();
+        verify(mock,times(1)).close();
     }
     
     protected static CloseableHttpClient extractHttpClient(ApacheHttpClientProvider provider)  throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    	Field httpClientField = ApacheHttpClientProvider.class.getDeclaredField("httpClient");
-    	assertTrue("field was null", null != httpClientField);
-    	httpClientField.setAccessible(true);
-    	Object o = httpClientField.get(provider);
+        Field httpClientField = ApacheHttpClientProvider.class.getDeclaredField("httpClient");
+        assertTrue("field was null", null != httpClientField);
+        httpClientField.setAccessible(true);
+        Object o = httpClientField.get(provider);
         assertTrue("o was null", null != o);
         assertTrue("o wasn't an HttpRequestBase", CloseableHttpClient.class.isAssignableFrom(o.getClass()));
 
