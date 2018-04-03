@@ -34,11 +34,18 @@ implements ClientAuthorizationRequestProvider {
 
     private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
 
+    private final File file;
+    
     public FromDefaultHereCredentialsPropertiesFile() {
+        this(getDefaultHereCredentialsFile());
+    }
+    
+    public FromDefaultHereCredentialsPropertiesFile(File file) {
+        this.file = file;
     }
 
+
     protected ClientCredentialsProvider getClientCredentialsProvider() {
-        File file = getDefaultHereCredentialsFile();
         try {
             Properties properties = OAuth1ClientCredentialsProvider.getPropertiesFromFile(file);
             return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(properties);
