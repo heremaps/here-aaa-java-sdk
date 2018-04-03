@@ -51,20 +51,17 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 
 /**
- * An {@link HttpProvider} that uses Apache HttpClient as the underlying
- * implementation. See
- * <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HTTP
- * Components</a> for more information, specifically the HttpClient project.
+ * An {@link HttpProvider} that uses Apache HttpClient as the underlying implementation.
+ * See <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Components</a> 
+ * for more information, specifically the HttpClient project.
  * 
  * <p>
- * If you just want the default 5000 ms for both connection timeout and request
- * timeout, just use the following example code:
- * 
+ * If you just want the default 5000 ms for both connection timeout and request timeout, 
+ * just use the following example code:
  * <pre>
- * {
- *     @code
- *     HttpProvider httpProvider = ApacheHttpClientProvider.builder().build();
- *     // use httpProvider such as with HereAccessTokenProviders...
+ * {@code
+       HttpProvider httpProvider = ApacheHttpClientProvider.builder().build();
+       // use httpProvider such as with HereAccessTokenProviders...
  * }
  * </pre>
  * 
@@ -218,14 +215,24 @@ public class ApacheHttpClientProvider implements HttpProvider {
         }
 
         /*
-         * // headers support String contentType = null; FluentCaseInsensitiveStringsMap
-         * headers = request.getHeaders(); if (null != headers) { for (Entry<String,
-         * List<String>> entry : headers.entrySet()) { String name = entry.getKey();
-         * List<String> valueList = entry.getValue(); if (null != name && null !=
-         * valueList && valueList.size() > 0) { for (String value : valueList) { if
-         * (null == contentType && name.equals(AbstractHttpRequest.CONTENT_TYPE)) {
-         * contentType = value; } apacheRequest.addHeader(name, value); } } } }
-         */
+        // headers support
+        String contentType = null;
+        FluentCaseInsensitiveStringsMap headers = request.getHeaders();
+        if (null != headers) {
+            for (Entry<String, List<String>> entry : headers.entrySet()) {
+                String name = entry.getKey();
+                List<String> valueList = entry.getValue();
+                if (null != name && null != valueList && valueList.size() > 0) {
+                    for (String value : valueList) {
+                        if (null == contentType && name.equals(AbstractHttpRequest.CONTENT_TYPE)) {
+                            contentType = value;
+                        }
+                        apacheRequest.addHeader(name, value);
+                    }
+                }
+            }
+        }
+        */
 
         return apacheRequest;
     }
