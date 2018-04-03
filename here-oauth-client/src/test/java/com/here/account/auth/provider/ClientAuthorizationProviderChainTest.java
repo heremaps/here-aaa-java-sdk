@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -110,6 +111,24 @@ public class ClientAuthorizationProviderChainTest {
         return new FromDefaultHereCredentialsPropertiesFile();
     }
 
+    public ClientAuthorizationRequestProvider getClientAuthorizationRequestProviderFromHerePropertiesFileWithContent() throws Exception {
+        String prefix = UUID.randomUUID().toString();
+        File file = File.createTempFile(prefix, null);
+        file.deleteOnExit();
+        
+        byte[] bytes = ("here.token.endpoint.url=https://www.example.com/oauth2/token\n"
+                + "here.client.id=my-client-id\n"
+                + "here.access.key.id=my-access-key-id\n"
+                + "here.access.key.secret=my-secret\n")
+                .getBytes(StandardCharsets.UTF_8);
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            outputStream.write(bytes);
+            outputStream.flush();
+        }
+
+        return new FromDefaultHereCredentialsPropertiesFile(file);
+    }
+
     @Test
     public void test_DefaultProviderChain() throws Exception{
 
@@ -141,7 +160,7 @@ public class ClientAuthorizationProviderChainTest {
 
         ClientAuthorizationRequestProvider fromSystemProperties = getClientAuthorizationRequestProviderFromSystemPropertiesWithNoPropertiesSet();
         ClientAuthorizationRequestProvider fromIniFile = getClientAuthorizationRequestProviderFromIniFileWithNoPropertiesSet();
-        ClientAuthorizationRequestProvider fromPropertiesFile = getClientAuthorizationRequestProviderFromHerePropertiesFile();
+        ClientAuthorizationRequestProvider fromPropertiesFile = getClientAuthorizationRequestProviderFromHerePropertiesFileWithContent();
 
         ClientAuthorizationProviderChain providerChain = new ClientAuthorizationProviderChain
                 (fromSystemProperties, fromIniFile, fromPropertiesFile);
