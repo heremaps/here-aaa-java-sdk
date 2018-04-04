@@ -21,7 +21,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.File;
 import java.io.IOException;
 
-    public class HereClientCredentialsTokenTutorial {
+public class HereClientCredentialsTokenTutorial {
 
         protected String[] argv;
         private OAuth1ClientCredentialsProvider testCreds = null;

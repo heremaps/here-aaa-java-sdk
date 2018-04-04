@@ -24,7 +24,56 @@ import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 
 /**
- * An implementation to get HERE Access Tokens, that is configured using its Builder.
+ * An implementation that provides HERE Access Tokens, by accessing HERE Account 
+ * via the OAuth2.0 API.  Instances facilitate getting and maintaining a HERE 
+ * Access Token to use on requests to HERE Service REST APIs according to 
+ * <a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>.
+ * See also the OAuth2.0 
+ * <a href="https://tools.ietf.org/html/rfc6749#section-1.4">Access Token</a> spec.
+ * 
+ * <p>
+ * To use your provided credentials.ini or credentials.properties file to get a 
+ * token from the always-fresh implementation, do the following:
+ * <pre>
+ * {@code
+        try (
+            // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+            HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+        ) {
+            // call accessTokens.getAccessToken(); every time one is needed, it will always be fresh
+            String accessToken = accessTokens.getAccessToken();
+            // use accessToken on a request...
+        }
+ * }
+ * </pre>
+ * 
+ * <p>
+ * To use your provided credentials.ini or credentials.properties file in an 
+ * OAuth2Authorizer that uses always-fresh tokens, do the following:
+ * <pre>
+ * {@code
+        try (
+            // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+            HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+            ) {
+            OAuth2Authorizer authorizer = new OAuth2Authorizer(() -> {
+                return accessTokens.getAccessToken();
+            });
+            // use the always-fresh authorizer on requests...
+         }
+ * }
+ * </pre>
+ * 
+ * <p>
+ * The above examples uses the following defaults as supplied by the Builder: 
+ * <ul>
+ *   <li>alwaysRequestNewToken: false, to enable fast access to an "always fresh" 
+ *       Access Token when {@link HereAccessTokenProvider#getAccessToken()} is invoked.</li>
+ *   <li>clientAuthorizationRequestProvider: {@link ClientAuthorizationProviderChain#DEFAULT_CLIENT_CREDENTIALS_PROVIDER_CHAIN}, 
+ *       which checks System properties, ~/.here/credentials.ini, or ~/.here/credentials.properties file.</li>
+ *   <li>httpProvider: a new default {@link ApacheHttpClientProvider}.<li>
+ * </ul>
+ * Each of which may be overridden via appropriate Builder methods.
  *
  * @author kmccrack
  */

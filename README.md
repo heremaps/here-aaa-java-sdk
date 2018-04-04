@@ -135,11 +135,15 @@ The examples directory contains a tutorial example.  To run it
 
 1. Download and place your HERE Account authorization server credentials.properties file to
    ~/.here/credentials.properties.
-2.   $ chmod 400 ~/.here/credentials.properties
-3.   $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar
+2.
 
-This tutorial uses the recommended "always fresh" approach with the simplest FromFile properties
-loader.  The tutorial will obtain a valid HERE Access Token and print portions of it to stdout.
+     $ chmod 400 ~/.here/credentials.properties
+3.
+
+     $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar
+
+This tutorial uses the recommended "always fresh" approach with the default ClientAuthorizationProviderChain.
+The tutorial will obtain a valid HERE Access Token and print portions of it to stdout.
 If in a secure location, optionally re-run with
 
      $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar -v
@@ -153,14 +157,11 @@ adapt the integration to your environment.
 You can use the `-idToken` option to output the HERE Id Token (in Open ID format) instead of the 
 HERE Access Token.
 
-     $ java -jar examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar -idToken
+     $ java -cp examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar com.here.account.oauth2.tutorial.ClientCredentialsProgram -idToken
 
-You can optionally add the `-v` option to print a full valid Id Token to stdout.
+If in a secure location, optionally add the `-v` option to print a full valid Id Token to stdout.
 
-HereAccessTokenProviderTutorial:
-
-In order to run the HereAccessTokenProviderTutorial class, run the following in terminal
-      $ java -cp examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar com.here.account.oauth2.tutorial.HereAccessTokenProviderTutorial
+     $ java -cp examples/here-oauth-client-example/target/here-oauth-client-example-*[!javadoc][!sources].jar com.here.account.oauth2.tutorial.ClientCredentialsProgram -idToken -v
 
 Developer Usage
 ===============
@@ -168,11 +169,13 @@ Developer Usage
 Read the javadocs for details.  The mvn commands above will create javadocs locally, which you can
 see at 'here-oauth-client/target/apidocs/index.html'.
 
-If you are just getting started, go to com.here.account.oauth2.HereAccount javadocs for the overview
-of two options:
-- get an "always fresh" HERE Access Token via TokenEndpoint.requestAutoRefreshingToken(..) approach
-- get a one time use HERE Access Token via TokenEndpoint.requestToken(..) approach
-- get Id Token via TokenEndpoint.requestToken(..) approach by setting the
+If you are just getting started, go to com.here.account.oauth2.HereAccessTokenProvider javadocs for 
+the overview of two options:
+- get an "always fresh" HERE Access Token via the 
+HereAccessTokenProvider.builder().build(); followed by .getAccessToken(); approach
+- get a new HERE Access Token every time via HereAccessTokenProvider.builder().setAlwaysRequestNewToken(false).build(); followed by .getAccessToken(); approach
+
+A third option is to get an id_token
+- get Id Token via com.here.account.oauth2.HereAccount's TokenEndpoint.requestToken(..) approach by setting the
 scope field in the request.
 
-- get
