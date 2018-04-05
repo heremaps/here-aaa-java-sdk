@@ -98,7 +98,7 @@ public class GetHereClientCredentialsAccessTokenTutorial extends HereClientCrede
             } else if (null == filePathString) {
                 filePathString = arg;
             } else {
-                System.out.println("unrecognized option or more than one path_to_credentials_property_file");
+                System.err.println("unrecognized option or more than one path_to_credentials_property_file");
                 printUsageAndExit();
             }
         }

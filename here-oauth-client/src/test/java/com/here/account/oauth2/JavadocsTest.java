@@ -53,6 +53,7 @@ public class JavadocsTest {
     }
     
     // Another example HttpProvider from this project below uses pure-Java.
+    @Test
     @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
     public void test_JavaHttpProvider_javadocs() throws IOException {
         // create a Java HttpProvider

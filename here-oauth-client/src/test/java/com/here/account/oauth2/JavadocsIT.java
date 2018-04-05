@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import com.here.account.auth.OAuth2Authorizer;
 import com.here.account.http.apache.ApacheHttpClientProvider;
 
 public class JavadocsIT extends AbstractCredentialTezt {
@@ -81,5 +82,36 @@ public class JavadocsIT extends AbstractCredentialTezt {
         String hereAccessToken = freshToken.get().getAccessToken();
         // use hereAccessToken on your request...
     }
+    
+    // Get an auto refreshing HERE Access Token:
+    @Test
+    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
+    public void test_HereAccessTokenProvider_javadocs() throws IOException {
+        try (
+            // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+            HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+            ) {
+            // call accessTokens.getAccessToken(); every time one is needed, it will always be fresh
+            String accessToken = accessTokens.getAccessToken();
+            // use accessToken on a request...
+        }
+    }
+
+    // Use an automatically-fresh OAuth2Authorizer:
+    @Test
+    @SuppressWarnings("unused") // code snippet from Javadocs verbatim; intentionally has unused variable
+    public void test_HereAccessTokenProvider_OAuth2Authorizer_javadocs() throws IOException {
+        try (
+            // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+            HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+            ) {
+            OAuth2Authorizer authorizer = new OAuth2Authorizer(() -> {
+                return accessTokens.getAccessToken();
+            });
+            // use the always-fresh authorizer on requests...
+        }
+
+    }
+
 
 }

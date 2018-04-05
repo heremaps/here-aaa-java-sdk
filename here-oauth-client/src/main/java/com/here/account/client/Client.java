@@ -104,9 +104,9 @@ public class Client {
      * @param <T> the Response parameterized type
      * @param <U> the Response Error parameterized type
      * @return the Response of type T
-     * @throws AccessTokenException
-     * @throws RequestExecutionException
-     * @throws ResponseParsingException
+     * @throws RequestExecutionException if trouble executing the request
+     * @throws ResponseParsingException if trouble serializing the request, 
+     *      or deserializing the response
      */
     public <R, T, U> T sendMessage(
             String method,
@@ -115,7 +115,7 @@ public class Client {
             Class<T> responseClass,
             Class<U> errorResponseClass,
             BiFunction<Integer, U, RuntimeException> newExceptionFunction)
-            throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+            throws RequestExecutionException, ResponseParsingException {
 
         HttpProvider.HttpRequest httpRequest;
         if (null == request) {
@@ -140,14 +140,20 @@ public class Client {
      *
      * @param httpRequest the HTTP Request
      * @param responseClass the Response class
+     * @param errorResponseClass the class for Error Responses
+     * @param newExceptionFunction the new RuntimeException-creating function 
+     *     that takes a statusCode and an Error Response object.
      * @param <T> the Response parameterized type
      * @param <U> the Response Error parameterized type
-     * @return the Response object, deserialized
+     * @return the Response of type T
+     * @throws RequestExecutionException if trouble executing the request
+     * @throws ResponseParsingException if trouble serializing the request, 
+     *      or deserializing the response
      */
     public <T, U> T sendMessage(HttpRequest httpRequest, Class<T> responseClass,
             Class<U> errorResponseClass,
             BiFunction<Integer, U, RuntimeException> newExceptionFunction) 
-            throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+            throws RequestExecutionException, ResponseParsingException {
         // blocking
         HttpProvider.HttpResponse apacheResponse = null;
         InputStream jsonInputStream = null;
