@@ -136,4 +136,17 @@ public class HereAccessTokenProviderIT {
         }
     }
 
+    @Test
+    public void test_alwaysRequestNewToken() throws IOException {
+        try (
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                        .setAlwaysRequestNewToken(true)
+                        .build()
+        ) {
+            // Lame test. Added to increase code coverage.
+            String accessToken = accessTokens.getAccessToken();
+            assertTrue("accessToken was null", null != accessToken);
+            assertTrue("accessToken was blank", accessToken.trim().length() > 0);
+        }
+    }
 }

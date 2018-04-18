@@ -15,6 +15,8 @@
  */
 package com.here.account.http.apache;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -25,12 +27,14 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -99,6 +103,19 @@ public class ApacheHttpClientProviderTest {
             
         };
         httpProvider.execute(httpRequest);
+    }
+
+    @Test
+    public void test_ApacheHttpClientResponse() throws HttpException, IOException {
+        String requestBodyJson = "{\"foo\":\"bar\"}";
+        url = "http://google.com";
+
+        httpProvider = (ApacheHttpClientProvider) ApacheHttpClientProvider.builder().build();
+        httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "PUT", url, requestBodyJson);
+        HttpProvider.HttpResponse response = httpProvider.execute(httpRequest);
+        assertEquals(HttpURLConnection.HTTP_BAD_METHOD, response.getStatusCode());
+        assertNotNull("response body is null", response.getResponseBody());
+        assertTrue("response content length is 0", 0<response.getContentLength());
     }
 
     @Test
