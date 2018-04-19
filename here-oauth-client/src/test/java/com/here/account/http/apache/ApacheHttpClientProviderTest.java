@@ -15,15 +15,17 @@
  */
 package com.here.account.http.apache;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.here.account.http.HttpException;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpProvider.HttpRequest;
+import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.*;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -33,27 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import com.here.account.http.HttpException;
-import com.here.account.http.HttpProvider;
-import com.here.account.http.HttpProvider.HttpRequest;
-import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class ApacheHttpClientProviderTest {
     
@@ -110,7 +94,7 @@ public class ApacheHttpClientProviderTest {
         String requestBodyJson = "{\"foo\":\"bar\"}";
         url = "http://google.com";
 
-        httpProvider = (ApacheHttpClientProvider) ApacheHttpClientProvider.builder().build();
+        httpProvider = ApacheHttpClientProvider.builder().build();
         httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "PUT", url, requestBodyJson);
         HttpProvider.HttpResponse response = httpProvider.execute(httpRequest);
         assertEquals(HttpURLConnection.HTTP_BAD_METHOD, response.getStatusCode());
@@ -204,9 +188,6 @@ public class ApacheHttpClientProviderTest {
         assertTrue("httpEntity was expected null, but was "+httpEntity, null == httpEntity);
     }
 
-
-
-    
     @Test
     public void test_methods() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, ClassNotFoundException {
         verifyApacheType("GET", HttpGet.class);

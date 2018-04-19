@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -47,9 +48,13 @@ public class HereAccessTokenProviderIT {
             String accessToken = accessTokens.getAccessToken();
             assertTrue("accessToken was null", null != accessToken);
             assertTrue("accessToken was blank", accessToken.trim().length() > 0);
+
+            AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+            assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+            assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
         }
     }
-    
+
     @Test
     public void test_builder_basic_multipleTokens() throws IOException {
         do_builder_basic(10);
@@ -143,10 +148,13 @@ public class HereAccessTokenProviderIT {
                         .setAlwaysRequestNewToken(true)
                         .build()
         ) {
-            // Lame test. Added to increase code coverage.
             String accessToken = accessTokens.getAccessToken();
             assertTrue("accessToken was null", null != accessToken);
             assertTrue("accessToken was blank", accessToken.trim().length() > 0);
+
+            AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+            assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+            assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
         }
     }
 }
