@@ -242,7 +242,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
             
         }
     }
-    
+
     @Test
     public void testGetFreshTokenVerifyRefresh() throws Exception {
         // first token expires after 30 seconds (minimum refresh time)

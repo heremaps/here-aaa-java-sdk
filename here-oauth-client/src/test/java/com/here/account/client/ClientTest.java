@@ -97,6 +97,7 @@ public class ClientTest {
 
     Serializer serializer = new JacksonSerializer();
     HttpProvider.HttpRequest mockHttpRequest;
+    HttpProvider.HttpResponse mockHttpResponse;
     HttpProvider mockHttpProvider;
     HttpProvider.HttpRequestAuthorizer mockHttpRequestAuthorizer;
     FakeResponse expectedResponseObject;
@@ -106,7 +107,7 @@ public class ClientTest {
         mockHttpRequest = mock(HttpProvider.HttpRequest.class);
         mockHttpProvider = mock(HttpProvider.class);
         mockHttpRequestAuthorizer = mock(HttpProvider.HttpRequestAuthorizer.class);
-        HttpProvider.HttpResponse mockHttpResponse = mock(HttpProvider.HttpResponse.class);
+        mockHttpResponse = mock(HttpProvider.HttpResponse.class);
         expectedResponseObject = new FakeResponse("testAccessToken", "Bearer");
         String responseString = serializer.objectToJson(expectedResponseObject);
         InputStream inputStream = new ByteArrayInputStream(responseString.getBytes("UTF-8"));
@@ -173,6 +174,7 @@ public class ClientTest {
 
     @Test
     public void test_sendMessage1() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(201);
         Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
@@ -190,6 +192,7 @@ public class ClientTest {
 
     @Test
     public void test_sendMessage1_requestBodyNull() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(204);
         Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeResponse actualResponse = client.sendMessage("POST",
