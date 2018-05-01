@@ -347,7 +347,6 @@ public class ApacheHttpClientProvider implements HttpProvider {
         }
     }
 
-
     @Override
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
         if (!(httpRequest instanceof ApacheHttpClientRequest)) {

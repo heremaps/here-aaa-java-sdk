@@ -23,6 +23,7 @@ import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
+import com.here.account.util.Clock;
 
 /**
  * An incubator class that may be removed in subsequent releases,
@@ -93,6 +94,15 @@ public class RunAsIdAuthorizationProvider implements ClientAuthorizationRequestP
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        // not sure
+        return null;
     }
     
 }
