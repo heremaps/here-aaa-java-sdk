@@ -27,13 +27,16 @@ import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientCredentialsGrantRequest;
 import com.here.account.oauth2.ClientCredentialsProvider;
+import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 
 /**
  * A {@link ClientCredentialsProvider} that injects client credentials by signing
  * token requests with an OAuth1 signature.
  */
 public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvider {
-    
+
+    private final Clock clock;
     private final String tokenEndpointUrl;
     private final OAuth1Signer oauth1Signer;
     
@@ -49,12 +52,30 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
                                            String accessKeyId,
                                            String accessKeySecret) {
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret);
+    }
+
+    public OAuth1ClientCredentialsProvider(Clock clock,
+                                           String tokenEndpointUrl,
+                                           String accessKeyId,
+                                           String accessKeySecret
+                                           ) {
+        Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
         Objects.requireNonNull(accessKeyId, "accessKeyId is required");
         Objects.requireNonNull(accessKeySecret, "accessKeySecret is required");
-        
+
+        this.clock = clock;
         this.tokenEndpointUrl = tokenEndpointUrl;
-        this.oauth1Signer = new OAuth1Signer(accessKeyId, accessKeySecret);
+        this.oauth1Signer = new OAuth1Signer(clock, accessKeyId, accessKeySecret);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        return clock;
     }
 
     /**

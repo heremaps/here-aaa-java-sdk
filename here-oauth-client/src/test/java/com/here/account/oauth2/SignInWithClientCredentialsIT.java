@@ -111,6 +111,11 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
                 return HttpMethods.POST;
             }
 
+            @Override
+            public Clock getClock() {
+                return null;
+            }
+
         };
         
         this.signIn = HereAccount.getTokenEndpoint(

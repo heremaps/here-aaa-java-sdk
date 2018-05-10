@@ -24,6 +24,8 @@ import java.util.Objects;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
+import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 
 /**
  * @author kmccrack
@@ -33,16 +35,27 @@ implements ClientAuthorizationRequestProvider {
 
     private static final String CREDENTIALS_DOT_INI_FILENAME = "credentials.ini";
 
+    private final Clock clock;
     private final File file;
     private final String sectionName;
-    
+
+    public FromHereCredentialsIniFile(Clock clock) {
+        this(clock, getDefaultHereCredentialsIniFile(), FromHereCredentialsIniStream.DEFAULT_INI_SECTION_NAME);
+    }
+
     public FromHereCredentialsIniFile() {
         this(getDefaultHereCredentialsIniFile(), FromHereCredentialsIniStream.DEFAULT_INI_SECTION_NAME);
     }
 
     public FromHereCredentialsIniFile(File file, String sectionName) {
+        this(new SettableSystemClock(), file, sectionName);
+    }
+
+    public FromHereCredentialsIniFile(Clock clock, File file, String sectionName) {
+        Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(file, "file is required");
 
+        this.clock = clock;
         this.file = file;
         this.sectionName = sectionName;
     }
@@ -55,7 +68,7 @@ implements ClientAuthorizationRequestProvider {
      */
     protected ClientAuthorizationRequestProvider getDelegate() {
         try (InputStream inputStream = new FileInputStream(file)) {
-            return new FromHereCredentialsIniStream(inputStream, sectionName);
+            return new FromHereCredentialsIniStream(clock, inputStream, sectionName);
         } catch (IOException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
         }
@@ -93,4 +106,13 @@ implements ClientAuthorizationRequestProvider {
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        return clock;
+    }
+
 }

@@ -66,7 +66,7 @@ public interface HttpProvider extends Closeable {
          */
         void authorize(HttpRequest httpRequest, String method, String url, 
                 Map<String, List<String>> formParams);
-        
+
     }
     
     /**

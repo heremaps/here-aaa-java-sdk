@@ -155,17 +155,17 @@ public class Client {
             BiFunction<Integer, U, RuntimeException> newExceptionFunction) 
             throws RequestExecutionException, ResponseParsingException {
         // blocking
-        HttpProvider.HttpResponse apacheResponse = null;
+        HttpProvider.HttpResponse httpResponse = null;
         InputStream jsonInputStream = null;
 
         try {
-            apacheResponse = httpProvider.execute(httpRequest);
-            jsonInputStream = apacheResponse.getResponseBody();
+            httpResponse = httpProvider.execute(httpRequest);
+            jsonInputStream = httpResponse.getResponseBody();
         } catch (IOException | HttpException e) {
             throw new RequestExecutionException(e);
         }
 
-        int statusCode = apacheResponse.getStatusCode();
+        int statusCode = httpResponse.getStatusCode();
         try {
             if (200 == statusCode || 201 == statusCode || 204 == statusCode) {
                 try {

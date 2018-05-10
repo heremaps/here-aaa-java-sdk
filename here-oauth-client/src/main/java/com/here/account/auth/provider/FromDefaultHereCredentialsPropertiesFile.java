@@ -24,6 +24,8 @@ import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.oauth2.ClientCredentialsProvider;
+import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 
 /**
  * A {@link ClientCredentialsProvider} that pulls credential values from the
@@ -34,13 +36,23 @@ implements ClientAuthorizationRequestProvider {
 
     private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
 
+    private final Clock clock;
     private final File file;
-    
+
     public FromDefaultHereCredentialsPropertiesFile() {
-        this(getDefaultHereCredentialsFile());
+        this(new SettableSystemClock());
+    }
+
+    public FromDefaultHereCredentialsPropertiesFile(Clock clock) {
+        this(clock, getDefaultHereCredentialsFile());
     }
     
     public FromDefaultHereCredentialsPropertiesFile(File file) {
+        this(new SettableSystemClock(), file);
+    }
+
+    public FromDefaultHereCredentialsPropertiesFile(Clock clock, File file) {
+        this.clock = clock;
         this.file = file;
     }
 
@@ -48,7 +60,8 @@ implements ClientAuthorizationRequestProvider {
     protected ClientCredentialsProvider getClientCredentialsProvider() {
         try {
             Properties properties = OAuth1ClientCredentialsProvider.getPropertiesFromFile(file);
-            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(properties);
+            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties
+            );
         } catch (IOException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
         }
@@ -80,6 +93,14 @@ implements ClientAuthorizationRequestProvider {
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        return clock;
     }
 
 }

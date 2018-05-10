@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.here.account.auth.NoAuthorizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -252,15 +253,8 @@ public class JavaHttpProviderTest {
     
     @Test
     public void test_noAuthorizationHeader() throws IOException, HttpException {
-        httpRequestAuthorizer = new HttpRequestAuthorizer() {
+        httpRequestAuthorizer = new NoAuthorizer();
 
-            @Override
-            public void authorize(HttpRequest httpRequest, String method, String url,
-                    Map<String, List<String>> formParams) {
-                // intentionally don't add any authorization header for this test
-            }
-            
-        };
         doRequest();
     }
 

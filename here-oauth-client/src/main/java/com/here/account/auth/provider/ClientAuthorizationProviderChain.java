@@ -24,6 +24,8 @@ import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.oauth2.ClientCredentialsProvider;
+import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 
 /**
  * @author kmccrack
@@ -45,12 +47,27 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
         this.clientAuthorizationProviders = new ArrayList<ClientAuthorizationRequestProvider>(clientAuthorizationProviders);
     }
 
-    public static ClientAuthorizationProviderChain DEFAULT_CLIENT_CREDENTIALS_PROVIDER_CHAIN = getDefaultClientCredentialsProviderChain();
+    /**
+     * @deprecated use {@link #getNewDefaultClientCredentialsProviderChain(Clock)}
+     */
+    @Deprecated
+    public static ClientAuthorizationProviderChain DEFAULT_CLIENT_CREDENTIALS_PROVIDER_CHAIN =
+            getNewDefaultClientCredentialsProviderChain(new SettableSystemClock());
 
-    private static ClientAuthorizationProviderChain getDefaultClientCredentialsProviderChain() {
-        ClientAuthorizationRequestProvider systemProvider = new FromSystemProperties();
-        ClientAuthorizationRequestProvider iniFileProvider = new FromHereCredentialsIniFile();
-        ClientAuthorizationRequestProvider propertiesFileProvider = new FromDefaultHereCredentialsPropertiesFile();
+    /**
+     * Factory method for getting a new default ClientAuthorizationProviderChain.
+     * The exact sequence of providers is subject to change in future releases, as
+     * new providers are added.
+     *
+     * @param clock the clock implementation to use
+     * @return the ClientAuthorizationProviderChain with default implementations in preference order
+     */
+    public static ClientAuthorizationProviderChain getNewDefaultClientCredentialsProviderChain(
+            Clock clock
+    ) {
+        ClientAuthorizationRequestProvider systemProvider = new FromSystemProperties(clock);
+        ClientAuthorizationRequestProvider iniFileProvider = new FromHereCredentialsIniFile(clock);
+        ClientAuthorizationRequestProvider propertiesFileProvider = new FromDefaultHereCredentialsPropertiesFile(clock);
         return new ClientAuthorizationProviderChain(
                 systemProvider,
                 iniFileProvider,
@@ -113,5 +130,14 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
     public HttpMethods getHttpMethod() {
         return getClientCredentialsProvider().getHttpMethod();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        return getClientCredentialsProvider().getClock();
+    }
+
 
 }
