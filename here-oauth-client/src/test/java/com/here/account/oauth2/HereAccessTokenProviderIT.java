@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -155,6 +156,21 @@ public class HereAccessTokenProviderIT {
             AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
             assertTrue("accessTokenResponse was null", null != accessTokenResponse);
             assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+
+            accessTokens.close();
         }
+    }
+
+    @Test
+    public void test_not_alwaysRequestNewToken() throws IOException {
+        HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                .setAlwaysRequestNewToken(false)
+                .setHttpProvider(ApacheHttpClientProvider.builder().build())
+                .build();
+        AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+        assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+        assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+
+        accessTokens.close();
     }
 }

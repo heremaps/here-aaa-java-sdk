@@ -21,11 +21,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -73,6 +75,11 @@ public class FromHereCredentialsIniStreamTest {
             
         };
         fromHereCredentialsIniStream = new FromHereCredentialsIniStream(inputStream);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void test_invalid_stream() throws IOException {
+        FromHereCredentialsIniStream.getPropertiesFromIni(null, TEST_DEFAULT_INI_SECTION_NAME);
     }
 
     protected byte[] getDefaultIniStreamContents() {

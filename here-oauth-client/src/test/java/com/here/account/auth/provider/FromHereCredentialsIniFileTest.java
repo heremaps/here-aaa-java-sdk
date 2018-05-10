@@ -15,7 +15,9 @@
  */
 package com.here.account.auth.provider;
 
-import static org.junit.Assert.assertTrue;
+import com.here.account.http.HttpConstants.HttpMethods;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,10 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Test;
-
-import com.here.account.http.HttpConstants.HttpMethods;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author kmccrack
@@ -59,7 +58,14 @@ public class FromHereCredentialsIniFileTest {
         fromFile = new FromHereCredentialsIniFile(new File(UUID.randomUUID().toString()), FromHereCredentialsIniStreamTest.TEST_DEFAULT_INI_SECTION_NAME);
         fromFile.getTokenEndpointUrl();
     }
-    
+
+    @Test
+    public void test_getDelegate() {
+        fromFile = new FromHereCredentialsIniFile();
+        String tokenEndpointUrl = fromFile.getTokenEndpointUrl();
+        assertTrue("token endpoint url expected", tokenEndpointUrl.contains("account.api.here.com/oauth2/token"));
+    }
+
     @Test
     public void test_default_file() {
         fromFile = new FromHereCredentialsIniFile();
@@ -95,6 +101,4 @@ public class FromHereCredentialsIniFileTest {
         assertTrue("httpMethod expected " + expectedHttpMethod + ", actual " + httpMethod,
                 expectedHttpMethod.equals(httpMethod));
     }
-
-
 }
