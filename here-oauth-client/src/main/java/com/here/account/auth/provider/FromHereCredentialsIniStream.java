@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.util.Objects;
 import java.util.Properties;
 
+import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 import org.ini4j.Ini;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
@@ -18,27 +20,50 @@ import com.here.account.util.OAuthConstants;
 public class FromHereCredentialsIniStream extends ClientCredentialsGrantRequestProvider
 implements ClientAuthorizationRequestProvider {
 
+    private final Clock clock;
     private final ClientAuthorizationRequestProvider delegate;
-    
+
+    public FromHereCredentialsIniStream(Clock clock, InputStream inputStream) {
+        this(clock, inputStream, DEFAULT_INI_SECTION_NAME);
+    }
+
     public FromHereCredentialsIniStream(InputStream inputStream) {
         this(inputStream, DEFAULT_INI_SECTION_NAME);
     }
     
     public FromHereCredentialsIniStream(InputStream inputStream, String sectionName) {
+        this(new SettableSystemClock(), inputStream, sectionName);
+    }
+
+    public FromHereCredentialsIniStream(Clock clock, InputStream inputStream, String sectionName) {
+        Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(inputStream, "inputStream is required");
-        
+
+        this.clock = clock;
         // the delegate is fixed, because you cannot rewind an inputStream
-        this.delegate = getClientCredentialsProvider(inputStream, sectionName);
+        this.delegate = getClientCredentialsProvider(clock, inputStream, sectionName);
     }
     
     protected ClientAuthorizationRequestProvider getDelegate() {
         return delegate;
     }
-        
-    protected static ClientAuthorizationRequestProvider getClientCredentialsProvider(InputStream inputStream, String sectionName) {
+
+    /**
+     * @deprecated use {@link #getClientCredentialsProvider(Clock, InputStream, String)}
+     * @param inputStream the input stream
+     * @param sectionName the section name
+     * @return the ClientAuthorizationRequestProvider
+     */
+    protected static ClientAuthorizationRequestProvider getClientCredentialsProvider(InputStream inputStream,
+                                                                                     String sectionName) {
+        return getClientCredentialsProvider(new SettableSystemClock(), inputStream, sectionName);
+    }
+
+    protected static ClientAuthorizationRequestProvider getClientCredentialsProvider(Clock clock, InputStream inputStream,
+                                                                                     String sectionName) {
         try {
             Properties properties = getPropertiesFromIni(inputStream, sectionName);
-            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(properties);
+            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties);
         } catch (IOException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
         }
@@ -84,6 +109,14 @@ implements ClientAuthorizationRequestProvider {
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Clock getClock() {
+        return clock;
     }
 
 }

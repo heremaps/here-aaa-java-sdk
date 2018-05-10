@@ -18,6 +18,7 @@ package com.here.account.auth;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.util.Clock;
+import com.here.account.util.SettableSystemClock;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
     private static final int NONCE_LENGTH = 6;
     
     private final Clock clock;
-    
+
     /**
      * HERE client accessKeyId.  Becomes the value of oauth_consumer_key in the 
      * Authorization: OAuth header.
@@ -71,7 +72,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      *      in the Authorization: OAuth header.
      */
     public OAuth1Signer(String accessKeyId, String accessKeySecret) {
-        this(Clock.SYSTEM, accessKeyId, accessKeySecret);
+        this(new SettableSystemClock(), accessKeyId, accessKeySecret);
     }
     
     /**
@@ -99,7 +100,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
      * @param signatureMethod the choice of signature algorithm to use.
      */
     public OAuth1Signer(String consumerKey, String consumerSecret, SignatureMethod signatureMethod) {
-        this(Clock.SYSTEM, consumerKey, consumerSecret, signatureMethod);
+        this(new SettableSystemClock(), consumerKey, consumerSecret, signatureMethod);
     }
     
     /**

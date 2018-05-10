@@ -17,6 +17,7 @@ package com.here.account.oauth2;
 
 import static org.junit.Assert.assertTrue;
 
+import com.here.account.util.SettableSystemClock;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,7 +51,7 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
             String error = errorResponse.getError();
             final String expectedError = "invalid_client";
             assertTrue("\"error\" in JSON error response body was expected "
-                    +expectedError+", actual "+error, 
+                    +expectedError+", actual "+error+", errorResponse="+errorResponse,
                     expectedError.equals(error));
         }
     }
@@ -61,7 +62,8 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
         
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 httpProvider, 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret));
         
         AccessTokenResponse accessTokenResponse = tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
         assertTrue("accessTokenResponse was null", null != accessTokenResponse);

@@ -17,6 +17,7 @@ package com.here.account.oauth2;
 
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
+import com.here.account.util.Clock;
 
 /**
  * A {@code ClientAuthorizationRequestProvider} identifies a token endpoint,
@@ -56,5 +57,12 @@ public interface ClientAuthorizationRequestProvider {
      * @return the HTTP Method
      */
     HttpMethods getHttpMethod();
+
+    /**
+     * Get the Clock implementation in use.
+     *
+     * @return the Clock in use.
+     */
+    Clock getClock();
     
 }

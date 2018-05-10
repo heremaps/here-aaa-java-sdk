@@ -235,38 +235,38 @@ public class JavaHttpProvider implements HttpProvider {
     public HttpResponse execute(HttpRequest httpRequest) throws HttpException, IOException {
         if (!(httpRequest instanceof JavaHttpRequest)) {
             throw new IllegalArgumentException("httpRequest is not of expected type; use "
-                    +getClass()+".getRequest(..) to get a request of the expected type");
+                    + getClass() + ".getRequest(..) to get a request of the expected type");
         }
         JavaHttpRequest javaHttpRequest = (JavaHttpRequest) httpRequest;
-                 
+
         HttpURLConnection connection = getHttpUrlConnection(javaHttpRequest.getUrl());
         connection.setDoOutput(true);
         connection.setRequestMethod(javaHttpRequest.getMethod());
 
         byte[] body = javaHttpRequest.getBody();
         if (null != body) {
-            connection.setRequestProperty(HttpConstants.CONTENT_TYPE_HEADER, 
+            connection.setRequestProperty(HttpConstants.CONTENT_TYPE_HEADER,
                     javaHttpRequest.getContentType());
-            connection.setRequestProperty(HttpConstants.CONTENT_LENGTH_HEADER, 
+            connection.setRequestProperty(HttpConstants.CONTENT_LENGTH_HEADER,
                     javaHttpRequest.getContentLength());
         }
-        
+
         String authorizationHeader = javaHttpRequest.getAuthorizationHeader();
         if (null != authorizationHeader) {
             connection.setRequestProperty(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
-                 
+
         // Write data
-        try (
-            OutputStream outputStream = connection.getOutputStream()
-        ) {
-            if (null != body) {
+        if (null != body) {
+            try (
+                    OutputStream outputStream = connection.getOutputStream()
+            ) {
                 outputStream.write(body);
+                outputStream.flush();
             }
-            outputStream.flush();
         }
                  
-            // Read response
+        // Read response
         int statusCode = connection.getResponseCode();
         
         long responseContentLength = getContentLength(connection);
