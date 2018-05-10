@@ -15,55 +15,31 @@
  */
 package com.here.account.auth.provider;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
+import org.junit.Test;
+import org.mockito.Mockito;
 
-public class FromHereCredentialsIniStreamTest {
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
-    // the constants are copied in this file to represent files that have already been issued, 
-    // as canary tests to defend against unexpected changes in the code respect to file formats.
-    
-    static final String TEST_DEFAULT_INI_SECTION_NAME = "default";
-    private static final String TEST_TOKEN_ENDPOINT_URL_PROPERTY = "here.token.endpoint.url";
-    private static final String TEST_ACCESS_KEY_ID_PROPERTY = "here.access.key.id";
-    private static final String TEST_ACCESS_KEY_SECRET_PROPERTY = "here.access.key.secret";
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
-    private static final String SECTION_START = "[";
-    private static final String SECTION_END = "]";
-    private static final char NEWLINE = '\n';
-    private static final char EQUALS = '=';
-    
-    private String tokenEndpointUrl = "tokenEndpointUrl";
-    private String expectedTokenEndpointUrl = tokenEndpointUrl;
-    private String accessKeyId = "accessKeyId";
-    private String accessKeySecret = "accessKeySecret";
-    
+public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniConstants {
+
     FromHereCredentialsIniStream fromHereCredentialsIniStream;
-    
+
     @Test(expected = NullPointerException.class)
     public void test_basic_null_stream() {
         fromHereCredentialsIniStream = new FromHereCredentialsIniStream(null);
     }
-    
+
     @Test(expected = RuntimeException.class)
     public void test_basic_IOException_stream() {
         InputStream inputStream = new InputStream() {
@@ -72,7 +48,7 @@ public class FromHereCredentialsIniStreamTest {
             public int read() throws IOException {
                 throw new IOException("socket broken");
             }
-            
+
         };
         fromHereCredentialsIniStream = new FromHereCredentialsIniStream(inputStream);
     }
@@ -82,35 +58,9 @@ public class FromHereCredentialsIniStreamTest {
         FromHereCredentialsIniStream.getPropertiesFromIni(null, TEST_DEFAULT_INI_SECTION_NAME);
     }
 
-    protected byte[] getDefaultIniStreamContents() {
-        StringBuilder buf = new StringBuilder()
-                .append(SECTION_START)
-                .append(TEST_DEFAULT_INI_SECTION_NAME)
-                .append(SECTION_END)
-                .append(NEWLINE)
-                
-                .append(TEST_TOKEN_ENDPOINT_URL_PROPERTY)
-                .append(EQUALS)
-                .append(tokenEndpointUrl)
-                .append(NEWLINE)
-                
-                .append(TEST_ACCESS_KEY_ID_PROPERTY)
-                .append(EQUALS)
-                .append(accessKeyId)
-                .append(NEWLINE)
-                
-                .append(TEST_ACCESS_KEY_SECRET_PROPERTY)
-                .append(EQUALS)
-                .append(accessKeySecret)
-                .append(NEWLINE)
-                ;
-        
-        return buf.toString().getBytes(StandardCharsets.UTF_8);
-    }
-    
     @Test
     public void test_basic_default_stream() throws IOException {
-       
+
         try (InputStream inputStream = new ByteArrayInputStream(
                 getDefaultIniStreamContents()))
         {
@@ -118,15 +68,15 @@ public class FromHereCredentialsIniStreamTest {
             verifyExpected(fromHereCredentialsIniStream);
         }
     }
-    
+
     protected void verifyExpected(ClientAuthorizationRequestProvider clientAuthorizationRequestProvider) {
         String actualTokenEndpointUrl = clientAuthorizationRequestProvider.getTokenEndpointUrl();
-        assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl, 
+        assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
-        
+
         HttpRequestAuthorizer httpRequestAuthorizer = clientAuthorizationRequestProvider.getClientAuthorizer();
         assertTrue("httpRequestAuthorizer was null", null != httpRequestAuthorizer);
-        
+
         // the authorizer must append an Authorization header in the OAuth scheme.
         HttpRequest httpRequest = mock(HttpRequest.class);
 
@@ -138,7 +88,7 @@ public class FromHereCredentialsIniStreamTest {
         verify(httpRequest, times(1)).addAuthorizationHeader(
                 Mockito.matches("\\AOAuth .+\\z"));
     }
-    
+
     @Test
     public void test_getHttpMethod() throws IOException {
         test_basic_default_stream();
