@@ -29,13 +29,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.here.account.auth.OAuth1Signer;
-import com.here.account.auth.OAuth1SignerExposer;
-import com.here.account.auth.provider.*;
-import com.here.account.http.HttpProvider;
-import com.here.account.util.Clock;
-import com.here.account.util.SettableClock;
-import com.here.account.util.SettableSystemClock;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -222,6 +216,21 @@ public class HereAccessTokenProviderIT {
             AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
             assertTrue("accessTokenResponse was null", null != accessTokenResponse);
             assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+
+            accessTokens.close();
         }
+    }
+
+    @Test
+    public void test_not_alwaysRequestNewToken() throws IOException {
+        HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                .setAlwaysRequestNewToken(false)
+                .setHttpProvider(ApacheHttpClientProvider.builder().build())
+                .build();
+        AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+        assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+        assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+
+        accessTokens.close();
     }
 }

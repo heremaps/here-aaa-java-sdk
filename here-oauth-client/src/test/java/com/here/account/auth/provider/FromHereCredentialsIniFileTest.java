@@ -15,51 +15,60 @@
  */
 package com.here.account.auth.provider;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.UUID;
-
+import com.here.account.http.HttpConstants.HttpMethods;
 import org.junit.After;
 import org.junit.Test;
 
-import com.here.account.http.HttpConstants.HttpMethods;
+import java.io.*;
+import java.util.UUID;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author kmccrack
  */
-public class FromHereCredentialsIniFileTest {
-    
+public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConstants {
+
     File file;
     FromHereCredentialsIniFile fromFile;
-    
-    protected void createTmpFile() throws IOException {
+
+    protected void createTmpFileWithContent() throws IOException {
         String prefix = UUID.randomUUID().toString();
         file = File.createTempFile(prefix, null);
         file.deleteOnExit();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        bw.write(getDefaultIniStreamContents().toString());
+        bw.close();
     }
-    
+
     @After
     public void tearDown() {
         if (null != file) {
             file.delete();
         }
     }
-    
+
     @Test(expected = NullPointerException.class)
     public void test_null_file() {
         fromFile = new FromHereCredentialsIniFile(null, FromHereCredentialsIniStreamTest.TEST_DEFAULT_INI_SECTION_NAME);
     }
-    
+
     @Test(expected = RuntimeException.class)
     public void test_nonExistant_file() {
         fromFile = new FromHereCredentialsIniFile(new File(UUID.randomUUID().toString()), FromHereCredentialsIniStreamTest.TEST_DEFAULT_INI_SECTION_NAME);
         fromFile.getTokenEndpointUrl();
     }
-    
+
+    @Test
+    public void test_getDelegate() throws IOException {
+        createTmpFileWithContent();
+
+        fromFile = new FromHereCredentialsIniFile();
+        String tokenEndpointUrl = fromFile.getTokenEndpointUrl();
+        assertTrue("token endpoint url expected", tokenEndpointUrl.contains("account.api.here.com/oauth2/token"));
+    }
+
     @Test
     public void test_default_file() {
         fromFile = new FromHereCredentialsIniFile();
@@ -72,21 +81,21 @@ public class FromHereCredentialsIniFileTest {
 
     @Test
     public void test_basic_file() throws IOException {
-        createTmpFile();
-        
+        createTmpFileWithContent();
+
         FromHereCredentialsIniStreamTest otherTezt = new FromHereCredentialsIniStreamTest();
         byte[] bytes = otherTezt.getDefaultIniStreamContents();
-        
+
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
             outputStream.flush();
         }
-        
+
         // use the file
         fromFile = new FromHereCredentialsIniFile(file, FromHereCredentialsIniStreamTest.TEST_DEFAULT_INI_SECTION_NAME);
         otherTezt.verifyExpected(fromFile);
     }
-    
+
     @Test
     public void test_getHttpMethod() {
         fromFile = new FromHereCredentialsIniFile();
@@ -95,6 +104,4 @@ public class FromHereCredentialsIniFileTest {
         assertTrue("httpMethod expected " + expectedHttpMethod + ", actual " + httpMethod,
                 expectedHttpMethod.equals(httpMethod));
     }
-
-
 }
