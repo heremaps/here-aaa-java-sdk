@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
@@ -38,7 +39,7 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         file.deleteOnExit();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(getDefaultIniStreamContents().toString());
+        bw.write(new String(getDefaultIniStreamContents(), StandardCharsets.UTF_8));
         bw.close();
     }
 
@@ -64,9 +65,10 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
     public void test_getDelegate() throws IOException {
         createTmpFileWithContent();
 
-        fromFile = new FromHereCredentialsIniFile();
-        String tokenEndpointUrl = fromFile.getTokenEndpointUrl();
-        assertTrue("token endpoint url expected", tokenEndpointUrl.contains("account.api.here.com/oauth2/token"));
+        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
+        String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
+        assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
+                expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
     }
 
     @Test
