@@ -15,6 +15,7 @@
  */
 package com.here.account.http.java;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -258,7 +259,13 @@ public class JavaHttpProviderTest {
         doRequest();
     }
 
-
+    @Test
+    public void test_increaseCodeCoverageInJavaHttpProvider_getRequest() {
+        httpRequestAuthorizer = new OAuth2Authorizer("my-accessToken");
+        method = "GET";
+        JavaHttpProvider javaHttpProvider = (JavaHttpProvider) JavaHttpProvider.builder().build();
+        HttpRequest httpRequest = javaHttpProvider.getRequest(httpRequestAuthorizer, method, urlString, (String)null);
+    }
 
     int statusCode = 200;
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
