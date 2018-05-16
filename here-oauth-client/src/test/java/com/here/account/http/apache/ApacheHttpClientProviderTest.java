@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 HERE Europe B.V.
+ * Copyright (c) 2018 HERE Europe B.V.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,14 @@ public class ApacheHttpClientProviderTest {
         provider.close();
         verify(mock,times(1)).close();
     }
-    
+
+    @Test
+    public void test_setDoCloseToTrueAndHttpClientNull() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+        ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder().setHttpClient(null).build();
+
+        provider.close();
+    }
+
     protected static CloseableHttpClient extractHttpClient(ApacheHttpClientProvider provider)  throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         Field httpClientField = ApacheHttpClientProvider.class.getDeclaredField("httpClient");
         assertTrue("field was null", null != httpClientField);
