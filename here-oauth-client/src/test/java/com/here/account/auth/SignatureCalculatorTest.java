@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016 HERE Europe B.V.
- * 
+ * Copyright (c) 2018 HERE Europe B.V.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import java.util.*;
 
 import static com.here.account.auth.SignatureCalculator.ELLIPTIC_CURVE_ALGORITHM;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SignatureCalculatorTest {
@@ -39,6 +40,7 @@ public class SignatureCalculatorTest {
     static final private String baseURL = "https://www.sampleurl.com/some/path";
     static final private String baseURLWithPort = "https://www.sampleurl.com:443/some/path";
     static final private String baseURLWithNonStandardPort = "https://www.sampleurl.com:9000/some/path";
+    static final private String baseURLWithPort80 = "http://www.sampleurl.com:80/some/path";
     static final private Map<String, List<String>> params = createParamsList();
 
     //expected signatures from SHA256 - obtained using the same parameters via postman.
@@ -171,6 +173,13 @@ public class SignatureCalculatorTest {
         boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce,
                 SignatureMethod.HMACSHA256, params, params, withFormAndQueryParamSha256, consumerSecret);
         assertTrue(verified);
+    }
+
+    @Test
+    public void testVerifySha256UrlPort80SignatureToIncreaseCodeCoverage() {
+        boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort80, timestamp, nonce,
+                SignatureMethod.HMACSHA256, params, params, withFormAndQueryParamSha256, consumerSecret);
+        assertFalse(verified);
     }
 
     /////////////////////////////////////// ES512 Tests //////////////////////////////////////////////////////////////////
