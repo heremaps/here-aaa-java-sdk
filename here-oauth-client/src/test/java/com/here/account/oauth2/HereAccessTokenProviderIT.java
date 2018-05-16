@@ -15,32 +15,27 @@
  */
 package com.here.account.oauth2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.auth.OAuth1Signer;
 import com.here.account.auth.OAuth1SignerExposer;
-import com.here.account.auth.provider.*;
+import com.here.account.auth.provider.ClientAuthorizationProviderChain;
+import com.here.account.auth.provider.FromDefaultHereCredentialsPropertiesFileExposer;
+import com.here.account.auth.provider.FromHereCredentialsIniFile;
+import com.here.account.auth.provider.FromHereCredentialsIniStream;
 import com.here.account.http.HttpProvider;
 import com.here.account.util.Clock;
-import com.here.account.util.SettableClock;
 import com.here.account.util.SettableSystemClock;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import org.mockito.Mockito;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author kmccrack
@@ -223,5 +218,10 @@ public class HereAccessTokenProviderIT {
             assertTrue("accessTokenResponse was null", null != accessTokenResponse);
             assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
         }
+    }
+
+    @Test (expected = NullPointerException.class)
+    public void test_nullPropertyFile() throws IOException {
+        OAuth1ClientCredentialsProvider.getPropertiesFromFile(null);
     }
 }
