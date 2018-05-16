@@ -237,6 +237,14 @@ public class ApacheHttpClientProviderTest {
         provider.close();
         verify(mock,times(1)).close();
     }
+
+    @Test
+    public void test_setDoCloseToTrueAndHttpClientNull() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
+        ApacheHttpClientProvider provider = (ApacheHttpClientProvider)ApacheHttpClientProvider.builder()
+                .setHttpClient(null).build();
+
+        provider.close();
+    }
     
     protected static CloseableHttpClient extractHttpClient(ApacheHttpClientProvider provider)  throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         Field httpClientField = ApacheHttpClientProvider.class.getDeclaredField("httpClient");

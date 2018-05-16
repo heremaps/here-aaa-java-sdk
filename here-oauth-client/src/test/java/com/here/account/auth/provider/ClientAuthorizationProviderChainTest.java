@@ -155,6 +155,12 @@ public class ClientAuthorizationProviderChainTest {
         verifyExpected(providerChain, fromIniFile);
     }
 
+    @Test (expected = RequestProviderException.class)
+    public void test_noProviderChain() {
+        ClientAuthorizationProviderChain providerChain = new ClientAuthorizationProviderChain();
+        providerChain.getClientCredentialsProvider();
+    }
+
     @Test
     public void test_DefaultProviderChain_defaultingToProperties() throws Exception{
 

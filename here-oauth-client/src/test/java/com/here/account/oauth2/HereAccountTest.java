@@ -15,19 +15,11 @@
  */
 package com.here.account.oauth2;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpConstants;
+import com.here.account.http.HttpException;
+import com.here.account.http.HttpProvider;
+import com.here.account.http.HttpProvider.HttpResponse;
 import com.here.account.identity.bo.IdentityTokenRequest;
 import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
@@ -38,10 +30,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
-import com.here.account.auth.OAuth1ClientCredentialsProvider;
-import com.here.account.http.HttpException;
-import com.here.account.http.HttpProvider;
-import com.here.account.http.HttpProvider.HttpResponse;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class HereAccountTest extends AbstractCredentialTezt {
     
@@ -178,7 +177,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
                     error.equals(actualError));
         }
     }
-    
+
+    @Test
+    public void test_getNewAccessTokenRequest() {
+        OAuth1ClientCredentialsProvider clientAuthorizationRequestProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
+        Assert.assertThat(clientAuthorizationRequestProvider.getNewAccessTokenRequest(), instanceOf(AccessTokenRequest.class));
+    }
+
     @Test
     public void test_nullSafeCloseThrowingUnchecked_null() {
         HereAccount.nullSafeCloseThrowingUnchecked(null);
