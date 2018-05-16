@@ -33,10 +33,14 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
     File file;
     FromHereCredentialsIniFile fromFile;
 
-    protected void createTmpFileWithContent() throws IOException {
+    protected void createTmpFile() throws IOException {
         String prefix = UUID.randomUUID().toString();
         file = File.createTempFile(prefix, null);
         file.deleteOnExit();
+    }
+
+    protected void createTmpFileWithContent() throws IOException {
+        createTmpFile();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write(new String(getDefaultIniStreamContents(), StandardCharsets.UTF_8));
@@ -69,6 +73,14 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
         assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
+    }
+
+    @Test (expected = NullPointerException.class)
+    public void test_getDelegateThrowsNonIOException() throws IOException {
+        createTmpFile();
+
+        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
+        String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
     }
 
     @Test
