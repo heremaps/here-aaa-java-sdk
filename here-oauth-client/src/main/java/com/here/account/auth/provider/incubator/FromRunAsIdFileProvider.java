@@ -18,10 +18,12 @@ package com.here.account.auth.provider.incubator;
 import java.util.List;
 import java.util.Map;
 
-import com.here.account.auth.NoAuthorizer;
 import com.here.account.auth.provider.AbstractClientAuthorizationRequestProvider;
+import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
+import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
+import com.here.account.identity.bo.IdentityTokenRequest;
 import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.util.Clock;
@@ -33,30 +35,29 @@ import com.here.account.util.SettableSystemClock;
  * 
  * <p>
  * Gets authorization Access Tokens from an identity access token file.
- * 
+ *
  * @deprecated subject to removal, or non-backwards-compatible changes
  * @author kmccrack
  */
-public class RunAsIdAuthorizationProvider
+public class FromRunAsIdFileProvider
         extends AbstractClientAuthorizationRequestProvider
         implements ClientAuthorizationRequestProvider {
 
     /**
      * The HERE Access Token URL.
      */
-    private static final String RUN_AS_ID_TOKEN_ENDPOINT_URL = 
-            "http://localhost:8001/token";
+    private static final String FILE_ACCESS_TOKEN_ENDPOINT_URL = 
+            "file:///dev/shm/identity/access-token";
 
-    private final String tokenEndpointUrl;
+    private final String tokenUrl;
     
-    public RunAsIdAuthorizationProvider() {
-        this(new SettableSystemClock(), RUN_AS_ID_TOKEN_ENDPOINT_URL);
+    public FromRunAsIdFileProvider() {
+        this(new SettableSystemClock(), FILE_ACCESS_TOKEN_ENDPOINT_URL);
     }
-
-    public RunAsIdAuthorizationProvider(Clock clock,
-                                        String tokenEndpointUrl) {
+    
+    public FromRunAsIdFileProvider(Clock clock, String tokenUrl) {
         super(clock);
-        this.tokenEndpointUrl = tokenEndpointUrl;
+        this.tokenUrl = tokenUrl;
     }
     
     /**
@@ -64,34 +65,33 @@ public class RunAsIdAuthorizationProvider
      */
     @Override
     public String getTokenEndpointUrl() {
-        return tokenEndpointUrl;
+        return tokenUrl;
+        
     }
-
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public HttpRequestAuthorizer getClientAuthorizer() {
-        return new NoAuthorizer();
+        return getAuthorizer();
     }
-
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public AccessTokenRequest getNewAccessTokenRequest() {
-        return new AccessTokenRequest(null) {
-            
-            /**
-             * HTTP GETs cannot have request bodies.
-             * 
-             * @return null, indicating no form params/request body
-             */
-            @Override
-            public Map<String, List<String>> toFormParams() {
-                return null;
-            }
-        };
+        return getRequest();
+    }
+    
+    protected HttpProvider.HttpRequestAuthorizer getAuthorizer() {
+        return ((HttpRequest httpRequest, String method, String url,
+                Map<String, List<String>> formParams) -> {});
+    }
+    
+    protected IdentityTokenRequest getRequest() {
+        return new IdentityTokenRequest();
     }
     
     /**
@@ -101,5 +101,5 @@ public class RunAsIdAuthorizationProvider
     public HttpMethods getHttpMethod() {
         return HttpMethods.GET;
     }
-    
+
 }

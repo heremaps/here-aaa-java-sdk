@@ -36,7 +36,6 @@ implements ClientAuthorizationRequestProvider {
 
     private static final String CREDENTIALS_DOT_PROPERTIES_FILENAME = "credentials.properties";
 
-    private final Clock clock;
     private final File file;
 
     public FromDefaultHereCredentialsPropertiesFile() {
@@ -52,7 +51,7 @@ implements ClientAuthorizationRequestProvider {
     }
 
     public FromDefaultHereCredentialsPropertiesFile(Clock clock, File file) {
-        this.clock = clock;
+        super(clock);
         this.file = file;
     }
 
@@ -60,7 +59,7 @@ implements ClientAuthorizationRequestProvider {
     protected ClientCredentialsProvider getClientCredentialsProvider() {
         try {
             Properties properties = OAuth1ClientCredentialsProvider.getPropertiesFromFile(file);
-            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties
+            return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(getClock(), properties
             );
         } catch (IOException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
@@ -93,14 +92,6 @@ implements ClientAuthorizationRequestProvider {
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Clock getClock() {
-        return clock;
     }
 
 }

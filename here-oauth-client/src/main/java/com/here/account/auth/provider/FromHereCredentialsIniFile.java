@@ -52,7 +52,7 @@ implements ClientAuthorizationRequestProvider {
     }
 
     public FromHereCredentialsIniFile(Clock clock, File file, String sectionName) {
-        Objects.requireNonNull(clock, "clock is required");
+        super(clock);
         Objects.requireNonNull(file, "file is required");
 
         this.clock = clock;
@@ -107,12 +107,5 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Clock getClock() {
-        return clock;
-    }
 
 }
