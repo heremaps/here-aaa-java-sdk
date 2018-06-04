@@ -236,6 +236,15 @@ public class HereAccessTokenProvider implements AccessTokenProvider, Closeable {
      * {@inheritDoc}
      */
     @Override
+    public String get() {
+        return getAccessToken();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getAccessToken() {
         return getAccessTokenResponse().getAccessToken();
     }

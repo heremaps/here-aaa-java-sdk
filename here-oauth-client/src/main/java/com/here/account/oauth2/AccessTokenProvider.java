@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import java.util.function.Supplier;
+
 /**
  * An interface that lets you get Access Tokens, for use with HERE Services.
  *
@@ -25,7 +27,7 @@ package com.here.account.oauth2;
  *
  * @author kmccrack
  */
-public interface AccessTokenProvider {
+public interface AccessTokenProvider extends Supplier<String> {
 
     /**
      * Gets an OAuth2.0 Access Token.
@@ -33,4 +35,13 @@ public interface AccessTokenProvider {
      * @return the access token
      */
     String getAccessToken();
+
+    /**
+     * Gets an OAuth2.0 Access Token.
+     *
+     * @return the access token
+     */
+    @Override
+    String get();
+
 }

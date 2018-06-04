@@ -82,6 +82,27 @@ public class HereAccessTokenProviderTest {
     }
 
     @Test
+    public void test_Supplier() throws IOException {
+        try (
+                HereAccessTokenProvider hereAccessTokenProvider
+                        = HereAccessTokenProvider.builder()
+                        .setHttpProvider(mockHttpProvider)
+                        .setClientAuthorizationRequestProvider(clientAuthorizationRequestProvider)
+                        .build();
+        ) {
+
+            for (int i = 0 ; i < 10; i++) {
+                String accessTokenFromSupplier = hereAccessTokenProvider.get();
+                assertTrue("expected access token from supplier " + expectedAccessToken
+                                + ", actual " + accessTokenFromSupplier,
+                        expectedAccessToken.equals(accessTokenFromSupplier));
+            }
+
+        }
+
+    }
+
+    @Test
     public void test_HereAccessTokenProvider_getToken() throws IOException, HttpException {
         try (
             HereAccessTokenProvider hereAccessTokenProvider
