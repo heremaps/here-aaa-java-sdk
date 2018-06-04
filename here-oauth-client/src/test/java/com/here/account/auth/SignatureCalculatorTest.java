@@ -19,7 +19,6 @@ import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.oauth.ConsumerKey;
 import com.ning.http.client.oauth.OAuthSignatureCalculator;
 import com.ning.http.client.oauth.RequestToken;
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 import java.security.*;
@@ -189,12 +188,12 @@ public class SignatureCalculatorTest {
         KeyPair pair = generateES512KeyPair();
 
         final byte[] keyBytes = pair.getPrivate().getEncoded();
-        String keyBase64 = Base64.encodeBase64String(keyBytes);
+        String keyBase64 = Base64.getEncoder().encodeToString(keyBytes);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, keyBase64);
         String signature = sc.calculateSignature(method, baseURL, timestamp, nonce, SignatureMethod.ES512, null, null);
 
-        String publicKeyBase64 = Base64.encodeBase64String(pair.getPublic().getEncoded());
+        String publicKeyBase64 = Base64.getEncoder().encodeToString(pair.getPublic().getEncoded());
         assertTrue(SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, null, null, signature, publicKeyBase64));
     }
 
@@ -203,12 +202,12 @@ public class SignatureCalculatorTest {
         KeyPair pair = generateES512KeyPair();
 
         final byte[] keyBytes = pair.getPrivate().getEncoded();
-        String keyBase64 = Base64.encodeBase64String(keyBytes);
+        String keyBase64 = Base64.getEncoder().encodeToString(keyBytes);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, keyBase64);
         String signature = sc.calculateSignature(method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, params, params);
 
-        String publicKeyBase64 = Base64.encodeBase64String(pair.getPublic().getEncoded());
+        String publicKeyBase64 = Base64.getEncoder().encodeToString(pair.getPublic().getEncoded());
         boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, params, params, signature, publicKeyBase64);
         assertTrue(verified);
     }

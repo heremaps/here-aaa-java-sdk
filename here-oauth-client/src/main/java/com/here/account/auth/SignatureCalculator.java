@@ -16,7 +16,6 @@
 package com.here.account.auth;
 
 import com.here.account.util.OAuthConstants;
-import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -28,10 +27,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.here.account.auth.SignatureMethod.ES512;
 
@@ -286,7 +282,7 @@ public class SignatureCalculator {
             Signature s = Signature.getInstance(algorithm);
             s.initSign(consumerSecretToEllipticCurvePrivateKey(key));
             s.update(bytesToSign);
-            return Base64.encodeBase64String(s.sign());
+            return Base64.getEncoder().encodeToString(s.sign());
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -307,7 +303,7 @@ public class SignatureCalculator {
             Mac mac = Mac.getInstance(algorithm);
             mac.init(signingKey);
             byte[] signedBytes = mac.doFinal(bytesToSign);
-            return Base64.encodeBase64String(signedBytes);
+            return Base64.getEncoder().encodeToString(signedBytes);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -318,7 +314,7 @@ public class SignatureCalculator {
      */
     private static PrivateKey consumerSecretToEllipticCurvePrivateKey(String key) {
         try {
-            byte[] keyBytes = Base64.decodeBase64(key);
+            byte[] keyBytes = Base64.getDecoder().decode(key);
             PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(keyBytes);
             KeyFactory kf = KeyFactory.getInstance("EC");
             return kf.generatePrivate(privateSpec);
@@ -353,12 +349,12 @@ public class SignatureCalculator {
     private static boolean verifyECDSASignature(String cipherText, String signature, String verificationKey, SignatureMethod signatureMethod) {
         try {
             //convert the verification key to EC public key
-            byte[] keyBytes = Base64.decodeBase64(verificationKey);
+            byte[] keyBytes = Base64.getDecoder().decode(verificationKey);
             X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(keyBytes);
             KeyFactory kf = KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM);
             PublicKey pubKey = kf.generatePublic(publicSpec);
 
-            byte[] signatureBytes = Base64.decodeBase64(signature.getBytes(OAuthConstants.UTF_8_STRING));
+            byte[] signatureBytes = Base64.getDecoder().decode(signature.getBytes(OAuthConstants.UTF_8_STRING));
             Signature s = Signature.getInstance(signatureMethod.getAlgorithm());
             s.initVerify(pubKey);
             s.update(cipherText.getBytes(OAuthConstants.UTF_8_STRING));

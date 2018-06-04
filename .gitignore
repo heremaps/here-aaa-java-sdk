@@ -5,6 +5,7 @@
 **/.project
 **/.settings
 .idea/*
+*.iml
 target
 /bin/
 pom.xml.versionsBackup

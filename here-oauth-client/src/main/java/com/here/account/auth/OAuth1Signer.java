@@ -19,8 +19,8 @@ import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
-import org.apache.commons.codec.binary.Base64;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -164,7 +164,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         // choose the first 6 chars from base64 alphabet
         byte[] bytes = new byte[NONCE_LENGTH]; 
         nextBytes(bytes);
-        String nonce = Base64.encodeBase64URLSafeString(bytes).substring(0, NONCE_LENGTH);
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, NONCE_LENGTH);
         String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, 
                 signatureMethod,
                 formParams,
