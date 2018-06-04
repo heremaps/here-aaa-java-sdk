@@ -15,17 +15,17 @@
  */
 package com.here.account.oauth2;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.function.Supplier;
-
 import com.here.account.auth.provider.ClientAuthorizationProviderChain;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.http.java.JavaHttpProvider;
 import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.Serializer;
 import com.here.account.util.SettableSystemClock;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * An implementation that provides HERE Access Tokens, by accessing HERE Account 
@@ -76,7 +76,7 @@ import com.here.account.util.SettableSystemClock;
  *   <li>clientAuthorizationRequestProvider:
  *       {@link ClientAuthorizationProviderChain#getNewDefaultClientCredentialsProviderChain(Clock)},
  *       which checks System properties, ~/.here/credentials.ini, or ~/.here/credentials.properties file.</li>
- *   <li>httpProvider: a new default {@link ApacheHttpClientProvider}.<li>
+ *   <li>httpProvider: a new default {@link JavaHttpProvider}.<li>
  * </ul>
  * Each of which may be overridden via appropriate Builder methods.
  *
@@ -185,7 +185,7 @@ public class HereAccessTokenProvider implements AccessTokenProvider, Closeable {
             boolean doCloseHttpProvider = false;
             if (null == httpProvider) {
                 // uses PoolingHttpClientConnectionManager by default
-                this.httpProvider = ApacheHttpClientProvider.builder().build();
+                this.httpProvider = JavaHttpProvider.builder().build();
                 // because the httpProvider was not injected, we should close it
                 doCloseHttpProvider = true;
             }

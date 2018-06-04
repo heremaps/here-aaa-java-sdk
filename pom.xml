@@ -34,6 +34,8 @@
     </scm>
 
     <modules>
+        <module>here-oauth-client-core</module>
+        <module>here-oauth-client-apache-http-provider</module>
         <module>here-oauth-client</module>
         <module>examples/here-oauth-client-example</module>
         <module>here-oauth-client-dist</module>

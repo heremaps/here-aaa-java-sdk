@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpProvider;
-import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.http.java.JavaHttpProvider;
 
 public class JavadocsTest {
@@ -44,7 +43,7 @@ public class JavadocsTest {
     public void test_credentialsPropertiesFile_javadocs() throws IOException {
         // setup url, accessKeyId, and accessKeySecret as properties in credentials.properties
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                ApacheHttpClientProvider.builder().build(), 
+                JavaHttpProvider.builder().build(),
                 new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
         // choose 
         //   tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());

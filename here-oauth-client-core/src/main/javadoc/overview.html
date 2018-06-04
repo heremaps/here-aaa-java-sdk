@@ -1,0 +1,35 @@
+<html>
+    <body>
+        <p>
+            The HERE Account OAuth Client SDK is a general purpose Java client library
+            for the OAuth1.0 and OAuth2.0 standard specifications.
+
+        <p>
+   To use your provided credentials.properties to get a one-time use token:
+   <pre>
+   {@code
+        // use your provided credentials.properties
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                ApacheHttpClientProvider.builder().build(), 
+                new OAuth1ClientCredentialsProvider.FromFile(new File("credentials.properties")));
+        
+        String hereAccessToken = tokenEndpoint.requestToken(
+                new ClientCredentialsGrantRequest()).getAccessToken();
+        // use hereAccessToken on requests until expires...
+   }
+   </pre>
+   <p>
+      See the {@link com.here.account.oauth2.HereAccount} entry point class for detailed usage instructions.
+        <p>
+   To use your credentials in system properties, credentials.ini file or credentials.properties in that order, and get a token:
+        <pre>
+          {@code
+             HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
+             String accessToken = accessTokens.getAccessToken();
+
+            }
+        </pre>
+        <p>
+            See the {@link com.here.account.oauth2.HereAccessTokenProvider} entry point class for detailed usage instructions.
+    </body>
+</html>
