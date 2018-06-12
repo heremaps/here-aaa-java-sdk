@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.auth.provider.incubator;
+package com.here.account.auth.provider;
 
 import java.util.List;
 import java.util.Map;
@@ -30,13 +30,9 @@ import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
 
 /**
- * An incubator class that may be removed in subsequent releases,
- * or refactored into the parent package.
- * 
- * <p>
  * Gets authorization Access Tokens from an identity access token file.
+ * A mechanism for runtimes using Run As Id to receive access tokens.
  *
- * @deprecated subject to removal, or non-backwards-compatible changes
  * @author kmccrack
  */
 public class FromRunAsIdFileProvider
@@ -52,7 +48,11 @@ public class FromRunAsIdFileProvider
     private final String tokenUrl;
     
     public FromRunAsIdFileProvider() {
-        this(new SettableSystemClock(), FILE_ACCESS_TOKEN_ENDPOINT_URL);
+        this(new SettableSystemClock());
+    }
+
+    public FromRunAsIdFileProvider(Clock clock) {
+        this(clock, FILE_ACCESS_TOKEN_ENDPOINT_URL);
     }
     
     public FromRunAsIdFileProvider(Clock clock, String tokenUrl) {

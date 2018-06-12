@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.here.account.auth.provider.incubator;
+package com.here.account.auth.provider;
 
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.here.account.auth.provider.ClientAuthorizationProviderChain;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.oauth2.HereAccessTokenProvider;
 import com.here.account.util.JacksonSerializer;
