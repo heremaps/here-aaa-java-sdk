@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 HERE Europe B.V.
+ * Copyright (c) 2017 HERE Europe B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,28 @@
  */
 package com.here.account.auth.provider;
 
-import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
-import com.here.account.oauth2.ClientCredentialsGrantRequest;
 import com.here.account.util.Clock;
 
-public abstract class ClientCredentialsGrantRequestProvider
-        extends AbstractClientAuthorizationRequestProvider
-        implements ClientAuthorizationRequestProvider {
+import java.util.Objects;
 
-    protected ClientCredentialsGrantRequestProvider(Clock clock) {
-        super(clock);
+public abstract class AbstractClientAuthorizationRequestProvider implements ClientAuthorizationRequestProvider {
+
+    private final Clock clock;
+
+    protected AbstractClientAuthorizationRequestProvider(Clock clock) {
+        Objects.requireNonNull(clock, "clock is required");
+
+        this.clock = clock;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AccessTokenRequest getNewAccessTokenRequest() {
-        return new ClientCredentialsGrantRequest();
+    public Clock getClock() {
+        return clock;
     }
-    
+
+
 }

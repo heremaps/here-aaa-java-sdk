@@ -36,7 +36,7 @@ implements ClientAuthorizationRequestProvider {
     }
 
     public FromHereCredentialsIniStream(Clock clock, InputStream inputStream, String sectionName) {
-        Objects.requireNonNull(clock, "clock is required");
+        super(clock);
         Objects.requireNonNull(inputStream, "inputStream is required");
 
         this.clock = clock;
@@ -109,14 +109,6 @@ implements ClientAuthorizationRequestProvider {
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Clock getClock() {
-        return clock;
     }
 
 }

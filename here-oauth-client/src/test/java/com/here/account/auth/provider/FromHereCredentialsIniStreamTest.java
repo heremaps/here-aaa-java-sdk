@@ -19,6 +19,7 @@ import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
+import com.here.account.util.Clock;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -39,6 +41,33 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
     public void test_basic_null_stream() {
         fromHereCredentialsIniStream = new FromHereCredentialsIniStream(null);
     }
+
+    @Test
+    public void test_myclock() throws IOException {
+        Clock myClock = new Clock() {
+
+            @Override
+            public long currentTimeMillis() {
+                return 0;
+            }
+
+            @Override
+            public void schedule(ScheduledExecutorService scheduledExecutorService, Runnable runnable, long millisecondsInTheFutureToSchedule) {
+
+            }
+        };
+
+        try (InputStream inputStream = new ByteArrayInputStream(
+                getDefaultIniStreamContents()))
+        {
+            fromHereCredentialsIniStream = new FromHereCredentialsIniStream(myClock, inputStream);
+
+            Clock actualClock = fromHereCredentialsIniStream.getClock();
+            assertTrue("expected clock " + myClock + ", actual " + actualClock,
+                myClock == actualClock);
+        }
+    }
+
 
     @Test(expected = RuntimeException.class)
     public void test_basic_IOException_stream() {
