@@ -16,6 +16,8 @@
 package com.here.account.auth.provider;
 
 import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -88,14 +90,17 @@ public class FromRunAsIdFileProvider
     }
 
     protected void verifyFileIsReadable() {
-        String tokenUrl = getTokenEndpointUrl();
-        if (tokenUrl.startsWith(HttpConstants.FILE_URL_START)) {
-            File file = new File(tokenUrl.substring(HttpConstants.FILE_URL_START.length()));
+        try {
+            URL url = new URL(getTokenEndpointUrl());
+            File file = Paths.get(url.toURI()).toFile();
             if (file.exists() && file.canRead()) {
                 return;
             }
+            throw new RequestProviderException("trouble FromRunAsIdFile " + tokenUrl + " isn't readable");
+        } catch (Exception e) {
+            throw new RequestProviderException("unable to verify whether file is readable " + tokenUrl);
+
         }
-        throw new RequestProviderException("trouble FromRunAsIdFile " + tokenUrl + " isn't readable");
     }
 
     protected HttpProvider.HttpRequestAuthorizer getAuthorizer() {

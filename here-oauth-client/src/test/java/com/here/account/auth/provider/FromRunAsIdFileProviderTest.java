@@ -59,21 +59,23 @@ public class FromRunAsIdFileProviderTest {
     public void test_IdentityAuthorizationFileProvider() throws IOException {
         File file = File.createTempFile(testName.getMethodName(), "");
         file.deleteOnExit();
-        String tokenUrl = HttpConstants.FILE_URL_START + file.getAbsolutePath();
+        String tokenUrl = FILE_URL_START + file.getAbsolutePath();
         provider = new FromRunAsIdFileProvider(new SettableSystemClock(), tokenUrl);
         this.expectedTokenEndpointUrl = tokenUrl;
         verifyExpected(provider);
     }
 
+    static final String FILE_URL_START = "file://";
+
     @Test
     public void test_inchain() throws IOException {
         Clock clock = new SettableSystemClock();
         File file = new File(UUID.randomUUID().toString());
-        String tokenUrl = HttpConstants.FILE_URL_START + file.getAbsolutePath();
+        String tokenUrl = FILE_URL_START + file.getAbsolutePath();
         provider = new FromRunAsIdFileProvider(clock, tokenUrl);
         File file2 = File.createTempFile(testName.getMethodName(), "");
         file2.deleteOnExit();
-        String tokenUrl2 = HttpConstants.FILE_URL_START + file2.getAbsolutePath();
+        String tokenUrl2 = FILE_URL_START + file2.getAbsolutePath();
         ClientAuthorizationRequestProvider provider2 = new FromRunAsIdFileProvider(clock, tokenUrl2);
         ClientAuthorizationRequestProvider providerChain = new ClientAuthorizationProviderChain(provider, provider2);
         this.expectedTokenEndpointUrl = tokenUrl2;

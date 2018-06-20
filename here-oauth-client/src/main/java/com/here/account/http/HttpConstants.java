@@ -27,7 +27,6 @@ public class HttpConstants {
      */
     private HttpConstants() {}
 
-    public static final String FILE_URL_START = "file://";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String CHARSET_STRING = "UTF-8";
     public static final Charset ENCODING_CHARSET = Charset.forName(CHARSET_STRING);

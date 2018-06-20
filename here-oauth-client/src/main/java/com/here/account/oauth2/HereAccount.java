@@ -304,7 +304,7 @@ public class HereAccount {
             this.httpProvider = httpProvider;
             this.serializer = serializer;
 
-            requestTokenFromFile = null != url && url.startsWith(HttpConstants.FILE_URL_START);
+            requestTokenFromFile = null != url && url.startsWith(FILE_URL_START);
 
             if (currentTimeMillisSettable = clock instanceof SettableClock
                     && null != url && url.endsWith(SLASH_TOKEN)) {
@@ -326,6 +326,8 @@ public class HereAccount {
                 throw new RequestExecutionException(e);
             }
         }
+
+        private static final String FILE_URL_START = "file://";
 
         @Override
         public AccessTokenResponse requestToken(AccessTokenRequest authorizationRequest) 
