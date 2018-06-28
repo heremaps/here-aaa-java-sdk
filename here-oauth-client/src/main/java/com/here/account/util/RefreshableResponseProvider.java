@@ -272,8 +272,7 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
   private void refreshToken() {
     LOG.info(
         String.format(
-            "Refreshing HERE auth token (idle %s seconds)",
-            TimeUnit.SECONDS.convert(clock.currentTimeMillis() - refreshToken.getStartTimeMilliseconds(), TimeUnit.MILLISECONDS)
+            "Refresh HERE auth token in %s milliseconds", nextRefreshInterval()
         )
     );
 
@@ -283,7 +282,8 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
     } catch (Exception exp) {
       LOG.warning("Failed to refresh HERE token " + exp);
       scheduleTokenRefresh(
-          Math.min(nextRefreshInterval(), RETRY_FAIL_SECONDS)  //try again within time window if call failed
+          //try again within time window if call failed
+          Math.min(nextRefreshInterval(), TimeUnit.SECONDS.toMillis(RETRY_FAIL_SECONDS))
       );
     }
   }
