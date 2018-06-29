@@ -326,7 +326,7 @@ public class HereAccount {
                 throw new RequestExecutionException(e);
             }
         }
-        
+
         private static final String FILE_URL_START = "file://";
 
         @Override

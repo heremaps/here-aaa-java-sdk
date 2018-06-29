@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 HERE Europe B.V.
+ * Copyright (c) 2018 HERE Europe B.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package com.here.account.oauth2;
 
+import java.util.function.Supplier;
+
 /**
  * An interface that lets you get Access Tokens, for use with HERE Services.
+ * A Supplier&lt;String&gt; of Access Tokens.
  *
  * <p>
  * See <a href="https://tools.ietf.org/html/rfc6749#section-7.1">OAuth2.0</a>,
@@ -24,16 +27,15 @@ package com.here.account.oauth2;
  * for details.
  *
  * @author kmccrack
- * @deprecated since 0.4.14
  */
-@Deprecated
-public interface AccessTokenProvider {
+public interface AccessTokenSupplier extends Supplier<String> {
 
     /**
      * Gets an OAuth2.0 Access Token.
      *
      * @return the access token
      */
-    String getAccessToken();
+    @Override
+    String get();
 
 }

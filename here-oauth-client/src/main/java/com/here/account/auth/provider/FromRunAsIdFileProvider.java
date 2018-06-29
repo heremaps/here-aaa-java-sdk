@@ -15,10 +15,14 @@
  */
 package com.here.account.auth.provider;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import com.here.account.auth.provider.AbstractClientAuthorizationRequestProvider;
+import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequest;
@@ -84,8 +88,24 @@ public class FromRunAsIdFileProvider
     public AccessTokenRequest getNewAccessTokenRequest() {
         return getRequest();
     }
-    
+
+    protected void verifyFileIsReadable() {
+        try {
+            URL url = new URL(getTokenEndpointUrl());
+            File file = Paths.get(url.toURI()).toFile();
+            if (file.exists() && file.canRead()) {
+                return;
+            }
+            throw new RequestProviderException("trouble FromRunAsIdFile " + tokenUrl + " isn't readable");
+        } catch (Exception e) {
+            throw new RequestProviderException("unable to verify whether file is readable " + tokenUrl);
+
+        }
+    }
+
     protected HttpProvider.HttpRequestAuthorizer getAuthorizer() {
+        verifyFileIsReadable();
+
         return ((HttpRequest httpRequest, String method, String url,
                 Map<String, List<String>> formParams) -> {});
     }
