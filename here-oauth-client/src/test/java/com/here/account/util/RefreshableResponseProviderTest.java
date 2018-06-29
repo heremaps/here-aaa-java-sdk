@@ -5,7 +5,10 @@ import com.here.account.util.RefreshableResponseProvider.ResponseRefresher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
+
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.assertTrue;
 
@@ -53,8 +56,11 @@ public class RefreshableResponseProviderTest {
             public MyExpiringResponse refresh(MyExpiringResponse previous) {
                 return new MyExpiringResponse();
             }
-            
+
         };
+    }
+
+    private void setupRefreshableResponseProvider() {
         this.refreshableResponseProvider = new RefreshableResponseProvider<MyExpiringResponse>(
          refreshIntervalMillis,
          initialToken,
@@ -63,11 +69,14 @@ public class RefreshableResponseProviderTest {
     
     @After
     public void tearDown() {
-        this.refreshableResponseProvider.shutdown();
+        if (null != refreshableResponseProvider) {
+            this.refreshableResponseProvider.shutdown();
+        }
     }
     
     @Test
     public void test_refreshIntervalMillis() {
+        setupRefreshableResponseProvider();
         refreshIntervalMillis = 100L;
         initialToken = new MyExpiringResponse();
         refreshTokenFunction = new ResponseRefresher<MyExpiringResponse>() {
@@ -89,6 +98,46 @@ public class RefreshableResponseProviderTest {
                     +" didn't match refreshIntervalMillis "+refreshIntervalMillis,
                     refreshIntervalMillis == actualNextRefreshInterval);
         }
+    }
+
+    @Test
+    public void test_shutdown_multiple() {
+        setupRefreshableResponseProvider();
+        for (int i = 0; i < 3; i++) {
+            tearDown();
+        }
+    }
+
+
+
+    @Test
+    public void test_refreshToken_fails_retryInterval() throws InterruptedException {
+        refreshIntervalMillis = 100L;
+        /*          final Clock clock,
+          final Long refreshIntervalMillis,
+          final T initialResponse,
+          final ResponseRefresher<T> refreshTokenFunction,
+          final ScheduledExecutorService scheduledExecutorService
+*/
+        final Clock clock = new SettableSystemClock();
+        final Clock spyClock = Mockito.spy(clock);
+        this.refreshableResponseProvider = new RefreshableResponseProvider<MyExpiringResponse>(
+                spyClock,
+                refreshIntervalMillis,
+                initialToken,
+                (MyExpiringResponse previous) -> {
+                    throw new RuntimeException("simulate unable to refresh");
+                },
+                RefreshableResponseProvider.getScheduledExecutorServiceSize1());
+
+        Thread.sleep(3*refreshIntervalMillis);
+        // invoked once in the constructor, and at least once from the failing refresh
+        Mockito.verify(spyClock, Mockito.atLeast(2)).schedule(
+                Mockito.any(ScheduledExecutorService.class),
+                Mockito.any(Runnable.class),
+                Matchers.eq(100L));
+
+
     }
 
     @Test
@@ -130,11 +179,4 @@ public class RefreshableResponseProviderTest {
 
 
 
-    @Test
-    public void test_shutdown_multiple() {
-        for (int i = 0; i < 3; i++) {
-            tearDown();
-        }
-    }
-    
 }
