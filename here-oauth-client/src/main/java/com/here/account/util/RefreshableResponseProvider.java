@@ -251,7 +251,7 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
   /**
    * Schedule the next refresh with the specified timeout duration
    */
-  private void scheduleTokenRefresh(long millis) {
+  protected void scheduleTokenRefresh(long millis) {
     if (!started) {
       LOG.info("Refresh token thread shutdown, not scheduling");
       return;

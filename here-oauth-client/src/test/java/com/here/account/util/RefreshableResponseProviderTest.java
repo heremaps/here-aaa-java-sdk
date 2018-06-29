@@ -1,13 +1,12 @@
 package com.here.account.util;
 
-import static org.junit.Assert.assertTrue;
-
+import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
+import com.here.account.util.RefreshableResponseProvider.ResponseRefresher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
-import com.here.account.util.RefreshableResponseProvider.ResponseRefresher;
+import static org.junit.Assert.assertTrue;
 
 public class RefreshableResponseProviderTest {
 
@@ -90,7 +89,7 @@ public class RefreshableResponseProviderTest {
                     refreshIntervalMillis == actualNextRefreshInterval);
         }
     }
-    
+
     @Test
     public void test_refreshToken_fails() throws InterruptedException {
         refreshIntervalMillis = 100L;
@@ -108,20 +107,27 @@ public class RefreshableResponseProviderTest {
          initialToken,
          refreshTokenFunction);
 
-        
+
         for (int i = 0; i < 10; i++) {
             Thread.sleep(100L);
-            MyExpiringResponse response = refreshableResponseProvider.getUnexpiredResponse();
+            MyExpiringResponse response = spyRefreshableResponseProvider.getUnexpiredResponse();
             assertTrue("response was null", null != response);
             long expiresIn = response.getExpiresIn();
             long expectedExpiresIn = 600L;
             assertTrue("expected expires in "+expectedExpiresIn+" != actual expiresIn "+expiresIn, 
                     expectedExpiresIn == expiresIn);
+
+            // verify when refreshTokenFunction.refresh() throws an exception causing RefreshResponseProvider.refreshToken()
+            // to scheduleTokenRefresh(), that the refresh is not 10ms. (AAA-689)
+            //
+            // The test below does not work. I do not know why. I see log output saying: INFO: Scheduling next token refresh in 100 milliseconds
+            // but Mockito says - Wanted but not invoked:  refreshableResponseProvider.scheduleTokenRefresh(100);
+            //Mockito.verify(spyRefreshableResponseProvider).scheduleTokenRefresh(100);
         }
     }
 
-    
-    
+
+
     @Test
     public void test_shutdown_multiple() {
         for (int i = 0; i < 3; i++) {
