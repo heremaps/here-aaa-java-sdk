@@ -82,7 +82,7 @@ import com.here.account.util.SettableSystemClock;
  *
  * @author kmccrack
  */
-public class HereAccessTokenProvider implements AccessTokenProvider, Closeable {
+public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, AccessTokenProvider {
 
     /**
      * Gets a new Builder for a HERE Access Token Provider.
