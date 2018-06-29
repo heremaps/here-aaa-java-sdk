@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import com.here.account.auth.provider.RequestProviderException;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.util.Clock;
@@ -40,6 +41,8 @@ public interface ClientAuthorizationRequestProvider {
      * to authorize access token requests.
      * 
      * @return the client authorizer
+     * @throws RequestProviderException if no suitable authorizer can be
+     *      gotten, due to missing configuration elements
      */
     HttpProvider.HttpRequestAuthorizer getClientAuthorizer();
     
