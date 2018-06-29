@@ -5,6 +5,7 @@ import com.here.account.util.RefreshableResponseProvider.ResponseRefresher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertTrue;
 
@@ -106,6 +107,7 @@ public class RefreshableResponseProviderTest {
          refreshIntervalMillis,
          initialToken,
          refreshTokenFunction);
+        RefreshableResponseProvider<MyExpiringResponse> spyRefreshableResponseProvider = Mockito.spy(this.refreshableResponseProvider);
 
 
         for (int i = 0; i < 10; i++) {
