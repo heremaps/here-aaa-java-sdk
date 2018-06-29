@@ -22,11 +22,7 @@ import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +30,6 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -189,7 +184,7 @@ public class OAuth1SignerTest {
                 0x04,
                 0x05
         };
-        String nonce = Base64.encodeBase64URLSafeString(nonceBytes).substring(0, nonceBytes.length);
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
         
         long oauth_timestamp = clockCurrentTimeMillis / 1000L; // oauth1 uses seconds
 
@@ -236,7 +231,7 @@ public class OAuth1SignerTest {
             Mac mac = Mac.getInstance(signatureMethod);
             mac.init(signingKey);
             byte[] signedBytes = mac.doFinal(bytesToSign);
-            return Base64.encodeBase64String(signedBytes);
+            return Base64.getEncoder().encodeToString(signedBytes);
 
          */
         byte[] keyBytes = keyString.getBytes("UTF-8");
@@ -248,7 +243,7 @@ public class OAuth1SignerTest {
         byte[] signatureBytes = mac.doFinal(baseString.getBytes("UTF-8"));
     
         // base64-encode the hmac
-        //return new Base64().encodeAsString(signatureBytes);
-        return Base64.encodeBase64String(signatureBytes);
+        //return new Base64.getEncoder().encodeToString(signatureBytes);
+        return Base64.getEncoder().encodeToString(signatureBytes);
     }
 }
