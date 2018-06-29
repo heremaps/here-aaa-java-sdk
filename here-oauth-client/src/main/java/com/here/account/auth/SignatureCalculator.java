@@ -28,6 +28,8 @@ import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.here.account.auth.SignatureMethod.ES512;
 
@@ -38,6 +40,9 @@ import static com.here.account.auth.SignatureMethod.ES512;
  * @author srrajago
  */
 public class SignatureCalculator {
+
+    private static final Logger LOG = Logger.getLogger(SignatureCalculator.class.getName());
+
     private final String consumerKey;
     private final String consumerSecret;
 
@@ -113,8 +118,12 @@ public class SignatureCalculator {
      * @return the Authorization header for OAuth 1.0 calls.
      */
     public String constructAuthHeader(String signature, String nonce, long oauthTimestamp, SignatureMethod signatureMethod) {
+        // https://tools.ietf.org/html/rfc5849#section-3.5.1 :
+        //
+        //    Parameter names and values are encoded per Parameter Encoding
+        //    (Section 3.6).
         return new StringBuilder().append("OAuth ")
-                .append("oauth_consumer_key").append("=\"").append(consumerKey)
+                .append("oauth_consumer_key").append("=\"").append(urlEncode(consumerKey))
                 .append("\", ").append("oauth_signature_method").append("=\"").append(signatureMethod.getOauth1SignatureMethod())
                 .append("\", ").append("oauth_signature").append("=\"").append(urlEncode(signature))
                 .append("\", ").append("oauth_timestamp").append("=\"").append(oauthTimestamp)
@@ -201,8 +210,14 @@ public class SignatureCalculator {
         signatureBaseString.append(urlEncode(normalizeBaseURL(baseURL)));
 
         //create parameter set with OAuth parameters
+        // 3.4.1.3.1.  Parameter Sources
         OAuthParameterSet parameterSet = new OAuthParameterSet();
-        parameterSet.add("oauth_consumer_key", consumerKey);
+
+        // The OAuth HTTP "Authorization" header field (Section 3.5.1) if
+        // present.  The header's content is parsed into a list of name/value
+        // pairs excluding the "realm" parameter if present.  The parameter
+        // values are decoded as defined by Section 3.5.1.
+        parameterSet.add("oauth_consumer_key", consumerKey); // decoded consumerKey
         parameterSet.add("oauth_nonce", nonce);
         parameterSet.add("oauth_signature_method", signatureMethod.getOauth1SignatureMethod());
         parameterSet.add("oauth_timestamp", String.valueOf(oauthTimestamp));
@@ -235,6 +250,11 @@ public class SignatureCalculator {
         //combine the signature base and parameters
         signatureBaseString.append('&');
         signatureBaseString.append(urlEncode(parameterString));
+
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.fine("signatureBaseString=" + signatureBaseString);
+        }
+
         return signatureBaseString.toString();
     }
 
@@ -263,7 +283,7 @@ public class SignatureCalculator {
      * Utility method to URL encode a given string. If there are any spaces the URLEncodes encodes it to "+"
      * but we require it to be "%20".
      */
-    private static String urlEncode(String s) {
+    static String urlEncode(String s) {
         try {
             return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING).replaceAll("\\+", "%20");
         } catch (UnsupportedEncodingException e) {

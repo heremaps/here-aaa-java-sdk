@@ -198,6 +198,35 @@ public class SignatureCalculatorTest {
     }
 
     @Test
+    public void testSignatureES512WithUserConsumerKey() {
+        KeyPair pair = generateES512KeyPair();
+
+        final byte[] keyBytes = pair.getPrivate().getEncoded();
+        String keyBase64 = Base64.getEncoder().encodeToString(keyBytes);
+
+        String consumerKey = "hrn:here-dev:account::test:HERE-a7a3b092-b8f3-4895-a918-8f7b368b0e73";
+
+        SignatureCalculator sc = new SignatureCalculator(consumerKey, keyBase64);
+        String signature = sc.calculateSignature(method, baseURL, timestamp, nonce, SignatureMethod.ES512, null, null);
+
+        String publicKeyBase64 = Base64.getEncoder().encodeToString(pair.getPublic().getEncoded());
+        assertTrue(SignatureCalculator.verifySignature(consumerKey, method, baseURLWithPort, timestamp, nonce, SignatureMethod.ES512, null, null, signature, publicKeyBase64));
+
+        String authHeader = sc.constructAuthHeader(signature, nonce, timestamp, SignatureMethod.ES512);
+        // signature changes each time with ES512
+        String encodedOauthConsumerKey = SignatureCalculator.urlEncode(consumerKey);
+        String encodedSignature = SignatureCalculator.urlEncode(signature);
+        String expectedAuthHeader = "OAuth oauth_consumer_key=\""
+                + encodedOauthConsumerKey
+                + "\", oauth_signature_method=\"ES512\", oauth_signature=\""
+                + encodedSignature
+                + "\", oauth_timestamp=\"123456789\", oauth_nonce=\"ab1Xo3\", oauth_version=\"1.0\"";
+        assertTrue("expected authHeader " + expectedAuthHeader + ", actual " + authHeader,
+                expectedAuthHeader.equals(authHeader));
+    }
+
+
+    @Test
     public void testSignatureES512WithBaseUrlWithPort(){
         KeyPair pair = generateES512KeyPair();
 
