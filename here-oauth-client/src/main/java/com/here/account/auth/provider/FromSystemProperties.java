@@ -30,19 +30,18 @@ import com.here.account.util.SettableSystemClock;
  */
 public class FromSystemProperties extends ClientCredentialsGrantRequestProvider
 implements ClientAuthorizationRequestProvider {
-    private final Clock clock;
 
     public FromSystemProperties() {
         this(new SettableSystemClock());
     }
 
     public FromSystemProperties(Clock clock) {
-        this.clock = clock;
+        super(clock);
     }
 
     protected ClientCredentialsProvider getDelegate() {
         Properties properties = System.getProperties();
-        return getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties);
+        return getClientCredentialsProviderWithDefaultTokenEndpointUrl(getClock(), properties);
     }
 
     private static final String DEFAULT_TOKEN_ENDPOINT_URL = "https://account.api.here.com/oauth2/token";
@@ -88,14 +87,6 @@ implements ClientAuthorizationRequestProvider {
     @Override
     public HttpMethods getHttpMethod() {
         return HttpMethods.POST;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Clock getClock() {
-        return clock;
     }
 
 }

@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.here.account.util.SettableSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.here.account.auth.provider.incubator.RunAsIdAuthorizationProvider;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
@@ -72,7 +72,9 @@ public class RunAsIdAuthorizationProviderTest {
     @Test
     public void test_getTokenEndpointUrl_different() {
         String expectedTokenEndpointUrl = "http://www.example.com/token";
-        runAsIdAuthorizationProvider = new RunAsIdAuthorizationProvider(expectedTokenEndpointUrl);
+        runAsIdAuthorizationProvider = new RunAsIdAuthorizationProvider(
+                new SettableSystemClock(),
+                expectedTokenEndpointUrl);
         String actualTokenEndpointUrl = runAsIdAuthorizationProvider.getTokenEndpointUrl();
         assertTrue("expected tokenEndpointUrl " + expectedTokenEndpointUrl
                 + ", actual " + actualTokenEndpointUrl, 

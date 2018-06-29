@@ -35,7 +35,6 @@ implements ClientAuthorizationRequestProvider {
 
     private static final String CREDENTIALS_DOT_INI_FILENAME = "credentials.ini";
 
-    private final Clock clock;
     private final File file;
     private final String sectionName;
 
@@ -52,10 +51,9 @@ implements ClientAuthorizationRequestProvider {
     }
 
     public FromHereCredentialsIniFile(Clock clock, File file, String sectionName) {
-        Objects.requireNonNull(clock, "clock is required");
+        super(clock);
         Objects.requireNonNull(file, "file is required");
 
-        this.clock = clock;
         this.file = file;
         this.sectionName = sectionName;
     }
@@ -68,7 +66,7 @@ implements ClientAuthorizationRequestProvider {
      */
     protected ClientAuthorizationRequestProvider getDelegate() {
         try (InputStream inputStream = new FileInputStream(file)) {
-            return new FromHereCredentialsIniStream(clock, inputStream, sectionName);
+            return new FromHereCredentialsIniStream(getClock(), inputStream, sectionName);
         } catch (IOException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
         }
@@ -107,12 +105,5 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Clock getClock() {
-        return clock;
-    }
 
 }

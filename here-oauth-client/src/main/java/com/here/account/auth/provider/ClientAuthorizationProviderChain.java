@@ -68,10 +68,12 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
         ClientAuthorizationRequestProvider systemProvider = new FromSystemProperties(clock);
         ClientAuthorizationRequestProvider iniFileProvider = new FromHereCredentialsIniFile(clock);
         ClientAuthorizationRequestProvider propertiesFileProvider = new FromDefaultHereCredentialsPropertiesFile(clock);
+        ClientAuthorizationRequestProvider runAsIdFileProvider = new FromRunAsIdFileProvider(clock);
         return new ClientAuthorizationProviderChain(
                 systemProvider,
                 iniFileProvider,
-                propertiesFileProvider
+                propertiesFileProvider,
+                runAsIdFileProvider
                 );
     }
 
