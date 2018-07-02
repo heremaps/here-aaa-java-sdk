@@ -56,12 +56,12 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
   /**
    * number of seconds to remove from suggested token timeout
    */
-  static final long REFRESH_BACKOFF_SECONDS = 10;
+  static final long REFRESH_BACKOFF_SECONDS = 60;
   /**
    * number of seconds to wait before refreshing a response when the
    * attempt to refresh failed
    */
-  static final long RETRY_FAIL_SECONDS = 1;
+  static final long RETRY_FAIL_SECONDS = 5;
 
   private final ResponseRefresher<T> refreshResponseFunction;
   private final ScheduledExecutorService scheduledExecutorService;
