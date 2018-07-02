@@ -58,11 +58,12 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
    */
   static final long REFRESH_BACKOFF_SECONDS = 10;
   /**
-   * number of seconds to wait before refreshing a token previous refresh call failed
+   * number of seconds to wait before refreshing a response when the
+   * attempt to refresh failed
    */
-  static final long RETRY_FAIL_SECONDS = 10;
+  static final long RETRY_FAIL_SECONDS = 1;
 
-  private final ResponseRefresher<T> refreshTokenFunction;
+  private final ResponseRefresher<T> refreshResponseFunction;
   private final ScheduledExecutorService scheduledExecutorService;
   /**
    * If specified, overrides the normal semantics of scheduling the next refresh 
@@ -71,29 +72,29 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
    */
   private final Long refreshIntervalMillis;
   private boolean started;
-  private volatile T refreshToken;  //volatile so consistent across threads
+  private volatile T refreshResponse;  //volatile so consistent across threads
   private Clock clock;
 
   /**
-   * Create a RefreshableResponseProvider with optional refreshIntervalMillis, initialToken, 
-   * and refreshTokenFunction.
+   * Create a RefreshableResponseProvider with optional refreshIntervalMillis, initialResponse,
+   * and refreshResponseFunction.
    * 
    * @param refreshIntervalMillis optional.  only specify during tests, not in real code.  
    *     if you want to ignore the normal response 
    *     <a href="https://tools.ietf.org/html/rfc6749#section-4.2.2">expires_in</a>, 
    *     and instead refresh on a fixed interval not set by the HERE authorization server, 
    *     specify this value in milliseconds.
-   * @param initialToken the initial value of an active token
-   * @param refreshTokenFunction the ability to refresh and get a new token prior to the 
+   * @param initialResponse the initial value of an active response
+   * @param refreshResponseFunction the ability to refresh and get a new response prior to the
    *     previous one expiring.
    */
   public RefreshableResponseProvider(
       final Long refreshIntervalMillis,
-      final T initialToken,
-      final ResponseRefresher<T> refreshTokenFunction
+      final T initialResponse,
+      final ResponseRefresher<T> refreshResponseFunction
   ) {
       this(Clock.SYSTEM, refreshIntervalMillis, 
-              initialToken, refreshTokenFunction,
+              initialResponse, refreshResponseFunction,
               getScheduledExecutorServiceSize1()
               );
   }
@@ -123,12 +124,12 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
           final Clock clock,
           final Long refreshIntervalMillis,
           final T initialResponse,
-          final ResponseRefresher<T> refreshTokenFunction,
+          final ResponseRefresher<T> refreshResponseFunction,
           final ScheduledExecutorService scheduledExecutorService
       ) {
       Objects.requireNonNull(clock, "clock cannot be null");
       Objects.requireNonNull(initialResponse, "initialResponse cannot be null");
-      Objects.requireNonNull(refreshTokenFunction, "refreshTokenFunction cannot be null");
+      Objects.requireNonNull(refreshResponseFunction, "refreshResponseFunction cannot be null");
       Objects.requireNonNull(scheduledExecutorService, "scheduledExecutorService cannot be null");
       
       // expires_in cannot be null
@@ -139,8 +140,8 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
       
       this.clock = clock;
       this.refreshIntervalMillis = refreshIntervalMillis;
-      this.refreshToken = initialResponse;
-      this.refreshTokenFunction = refreshTokenFunction;
+      this.refreshResponse = initialResponse;
+      this.refreshResponseFunction = refreshResponseFunction;
 
       this.scheduledExecutorService = scheduledExecutorService;
       this.started = true;
@@ -215,7 +216,7 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
 
   /*@Override
   public void writeAuthentication(HttpRequest request) {
-    TokenUtil.setBearerToken(request, refreshToken.getAccessToken());
+    TokenUtil.setBearerToken(request, refreshResponse.getAccessToken());
   }*/
 
   /**
@@ -228,7 +229,7 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
    * @return the unexpired response
    */
   public T getUnexpiredResponse() {
-      return refreshToken;
+      return refreshResponse;
   }
 
   /*---- private ------------------------------------------------------------*/
@@ -244,14 +245,14 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
 
     //remove a few seconds to give time to refresh before token expires
     return TimeUnit.SECONDS.toMillis(
-        Math.max(refreshToken.getExpiresIn() - REFRESH_BACKOFF_SECONDS, MIN_REFRESH_SECONDS)
+        Math.max(refreshResponse.getExpiresIn() - REFRESH_BACKOFF_SECONDS, MIN_REFRESH_SECONDS)
     );
   }
 
   /**
    * Schedule the next refresh with the specified timeout duration
    */
-  private void scheduleTokenRefresh(long millis) {
+  protected void scheduleTokenRefresh(long millis) {
     if (!started) {
       LOG.info("Refresh token thread shutdown, not scheduling");
       return;
@@ -271,19 +272,20 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
    */
   private void refreshToken() {
     LOG.info(
-        String.format(
-            "Refreshing HERE auth token (idle %s seconds)",
-            TimeUnit.SECONDS.convert(clock.currentTimeMillis() - refreshToken.getStartTimeMilliseconds(), TimeUnit.MILLISECONDS)
-        )
+          String.format(
+              "Refreshing HERE auth token (last successful response %s seconds)",
+              TimeUnit.SECONDS.convert(clock.currentTimeMillis() - refreshResponse.getStartTimeMilliseconds(), TimeUnit.MILLISECONDS)
+          )
     );
 
     try {
-      this.refreshToken = refreshTokenFunction.refresh(refreshToken);
+      this.refreshResponse = refreshResponseFunction.refresh(refreshResponse);
       scheduleTokenRefresh(nextRefreshInterval());
     } catch (Exception exp) {
       LOG.warning("Failed to refresh HERE token " + exp);
       scheduleTokenRefresh(
-          Math.min(nextRefreshInterval(), RETRY_FAIL_SECONDS)  //try again within time window if call failed
+          //try again within time window if call failed
+          Math.min(nextRefreshInterval(), TimeUnit.SECONDS.toMillis(RETRY_FAIL_SECONDS))
       );
     }
   }
