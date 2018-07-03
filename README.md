@@ -19,7 +19,6 @@ The here-aaa-sdk project produces artifacts distributed in two ways:
 receive this bundle as part of onboarding.
 * via the [Maven Central Repository](https://search.maven.org/)
 
-The following artifacts are published to Maven Central:
 
 HERE OAuth Client
 ------
@@ -29,19 +28,42 @@ Server, for use with HERE Services.
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client</artifactId>
-  <version>0.4.13</version>
+  <version>${here-oauth-client.version}</version>
 </dependency>
 ```
+
+
 HERE OAuth Client Examples
 ------
-Example usage of the HERE OAuth Client library; these are tutorials intended to be adapted into or
-inform design of applications
+Example usage of the HERE OAuth Client library; these are tutorials intended to be 
+adapted into or inform design of applications. 
+
+Specify the version of the HERE OAuth Client library to include in your code by setting 
+the property here-oauth-client.version with a version available in Maven Central: 
+
+http://central.maven.org/maven2/com/here/account/here-oauth-client/ 
+
+Pick the version that you see most fit. The example below picks version 0.4.13. 
+We recommend that you select the latest version. 
+
+
 ```
-<dependency>
-  <groupId>com.here.account</groupId>
-  <artifactId>here-oauth-client-example</artifactId>
-  <version>0.4.13</version>
-</dependency>
+    <properties>
+           ...
+           <here-oauth-client.version>0.4.13</here-oauth-client.version>
+            .... 
+    </properties>
+
+
+	<dependencies>
+	    ....
+		<dependency>
+		  <groupId>com.here.account</groupId>
+		  <artifactId>here-oauth-client-example</artifactId>
+		  <version>${here-oauth-client.version}</version>
+		</dependency>
+		...		
+	</dependencies>		
 ```
 
 
@@ -107,7 +129,11 @@ Open a command prompt at the working tree's root directory and type:
 
     $ mvn -DskipTests clean package
 
-To build the package without testing it.
+To build the package without testing it. 
+
+When you commit your code in GitHub it will be automatically tested in Travis. 
+https://travis-ci.org/heremaps/here-aaa-java-sdk
+
 
 Test instructions
 -----------------
