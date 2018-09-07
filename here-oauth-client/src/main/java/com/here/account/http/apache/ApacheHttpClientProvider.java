@@ -64,7 +64,6 @@ import com.here.account.http.HttpProvider;
        // use httpProvider such as with HereAccessTokenProviders...
  * }
  * </pre>
- * </p>
  *
  * <p>
  * To set the HTTP connection pool size, use the following example code.
@@ -80,7 +79,6 @@ import com.here.account.http.HttpProvider;
  *      // use httpProvider such as with HereAccessTokenProviders...
  * }
  * </pre>
- * </p>
  * 
  * @author kmccrack
  *
