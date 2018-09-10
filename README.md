@@ -166,8 +166,8 @@ If in a secure location, optionally add the `-v` option to print a full valid Id
 Developer Usage
 ===============
 
-Read the javadocs for details.  The mvn commands above will create javadocs locally, which you can
-see at 'here-oauth-client/target/apidocs/index.html'.
+Read the javadocs for details and helpful code snippets (such as setting the HTTP connection pool size).  The mvn commands 
+above will create javadocs locally, which you can see at 'here-oauth-client/target/apidocs/index.html'.
 
 If you are just getting started, go to com.here.account.oauth2.HereAccessTokenProvider javadocs for 
 the overview of two options:

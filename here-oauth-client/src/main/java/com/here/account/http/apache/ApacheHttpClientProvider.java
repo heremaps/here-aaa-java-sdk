@@ -64,6 +64,21 @@ import com.here.account.http.HttpProvider;
        // use httpProvider such as with HereAccessTokenProviders...
  * }
  * </pre>
+ *
+ * <p>
+ * To set the HTTP connection pool size, use the following example code.
+ * <br>NOTE: the connection pool size is set to 200 in this example. Modify the value to fit your needs.
+ * <pre>
+ * {@code
+ *      PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+ *      // Increase max total connection to 200
+ *      cm.setMaxTotal(200);
+ *
+ *      CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+ *      HttpProvider httpProvider = ApacheHttpClientProvider.builder().setHttpClient(httpClient).build();
+ *      // use httpProvider such as with HereAccessTokenProviders...
+ * }
+ * </pre>
  * 
  * @author kmccrack
  *
