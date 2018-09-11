@@ -632,8 +632,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         // verify validToken2
         Assert.assertEquals("67890", freshToken.get().getAccessToken());
     }
-    
-    
+
     private HttpResponse dummyResponse(final int statusCode,
                                        final long contentLength,
                                        final InputStream body) {
@@ -675,5 +674,34 @@ public class HereAccountTest extends AbstractCredentialTezt {
         HttpProvider mock = Mockito.mock(HttpProvider.class);
         Mockito.when(mock.execute(Mockito.any())).thenThrow(throwable);
         return mock;
+    }
+
+    @Test
+    public void testGetFreshTokenVerifyRefreshWithCustomExpiration() throws Exception {
+        HttpProvider httpProvider = getHttpProvider();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret));
+
+        // ---
+        // Create a token that expires in 40 sec. Wait 30 sec. The token should not be refreshed. Then wait an
+        // additional 10 sec, now it should be refreshed.
+        // ---
+
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest().setExpiresIn(40L));
+        // get the initial token
+        String initialToken = freshToken.get().getAccessToken();
+
+        // wait
+        Thread.sleep(30000L);
+        // after 30sec the token should NOT be refreshed
+        Assert.assertEquals(initialToken, freshToken.get().getAccessToken());
+
+        // wait an additional 10sec + time for token to be refreshed
+        Thread.sleep(10000L + 200L);
+        // verify token was refreshed
+        Assert.assertNotEquals(initialToken, freshToken.get().getAccessToken());
     }
 }

@@ -235,9 +235,13 @@ public class HereAccount {
             Clock clock,
             TokenEndpoint tokenEndpoint, Supplier<AccessTokenRequest> accessTokenRequestFactory)
             throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+
+        Long refreshIntervalMillis = accessTokenRequestFactory.get().getExpiresIn();
+        if (refreshIntervalMillis != null) refreshIntervalMillis *= 1000;
+
         return new RefreshableResponseProvider<>(
                 clock,
-                null,
+                refreshIntervalMillis,
                 tokenEndpoint.requestToken(accessTokenRequestFactory.get()),
                 (AccessTokenResponse previous) -> {
                     try {
@@ -445,7 +449,7 @@ public class HereAccount {
         public Fresh<AccessTokenResponse> requestAutoRefreshingToken(AccessTokenRequest request) 
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {
             return requestAutoRefreshingToken(() -> {
-                        return new ClientCredentialsGrantRequest();
+                        return new ClientCredentialsGrantRequest().setExpiresIn(request.getExpiresIn());
                     });
         }
         
