@@ -16,6 +16,7 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -31,12 +32,13 @@ public class FileAccessTokenResponseTest {
         Long expiresIn = null;
         String refreshToken = null;
         String idToken = null;
+        String scope = "scope";
         int secondsFromNow = 45;
         Long exp = (System.currentTimeMillis() / 1000L) + secondsFromNow;
         
         response = new FileAccessTokenResponse( accessToken, 
                  tokenType,
-                 expiresIn,  refreshToken,  idToken,
+                 expiresIn,  refreshToken,  idToken, scope,
                  exp);
         
         String actualAccessToken = response.getAccessToken();
@@ -53,5 +55,7 @@ public class FileAccessTokenResponseTest {
         Long actualExp = response.getExp();
         assertTrue("expected exp " + exp + ", actual " + actualExp,
                 exp.equals(actualExp));
+
+        assertEquals("scope didn't match", scope, response.getScope());
     }
 }

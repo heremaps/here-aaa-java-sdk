@@ -15,23 +15,21 @@
  */
 package com.here.account.oauth2;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.here.account.auth.NoAuthorizer;
-import com.here.account.auth.provider.ClientAuthorizationProviderChain;
 import com.here.account.client.Client;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.TimestampResponse;
 import com.here.account.util.*;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * Static entry point to access HERE Account via the OAuth2.0 API.  This class
@@ -235,6 +233,7 @@ public class HereAccount {
             Clock clock,
             TokenEndpoint tokenEndpoint, Supplier<AccessTokenRequest> accessTokenRequestFactory)
             throws AccessTokenException, RequestExecutionException, ResponseParsingException {
+
         return new RefreshableResponseProvider<>(
                 clock,
                 null,
@@ -350,10 +349,12 @@ public class HereAccount {
                 clientAuthorizer, method, url, authorizationRequest.toFormParams());
 
             try {
-                return client.sendMessage(httpRequest, AccessTokenResponse.class,
+                AccessTokenResponse response = client.sendMessage(httpRequest, AccessTokenResponse.class,
                         ErrorResponse.class, (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
+                response.setScope(authorizationRequest.getScope());
+                return response;
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
             }
@@ -445,7 +446,9 @@ public class HereAccount {
         public Fresh<AccessTokenResponse> requestAutoRefreshingToken(AccessTokenRequest request) 
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {
             return requestAutoRefreshingToken(() -> {
-                        return new ClientCredentialsGrantRequest();
+                        return new ClientCredentialsGrantRequest()
+                                .setExpiresIn(request.getExpiresIn())
+                                .setScope(request.getScope());
                     });
         }
         

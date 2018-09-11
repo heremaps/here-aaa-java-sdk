@@ -632,8 +632,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         // verify validToken2
         Assert.assertEquals("67890", freshToken.get().getAccessToken());
     }
-    
-    
+
     private HttpResponse dummyResponse(final int statusCode,
                                        final long contentLength,
                                        final InputStream body) {
@@ -675,5 +674,73 @@ public class HereAccountTest extends AbstractCredentialTezt {
         HttpProvider mock = Mockito.mock(HttpProvider.class);
         Mockito.when(mock.execute(Mockito.any())).thenThrow(throwable);
         return mock;
+    }
+
+    @Test
+    public void testGetFreshTokenVerifyUserSpecifiedExpiration() throws Exception {
+        HttpProvider httpProvider = getHttpProvider();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret)
+        );
+
+        Long expiresIn = 50L;
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest().setExpiresIn(expiresIn));
+        Long actualExpiresIn = freshToken.get().getExpiresIn();
+        Long difference = expiresIn - actualExpiresIn;
+        Long acceptableVariance = 2L;
+
+        Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
+    }
+
+    @Test
+    public void testGetFreshTokenVerifyDefaultExpiration() throws Exception {
+        HttpProvider httpProvider = getHttpProvider();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret)
+        );
+
+        Long defaultExpiresIn = 86400L;  // 24hrs
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+        Long actualExpiresIn = freshToken.get().getExpiresIn();
+        Long difference = defaultExpiresIn - actualExpiresIn;
+        Long acceptableVariance = 2L;
+
+        Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
+    }
+
+    @Test
+    public void testGetFreshTokenVerifyUserSpecifiedScope() throws Exception {
+        HttpProvider httpProvider = getHttpProvider();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret)
+        );
+
+        String scope = "openid sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497";
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest().setScope(scope));
+        Assert.assertEquals(scope, freshToken.get().getScope());
+    }
+
+    @Test
+    public void testGetFreshTokenVerifyDefaultScope() throws Exception {
+        HttpProvider httpProvider = getHttpProvider();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret)
+        );
+
+        String defaultScope = null;
+        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
+        Assert.assertEquals(defaultScope, freshToken.get().getScope());
     }
 }
