@@ -75,8 +75,8 @@ public class AccessTokenResponse implements ExpiringResponse {
     public AccessTokenResponse() {
         this(null, null, null, null,  null);
     }
-    
-    public AccessTokenResponse(String accessToken, 
+
+    public AccessTokenResponse(String accessToken,
             String tokenType,
             Long expiresIn, String refreshToken, String idToken) {
         this.accessToken = accessToken;

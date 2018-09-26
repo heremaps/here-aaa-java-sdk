@@ -54,8 +54,8 @@ public class FileAccessTokenResponse extends AccessTokenResponse {
     public FileAccessTokenResponse() {
         this(null, null, null, null,  null, null);
     }
-    
-    public FileAccessTokenResponse(String accessToken, 
+
+    public FileAccessTokenResponse(String accessToken,
             String tokenType,
             Long expiresIn, String refreshToken, String idToken,
             Long exp) {
