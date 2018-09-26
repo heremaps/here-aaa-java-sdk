@@ -233,7 +233,6 @@ public class HereAccount {
             Clock clock,
             TokenEndpoint tokenEndpoint, Supplier<AccessTokenRequest> accessTokenRequestFactory)
             throws AccessTokenException, RequestExecutionException, ResponseParsingException {
-
         return new RefreshableResponseProvider<>(
                 clock,
                 null,
@@ -349,12 +348,10 @@ public class HereAccount {
                 clientAuthorizer, method, url, authorizationRequest.toFormParams());
 
             try {
-                AccessTokenResponse response = client.sendMessage(httpRequest, AccessTokenResponse.class,
+                return client.sendMessage(httpRequest, AccessTokenResponse.class,
                         ErrorResponse.class, (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
-                response.setScope(authorizationRequest.getScope());
-                return response;
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
             }

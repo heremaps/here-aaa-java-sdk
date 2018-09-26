@@ -15,11 +15,15 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertTrue;
+
 import com.here.account.auth.NoAuthorizer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.util.Clock;
+import com.here.account.util.JacksonSerializer;
+import com.here.account.util.JsonSerializer;
 import com.here.account.util.Serializer;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-
-import static org.junit.Assert.assertTrue;
 
 public class HereAccessTokenProviderTest {
 
@@ -158,11 +160,10 @@ public class HereAccessTokenProviderTest {
         Long expiresIn = 123L;
         String refreshToken = null;
         String idToken = null;
-        String scope = "scope";
         AccessTokenResponse deserializedAccessTokenResponse = new AccessTokenResponse(
                  expectedAccessToken,
                  tokenType,
-                 expiresIn,  refreshToken,  idToken, scope
+                 expiresIn,  refreshToken,  idToken
         );
         Mockito.when(jsonSerializer.jsonToPojo(Mockito.any(InputStream.class), Mockito.any(Class.class)))
                 .thenReturn(deserializedAccessTokenResponse);

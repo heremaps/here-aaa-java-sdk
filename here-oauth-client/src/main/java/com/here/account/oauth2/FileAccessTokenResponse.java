@@ -52,16 +52,16 @@ public class FileAccessTokenResponse extends AccessTokenResponse {
     private final Long exp;
     
     public FileAccessTokenResponse() {
-        this(null, null, null, null,  null, null, null);
+        this(null, null, null, null,  null, null);
     }
-    
+
     public FileAccessTokenResponse(String accessToken,
             String tokenType,
-            Long expiresIn, String refreshToken, String idToken, String scope,
+            Long expiresIn, String refreshToken, String idToken,
             Long exp) {
         super(accessToken, 
             tokenType,
-            expiresIn, refreshToken, idToken, scope);
+            expiresIn, refreshToken, idToken);
         
         this.exp = exp;
     }

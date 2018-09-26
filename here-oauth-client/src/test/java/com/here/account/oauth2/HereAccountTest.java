@@ -633,6 +633,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         Assert.assertEquals("67890", freshToken.get().getAccessToken());
     }
 
+
     private HttpResponse dummyResponse(final int statusCode,
                                        final long contentLength,
                                        final InputStream body) {
@@ -712,35 +713,5 @@ public class HereAccountTest extends AbstractCredentialTezt {
         Long acceptableVariance = 2L;
 
         Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
-    }
-
-    @Test
-    public void testGetFreshTokenVerifyUserSpecifiedScope() throws Exception {
-        HttpProvider httpProvider = getHttpProvider();
-
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                httpProvider,
-                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret)
-        );
-
-        String scope = "openid sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497";
-        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest().setScope(scope));
-        Assert.assertEquals(scope, freshToken.get().getScope());
-    }
-
-    @Test
-    public void testGetFreshTokenVerifyDefaultScope() throws Exception {
-        HttpProvider httpProvider = getHttpProvider();
-
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                httpProvider,
-                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret)
-        );
-
-        String defaultScope = null;
-        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
-        Assert.assertEquals(defaultScope, freshToken.get().getScope());
     }
 }

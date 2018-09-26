@@ -72,28 +72,19 @@ public class AccessTokenResponse implements ExpiringResponse {
     @JsonProperty("id_token")
     private final String idToken;
 
-    /**
-     * scope for the token request. See also
-     * <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     * Requesting Claims using Scope Values</a>.
-     */
-    @JsonProperty("scope")
-    private String scope;
-
     public AccessTokenResponse() {
-        this(null, null, null, null,  null, null);
+        this(null, null, null, null,  null);
     }
-    
-    public AccessTokenResponse(String accessToken, 
+
+    public AccessTokenResponse(String accessToken,
             String tokenType,
-            Long expiresIn, String refreshToken, String idToken, String scope) {
+            Long expiresIn, String refreshToken, String idToken) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
         this.refreshToken = refreshToken;
         this.startTimeMilliseconds = System.currentTimeMillis();
         this.idToken = idToken;
-        this.scope = scope;
     }
 
     /**
@@ -175,21 +166,4 @@ public class AccessTokenResponse implements ExpiringResponse {
         return idToken;
     }
 
-    /**
-     * Get the scope for the token request.  See also
-     * <a href="http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">
-     * Requesting Claims using Scope Values</a>.
-     *
-     * <p>
-     * The example value is "openid
-     * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
-     * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
-     * openid : Specifies the idToken is expected in the response
-     * sdp:[List of groupId separated by ',']
-     *
-     * @return the scope
-     */
-    public String getScope() { return scope; }
-
-    public void setScope(String scope) { this.scope = scope; }
 }

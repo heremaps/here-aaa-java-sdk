@@ -23,11 +23,9 @@ public class AccessTokenResponseTest {
     @Test
     public void testIdTokenIsSetViaConstructor() {
         String expectedIdToken = "idToken";
-        String expectedScope = "scope";
         AccessTokenResponse response = new AccessTokenResponse("accessToken",
-                "testType", 1200L, "testToken", expectedIdToken, expectedScope);
+                "testType", 1200L, "testToken", expectedIdToken);
 
         Assert.assertEquals(response.getIdToken(), expectedIdToken);
-        Assert.assertEquals(response.getScope(), expectedScope);
     }
 }
