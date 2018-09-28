@@ -100,6 +100,7 @@ public class ApacheHttpClientProviderTest {
         assertEquals(HttpURLConnection.HTTP_BAD_METHOD, response.getStatusCode());
         assertNotNull("response body is null", response.getResponseBody());
         assertTrue("response content length is 0", 0<response.getContentLength());
+        assertTrue("Content-Type Header should be present", response.getHeaders().get("Content-Type") != null);
     }
 
     @Test

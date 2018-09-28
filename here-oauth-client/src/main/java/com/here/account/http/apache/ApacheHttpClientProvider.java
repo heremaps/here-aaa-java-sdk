@@ -21,10 +21,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -196,6 +199,24 @@ public class ApacheHttpClientProvider implements HttpProvider {
                 return httpEntity.getContentLength();
             }
             return 0L;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Map<String, List<String>> getHeaders() {
+            Header[] headers = apacheHttpResponse.getAllHeaders();
+            Map<String, List<String>> ret = new HashMap<>();
+            for (Header header: headers) {
+                if(ret.containsKey(header.getName())) {
+                    ret.get(header.getName()).add(header.getValue());
+                }
+                else {
+                    ret.put(header.getName(), Arrays.asList(header.getValue()));
+                }
+            }
+            return ret;
         }
 
     }
