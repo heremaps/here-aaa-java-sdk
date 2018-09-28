@@ -98,6 +98,16 @@ public interface HttpProvider extends Closeable {
          * @throws IOException if there is I/O trouble
          */
         InputStream getResponseBody() throws IOException;
+
+        /**
+         * Returns all the headers from the response
+         * @return returns a Map of headers if the method implementation returns the headers 
+         *      or throws Unsupported Operation Exception if the method is not implemented
+         */
+
+        default Map<String, List<String>> getHeaders() {
+            throw new UnsupportedOperationException();
+        }
         
     }
 

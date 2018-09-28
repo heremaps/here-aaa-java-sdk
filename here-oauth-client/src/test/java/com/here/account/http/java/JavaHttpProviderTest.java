@@ -15,6 +15,7 @@
  */
 package com.here.account.http.java;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -45,6 +46,7 @@ import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.http.HttpProvider.HttpResponse;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.JsonSerializer;
 
 public class JavaHttpProviderTest {
@@ -332,6 +334,19 @@ public class JavaHttpProviderTest {
             }
             
         };
+    }
+    
+    @Test
+    public void test_JavaHttpClientResponse_Headers() throws HttpException, IOException {
+        String requestBodyJson = "{\"foo\":\"bar\"}";
+        String url = "http://google.com";
+        HttpProvider httpProvider = JavaHttpProvider.builder().build();
+        HttpRequest httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "PUT", url, requestBodyJson);
+        HttpProvider.HttpResponse response = httpProvider.execute(httpRequest);
+        assertEquals(HttpURLConnection.HTTP_BAD_METHOD, response.getStatusCode());
+        assertNotNull("response body is null", response.getResponseBody());
+        assertTrue("response content length is 0", 0<response.getContentLength());;
+        assertTrue("Content-Type Header should be present", response.getHeaders().get("Content-Type") != null);
     }
 
 }

@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -64,13 +65,15 @@ public class JavaHttpProvider implements HttpProvider {
         private final int statusCode;
         private final long contentLength;
         private final InputStream responseBody;
+        private final Map<String, List<String>> headers;
         
         public JavaHttpResponse(int statusCode, 
                 long contentLength, 
-                InputStream responseBody) {
+                InputStream responseBody, Map<String, List<String>> headers) {
             this.statusCode = statusCode;
             this.contentLength = contentLength;
             this.responseBody = responseBody;
+            this.headers = headers;
         }
             
         /**
@@ -96,6 +99,15 @@ public class JavaHttpProvider implements HttpProvider {
         public InputStream getResponseBody() throws IOException {
             return responseBody;
         }
+        
+        /**
+         * {@inheritDoc}
+         */
+        public Map<String, List<String>> getHeaders() {
+            return headers;
+        }
+        
+        
     }
     
     private static class JavaHttpRequest implements HttpRequest {
@@ -271,6 +283,8 @@ public class JavaHttpProvider implements HttpProvider {
         
         long responseContentLength = getContentLength(connection);
         
+        Map<String, List<String>> headers = connection.getHeaderFields();
+        
         InputStream inputStream;
         if (statusCode < HttpURLConnection.HTTP_BAD_REQUEST) {
             inputStream = connection.getInputStream();
@@ -279,7 +293,7 @@ public class JavaHttpProvider implements HttpProvider {
             inputStream = connection.getErrorStream();
         }
         
-        return new JavaHttpResponse(statusCode, responseContentLength, inputStream);
+        return new JavaHttpResponse(statusCode, responseContentLength, inputStream, headers);
     }
 
     protected static byte[] getFormBody(Map<String, List<String>> formParams) throws UnsupportedEncodingException {
