@@ -15,6 +15,8 @@
  */
 package com.here.account.client;
 
+import static org.junit.Assert.fail;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
@@ -22,6 +24,7 @@ import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.util.CloseUtil;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.Serializer;
 import org.junit.Assert;
@@ -35,6 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -191,8 +197,161 @@ public class ClientTest {
     }
 
     @Test
-    public void test_sendMessage1_requestBodyNull() {
+    public void test_getClientAuthorizer() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(201);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        HttpProvider.HttpRequestAuthorizer clientAuthorizer = client.getClientAuthorizer();
+        assertTrue("expected clientAuthorizer " + mockHttpRequestAuthorizer
+                + ", actual " + clientAuthorizer,
+                mockHttpRequestAuthorizer == clientAuthorizer);
+    }
+
+    @Test
+    public void test_sendMessage1_additionalHeaders() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(201);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        FakeResponse actualResponse = client.sendMessage("POST",
+                "http://test.com",
+                fakeRequest,
+                additionalHeaders,
+                FakeResponse.class,
+                ErrorResponse.class,
+                (statusCode, errorResponse) -> {
+                    return new AccessTokenException(statusCode, errorResponse);
+                });
+        assertTrue(expectedResponseObject.getAccessToken().equals(actualResponse.getAccessToken()));
+        assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
+        Mockito.verify(mockHttpRequest, Mockito.times(1)).addHeader(additionalHeaderName, additionalHeaderValue);
+
+    }
+
+    @Test
+    public void test_sendMessage1_GET_404() throws IOException {
+        method = "GET";
+        verify404();
+    }
+
+
+    String method;
+
+    @Test
+    public void test_sendMessage1_POST_404() throws IOException {
+        method = "POST";
+        verify404();
+    }
+
+    protected void verify404() throws IOException {
+        // String error,
+        //            String errorDescription,
+        //          String errorId,
+        //          Integer httpStatus,
+        //          Integer errorCode,
+        //          String message
+        Integer httpStatus = 404;
+        Integer errorCode = 4040404;
+        expectedResponseObject = null;
+        ErrorResponse errorResponse1 = new ErrorResponse("error", "errorDescription", "errorId", httpStatus, errorCode, "message");
+        String responseString = serializer.objectToJson(errorResponse1);
+        InputStream inputStream = new ByteArrayInputStream(responseString.getBytes(StandardCharsets.UTF_8));
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(inputStream);
+
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(404);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+
+        try {
+            client.sendMessage(method,
+                    "http://test.com",
+                    fakeRequest,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+            fail("should have thrown exception");
+        } catch (AccessTokenException e) {
+            int expectedStatusCode = 404;
+            int statusCode = e.getStatusCode();
+            assertTrue("expected status code " + expectedStatusCode + ", actual " + statusCode,
+                expectedStatusCode == statusCode);
+            ErrorResponse errorResponse2 = e.getErrorResponse();
+            assertTrue("errorResponse was expected " + errorResponse1 + ", actual " + errorResponse2,
+                    errorResponse1.toString().equals(errorResponse2.toString()));
+        }
+
+    }
+
+
+
+    @Test
+    public void test_sendMessage1_requestBodyNull_204_nobody() throws IOException {
+        expectedResponseObject = null;
+        InputStream inputStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(inputStream);
+
         Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(204);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        Void actualResponse = client.sendMessage("POST",
+                "http://test.com",
+                null,
+                Void.class,
+                ErrorResponse.class,
+                (statusCode, errorResponse) -> {
+                    return new AccessTokenException(statusCode, errorResponse);
+                });
+        assertTrue(actualResponse == null);
+    }
+
+    @Test(expected = ResponseParsingException.class)
+    public void test_sendMessage1_requestBodyNull_204_nobody_notVoid() throws IOException {
+        expectedResponseObject = null;
+        InputStream inputStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(inputStream);
+
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(204);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeResponse actualResponse = client.sendMessage("POST",
+                "http://test.com",
+                null,
+                FakeResponse.class,
+                ErrorResponse.class,
+                (statusCode, errorResponse) -> {
+                    return new AccessTokenException(statusCode, errorResponse);
+                });
+        assertTrue(actualResponse == null);
+    }
+
+
+    @Test
+    public void test_sendMessage1_requestBodyNull_204() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(204);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        Void actualResponse = client.sendMessage("POST",
+                "http://test.com",
+                null,
+                Void.class,
+                ErrorResponse.class,
+                (statusCode, errorResponse) -> {
+                    return new AccessTokenException(statusCode, errorResponse);
+                });
+        assertTrue(actualResponse == null);
+    }
+
+
+    @Test
+    public void test_sendMessage1_requestBodyNull() {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(200);
         Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer)
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeResponse actualResponse = client.sendMessage("POST",
@@ -207,9 +366,12 @@ public class ClientTest {
         assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
     }
 
+
+
+
     @Test
     public void test_nullSafeCloseThrowingUnchecked_null() {
-        Client.nullSafeCloseThrowingUnchecked(null);
+        CloseUtil.nullSafeCloseThrowingUnchecked(null);
     }
 
     @Test
@@ -221,7 +383,7 @@ public class ClientTest {
                 // no exceptions thrown
             }
         };
-        Client.nullSafeCloseThrowingUnchecked(closeable);
+        CloseUtil.nullSafeCloseThrowingUnchecked(closeable);
     }
 
     @Test
@@ -236,7 +398,7 @@ public class ClientTest {
 
         };
         try {
-            Client.nullSafeCloseThrowingUnchecked(closeable);
+            CloseUtil.nullSafeCloseThrowingUnchecked(closeable);
             Assert.fail("should have thrown UncheckedIOException");
         } catch (UncheckedIOException unchecked) {
             IOException ioe = unchecked.getCause();

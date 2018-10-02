@@ -54,6 +54,7 @@ public class JavaHttpProviderTest {
     private Map<String, List<String>> formParams;
     private String jsonBody;
     boolean callGetRequest = false;
+    private HttpURLConnection mockHttpUrlConnection;
 
     @Before
     public void setUp() throws IOException {
@@ -63,7 +64,19 @@ public class JavaHttpProviderTest {
     public void test_example() throws HttpException, IOException {
         doRequest();
     }
-    
+
+    @Test
+    public void test_additionalHeaders() throws HttpException, IOException {
+        addAdditionalHeaders = true;
+        doRequest();
+
+        String expectedValue = additionalHeaderValue;
+        String value = this.requestHeaders.get(additionalHeaderName);
+        assertTrue("expected additional requestHeader to have been set on HtttpURLConnection: "
+                + expectedValue + ", actual " + value,
+                expectedValue.equals(value));
+    }
+
     @Test
     public void test_example_callGetRequest() throws HttpException, IOException {
         callGetRequest = true;
@@ -141,17 +154,27 @@ public class JavaHttpProviderTest {
             public void addAuthorizationHeader(String value) {
                 // no-op
             }
-            
+
+            @Override
+            public void addHeader(String name, String value) {
+                // no-op
+            }
+
         };
         javaHttpProvider.execute(httpRequest);
     }
     
     HttpRequestAuthorizer httpRequestAuthorizer = new OAuth2Authorizer("my-accessToken");
 
+    boolean addAdditionalHeaders = false;
+    String additionalHeaderName = "foo";
+    String additionalHeaderValue = "bar";
+
     protected void doRequest() throws MalformedURLException, IOException, HttpException {
         JavaHttpProvider javaHttpProvider = (JavaHttpProvider) JavaHttpProvider.builder().build();
         JavaHttpProvider mock = Mockito.spy(javaHttpProvider);
-        Mockito.doReturn(getMockHttpUrlConnection()).when(mock).getHttpUrlConnection(Mockito.anyString());
+        mockHttpUrlConnection = getMockHttpUrlConnection();
+        Mockito.doReturn(mockHttpUrlConnection).when(mock).getHttpUrlConnection(Mockito.anyString());
 
         HttpProvider.HttpRequest httpRequest;
         if (callGetRequest) {
@@ -162,6 +185,9 @@ public class JavaHttpProviderTest {
             } else {
                 httpRequest = javaHttpProvider.getRequest(httpRequestAuthorizer, method, urlString, formParams);
             }
+        }
+        if (addAdditionalHeaders) {
+            httpRequest.addHeader(additionalHeaderName, additionalHeaderValue);
         }
 
         HttpResponse httpResponse = mock.execute(httpRequest);

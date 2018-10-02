@@ -39,7 +39,10 @@ public class HttpConstants {
     public static final int DEFAULT_REQUEST_TIMEOUT_IN_MS = 5000;
     public static final int DEFAULT_CONNECTION_TIMEOUT_IN_MS = 5000;
 
-    public static enum HttpMethods {
+    public enum HttpMethods {
+        /**
+         * See <a href="https://tools.ietf.org/html/rfc7231#section-4.3.1">HTTP/1.1 Semantics and Content: GET</a>.
+         */
         GET("GET"),
         POST("POST");
         

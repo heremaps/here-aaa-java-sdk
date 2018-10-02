@@ -62,6 +62,11 @@ public class OAuth1SignerTest {
             this.authorizationHeader = value;
         }
 
+        @Override
+        public void addHeader(String name, String value) {
+            // no-op
+        }
+
         public String getAuthorizationHeader() {
             return this.authorizationHeader;
         }
