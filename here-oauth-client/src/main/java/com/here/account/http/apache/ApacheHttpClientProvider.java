@@ -159,6 +159,15 @@ public class ApacheHttpClientProvider implements HttpProvider {
         public void addAuthorizationHeader(String value) {
             httpRequestBase.addHeader(HttpConstants.AUTHORIZATION_HEADER, value);
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void addHeader(String name, String value) {
+            httpRequestBase.addHeader(name, value);
+        }
+
     }
     
     private static class ApacheHttpClientResponse implements HttpResponse {

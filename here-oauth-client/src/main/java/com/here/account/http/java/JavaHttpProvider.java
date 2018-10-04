@@ -115,6 +115,7 @@ public class JavaHttpProvider implements HttpProvider {
         private final String method;
         private final String url;
         private String authorizationHeader;
+        private Map<String, String> additionalHeaders;
         
         private byte[] body;
         private final String contentType;
@@ -123,6 +124,7 @@ public class JavaHttpProvider implements HttpProvider {
         private JavaHttpRequest(String method, String url) {
             this.method = method;
             this.url = url;
+            this.additionalHeaders = new HashMap<String, String>();
 
             contentType = null;
             body = null;
@@ -162,7 +164,18 @@ public class JavaHttpProvider implements HttpProvider {
         public void addAuthorizationHeader(String value) {
             this.authorizationHeader = value;
         }
-        
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void addHeader(String name, String value) {
+            this.additionalHeaders.put(name, value);
+        }
+
+        /**
+         * Get the HTTP Request method value.
+         */
         public String getMethod() {
             return method;
         }
@@ -173,6 +186,10 @@ public class JavaHttpProvider implements HttpProvider {
 
         public String getAuthorizationHeader() {
             return authorizationHeader;
+        }
+
+        public Map<String, String> getAdditionalHeaders() {
+            return additionalHeaders;
         }
         
         public byte[] getBody() {
@@ -266,6 +283,15 @@ public class JavaHttpProvider implements HttpProvider {
         String authorizationHeader = javaHttpRequest.getAuthorizationHeader();
         if (null != authorizationHeader) {
             connection.setRequestProperty(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+
+        Map<String, String> additionalHeaders = javaHttpRequest.getAdditionalHeaders();
+        if (null != additionalHeaders) {
+            for (Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
+                String key = additionalHeader.getKey();
+                String value = additionalHeader.getValue();
+                connection.setRequestProperty(key, value);
+            }
         }
 
         // Write data

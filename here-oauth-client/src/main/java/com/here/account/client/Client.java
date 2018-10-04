@@ -15,18 +15,19 @@
  */
 package com.here.account.client;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 
+import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
-import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.util.CloseUtil;
 import com.here.account.util.Serializer;
 
 /**
@@ -40,6 +41,8 @@ import com.here.account.util.Serializer;
  * @author kmccrack
  */
 public class Client {
+
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
     public static class Builder {
         private HttpProvider httpProvider;
@@ -85,6 +88,10 @@ public class Client {
         this.clientAuthorizer = clientAuthorizer;
     }
 
+    public HttpProvider.HttpRequestAuthorizer getClientAuthorizer() {
+        return this.clientAuthorizer;
+    }
+
     /**
      * Sends the requested HTTP Message to the Server.
      * This method is useful if you want to interact with your 
@@ -116,6 +123,48 @@ public class Client {
             Class<U> errorResponseClass,
             BiFunction<Integer, U, RuntimeException> newExceptionFunction)
             throws RequestExecutionException, ResponseParsingException {
+        return sendMessage(method, url, request,
+                null,
+                responseClass, errorResponseClass, newExceptionFunction);
+    }
+
+    /**
+     * Sends the requested HTTP Message to the Server, with additional headers.
+     * This method is useful if you want to interact with your
+     * Resource Server using serializable Java objects as inputs and outputs.
+     * It covers the case where your Resource Server API uses
+     * Content-Type: application/json for request and response
+     * documents.
+     * This method provides the ability to specify HTTP Headers beyond that (those)
+     * possibly added by your HttpRequestAuthorizer.
+     *
+     * @param method the HTTP method
+     * @param url the HTTP request URL
+     * @param request the request object of type R, or null if no request object
+     * @param additionalHeaders additional headers to add to the request,
+     *        beyond that (those) possibly added by your HttpRequestAuthorizer.
+     * @param responseClass the response object class, for deserialization
+     * @param errorResponseClass the response error object class, for deserialization
+     * @param newExceptionFunction the function for getting a new RuntimeException based
+     *      on the statusCode and error response object
+     * @param <R> the Request parameterized type
+     * @param <T> the Response parameterized type
+     * @param <U> the Response Error parameterized type
+     * @return the Response of type T
+     * @throws RequestExecutionException if trouble executing the request
+     * @throws ResponseParsingException if trouble serializing the request,
+     *      or deserializing the response
+     */
+    public <R, T, U> T sendMessage(
+            String method,
+            String url,
+            R request,
+            Map<String, String> additionalHeaders,
+            Class<T> responseClass,
+            Class<U> errorResponseClass,
+            BiFunction<Integer, U, RuntimeException> newExceptionFunction)
+            throws RequestExecutionException, ResponseParsingException {
+
 
         HttpProvider.HttpRequest httpRequest;
         if (null == request) {
@@ -126,6 +175,14 @@ public class Client {
             String jsonBody = serializer.objectToJson(request);
             httpRequest = httpProvider.getRequest(
                         clientAuthorizer, method, url, jsonBody);
+        }
+
+        if (null != additionalHeaders) {
+            for (Map.Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
+                String name = additionalHeader.getKey();
+                String value = additionalHeader.getValue();
+                httpRequest.addHeader(name, value);
+            }
         }
 
         return sendMessage(httpRequest, responseClass,
@@ -168,6 +225,9 @@ public class Client {
         int statusCode = httpResponse.getStatusCode();
         try {
             if (200 == statusCode || 201 == statusCode || 204 == statusCode) {
+                if (204 == statusCode && responseClass.equals(Void.class)) {
+                    return null;
+                }
                 try {
                     return serializer.jsonToPojo(jsonInputStream,
                             responseClass);
@@ -177,7 +237,6 @@ public class Client {
             } else {
                 U errorResponse;
                 try {
-                    // parse the error response
                     errorResponse = serializer.jsonToPojo(jsonInputStream, errorResponseClass);
                 } catch (Exception e) {
                     // if there is trouble parsing the error
@@ -186,25 +245,8 @@ public class Client {
                 throw newExceptionFunction.apply(statusCode, errorResponse);
             }
         } finally {
-            nullSafeCloseThrowingUnchecked(jsonInputStream);
+            CloseUtil.nullSafeCloseThrowingUnchecked(jsonInputStream);
         }
-    }
-
-    /**
-     * A null-safe invocation of closeable.close(), such that if an IOException is 
-     * triggered, it is wrapped instead in an UncheckedIOException.
-     * 
-     * @param closeable the closeable to be closed
-     */
-    static void nullSafeCloseThrowingUnchecked(Closeable closeable) {
-        if (null != closeable) {
-            try {
-                closeable.close();
-            } catch (IOException ioe) {
-                throw new UncheckedIOException(ioe);
-            }
-        }
-
     }
 
 }

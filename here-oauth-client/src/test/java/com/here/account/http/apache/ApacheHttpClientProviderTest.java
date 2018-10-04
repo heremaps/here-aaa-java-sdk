@@ -19,6 +19,7 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -84,7 +85,12 @@ public class ApacheHttpClientProviderTest {
             public void addAuthorizationHeader(String value) {
                 // no-op
             }
-            
+
+            @Override
+            public void addHeader(String name, String value) {
+                // no-op
+            }
+
         };
         httpProvider.execute(httpRequest);
     }
@@ -102,6 +108,37 @@ public class ApacheHttpClientProviderTest {
         assertTrue("response content length is 0", 0<response.getContentLength());
         assertTrue("Content-Type Header should be present", response.getHeaders().get("Content-Type") != null);
     }
+
+    @Test
+    public void test_ApacheHttpClientResponse_additionalHeaders() throws HttpException, IOException {
+        String requestBodyJson = "{\"foo\":\"bar\"}";
+        url = "http://google.com";
+
+        httpProvider = ApacheHttpClientProvider.builder().build();
+        httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "PUT", url, requestBodyJson);
+
+        final String additionalHeaderName = "foohead";
+        final String additionalHeaderValue = "barval";
+        httpRequest.addHeader(additionalHeaderName, additionalHeaderValue);
+
+        HttpRequestBase httpRequestBase = ApacheHttpClientProviderExposer.getHttpRequestBase(httpRequest);
+        Header[] headers = httpRequestBase.getHeaders(additionalHeaderName);
+        assertTrue("headers was null", null != headers);
+        int expectedLength = 1;
+        int length = headers.length;
+        assertTrue("headers was expected length " + expectedLength + ", actual length " + length,
+        expectedLength == length);
+        Header header = headers[0];
+        assertTrue("header was null", null != header);
+        String name = header.getName();
+        String value = header.getValue();
+        assertTrue("name was expected " + additionalHeaderName + ", actual " + name,
+        additionalHeaderName.equals(name));
+        assertTrue("value was expected " + additionalHeaderValue + ", actual " + value,
+        additionalHeaderValue.equals(value));
+
+    }
+
 
     @Test
     public void test_badUri() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {

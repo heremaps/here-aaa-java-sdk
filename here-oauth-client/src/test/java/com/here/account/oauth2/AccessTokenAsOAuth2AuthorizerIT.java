@@ -48,7 +48,12 @@ public class AccessTokenAsOAuth2AuthorizerIT {
                 String accessToken = value.substring(expectedBearerSpace.length());
                 verifyAccessToken(accessToken);
             }
-            
+
+            @Override
+            public void addHeader(String name, String value) {
+                // no-op
+            }
+
         };
         String method = "GET";
         String url = "https://www.example.com/bar";

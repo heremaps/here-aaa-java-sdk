@@ -44,7 +44,20 @@ public interface HttpProvider extends Closeable {
          * @param value the value to add in the Authorization header
          */
         void addAuthorizationHeader(String value);
-        
+
+        /**
+         * Adds the additional (name, value)-pair to be sent as HTTP Headers
+         * on the HTTP Request.
+         * See also
+         * <a href="https://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230</a>.
+         *
+         * @param name the name of the HTTP Header to add
+         * @param value the value of the HTTP Header to add
+         */
+        default void addHeader(String name, String value) {
+            throw new UnsupportedOperationException("addHeader not supported");
+        }
+
     }
     
     /**
