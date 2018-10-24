@@ -172,8 +172,8 @@ above will create javadocs locally, which you can see at 'here-oauth-client/targ
 If you are just getting started, go to com.here.account.oauth2.HereAccessTokenProvider javadocs for 
 the overview of two options:
 - get an "always fresh" HERE Access Token via the 
-HereAccessTokenProvider.builder().build(); followed by .getAccessToken(); approach
-- get a new HERE Access Token every time via HereAccessTokenProvider.builder().setAlwaysRequestNewToken(false).build(); followed by .getAccessToken(); approach
+HereAccessTokenProvider.builder().build(); followed by .getAccessToken(); approach - i.e. reuse created tokens within their lifetime
+- get a new HERE Access Token every time via HereAccessTokenProvider.builder().setAlwaysRequestNewToken(true).build(); followed by .getAccessToken(); approach
 
 A third option is to get an id_token
 - get Id Token via com.here.account.oauth2.HereAccount's TokenEndpoint.requestToken(..) approach by setting the
