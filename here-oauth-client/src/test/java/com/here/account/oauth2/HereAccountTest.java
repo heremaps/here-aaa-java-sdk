@@ -695,23 +695,4 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
         Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
     }
-
-    @Test
-    public void testGetFreshTokenVerifyDefaultExpiration() throws Exception {
-        HttpProvider httpProvider = getHttpProvider();
-
-        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                httpProvider,
-                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret)
-        );
-
-        Long defaultExpiresIn = 86400L;  // 24hrs
-        Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
-        Long actualExpiresIn = freshToken.get().getExpiresIn();
-        Long difference = defaultExpiresIn - actualExpiresIn;
-        Long acceptableVariance = 2L;
-
-        Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
-    }
 }
