@@ -679,10 +679,30 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
     @Test
     public void testGetFreshTokenVerifyUserSpecifiedExpiration() throws Exception {
-        HttpProvider httpProvider = getHttpProvider();
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        String body = "{\"access_token\":\"my-token\",\"expires_in\":50}";
+        final HttpProvider.HttpResponse mockHttpResponse = new HttpProvider.HttpResponse() {
+
+            @Override
+            public int getStatusCode() {
+                return 200;
+            }
+
+            @Override
+            public long getContentLength() {
+                return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public InputStream getResponseBody() throws IOException {
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                return new ByteArrayInputStream(bytes);
+            }
+        };
+        Mockito.when(mockHttpProvider.execute(Mockito.any())).thenReturn(mockHttpResponse);
 
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                httpProvider,
+                mockHttpProvider,
                 new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
                         url, accessKeyId, accessKeySecret)
         );
@@ -691,8 +711,8 @@ public class HereAccountTest extends AbstractCredentialTezt {
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(new ClientCredentialsGrantRequest().setExpiresIn(expiresIn));
         Long actualExpiresIn = freshToken.get().getExpiresIn();
         Long difference = expiresIn - actualExpiresIn;
-        Long acceptableVariance = 2L;
+        Long acceptableDifference = 2L;
 
-        Assert.assertTrue("ExpiresIn not within exceptable variance", (acceptableVariance >= difference));
+        Assert.assertTrue("ExpiresIn not within acceptable difference", (acceptableDifference >= difference));
     }
 }
