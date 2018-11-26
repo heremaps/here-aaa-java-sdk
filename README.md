@@ -169,13 +169,12 @@ Developer Usage
 Read the javadocs for details and helpful code snippets (such as setting the HTTP connection pool size).  The mvn commands 
 above will create javadocs locally, which you can see at 'here-oauth-client/target/apidocs/index.html'.
 
-If you are just getting started, go to com.here.account.oauth2.HereAccessTokenProvider javadocs for 
+If you are just getting started, go to `com.here.account.oauth2.HereAccessTokenProvider` javadocs for 
 the overview of two options:
-- get an "always fresh" HERE Access Token via the 
-HereAccessTokenProvider.builder().build(); followed by .getAccessToken(); approach
-- get a new HERE Access Token every time via HereAccessTokenProvider.builder().setAlwaysRequestNewToken(false).build(); followed by .getAccessToken(); approach
+- To get a supplier of HERE Access Tokens optimized for making repeated API calls to resource servers, use `HereAccessTokenProvider.builder().build();` once followed by repeated calls to `.getAccessToken();`. This option is also recommended for long-running scenarios. In this default option, created Access Tokens are reused during their lifetime and automatically updated for you when needed.
+- To get a new HERE Access Token only once, or if you want to manage your own token expirations, use `HereAccessTokenProvider.builder().setAlwaysRequestNewToken(true).build();` followed by calls to `.getAccessToken();`.
 
 A third option is to get an id_token
-- get Id Token via com.here.account.oauth2.HereAccount's TokenEndpoint.requestToken(..) approach by setting the
+- get Id Token via `com.here.account.oauth2.HereAccount`'s `TokenEndpoint.requestToken(..)` approach by setting the
 scope field in the request.
 
