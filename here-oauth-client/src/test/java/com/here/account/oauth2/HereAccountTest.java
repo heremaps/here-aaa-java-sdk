@@ -715,4 +715,42 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
         Assert.assertTrue("ExpiresIn not within acceptable difference", (acceptableDifference >= difference));
     }
+    
+    @Test(expected = NullPointerException.class)
+    public void test_getTokenEndpoint_old_null_url() {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        ClientCredentialsProvider mockClientCredentialsProvider =
+                Mockito.mock(ClientCredentialsProvider.class);
+        Mockito.doReturn(null)
+                .when(mockClientCredentialsProvider).getTokenEndpointUrl();
+        Mockito.doReturn(HttpConstants.HttpMethods.POST)
+                .when(mockClientCredentialsProvider).getHttpMethod();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(mockHttpProvider, mockClientCredentialsProvider);
+        assertTrue("tokenEndpoint was null", null != tokenEndpoint);
+
+        AccessTokenRequest accessTokenRequest = new IdentityTokenRequest();
+        // we will get an error as the apache http response is null.
+        tokenEndpoint.requestToken(accessTokenRequest);
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void test_getTokenEndpoint_old_non_null_clock() {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        ClientCredentialsProvider mockClientCredentialsProvider =
+                Mockito.mock(ClientCredentialsProvider.class);
+        Mockito.doReturn(null)
+                .when(mockClientCredentialsProvider).getTokenEndpointUrl();
+        Mockito.doReturn(HttpConstants.HttpMethods.POST)
+                .when(mockClientCredentialsProvider).getHttpMethod();
+        Clock myClock = Clock.SYSTEM;
+        Mockito.doReturn(myClock).when(mockClientCredentialsProvider).getClock();
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(mockHttpProvider, mockClientCredentialsProvider);
+        assertTrue("tokenEndpoint was null", null != tokenEndpoint);
+
+        AccessTokenRequest accessTokenRequest = new IdentityTokenRequest();
+        // we will get an error as the apache http response is null.
+        tokenEndpoint.requestToken(accessTokenRequest);
+    }
 }

@@ -133,6 +133,41 @@ public class HereAccount {
      * This class cannot be instantiated.
      */
     private HereAccount() {}
+    
+    
+    
+    
+    /**
+     * 
+     * @deprecated
+     * Use of getTokenEndpoint(HttpProvider httpProvider, ClientAuthorizationRequestProvider clientAuthorizationRequestProvider) is suggested
+     * This method is solely for backward compatibility
+     * 
+     * Get the ability to run various Token Endpoint API calls to the 
+     * HERE Account Authorization Server.
+     * See OAuth2.0 
+     * <a href="https://tools.ietf.org/html/rfc6749#section-4">Obtaining Authorization</a>.
+     * 
+     * The returned {@code TokenEndpoint} exposes an abstraction to make calls
+     * against the OAuth2 token endpoint identified by the given client credentials
+     * provider.  In addition, all calls made against the returned endpoint will
+     * automatically be injected with the given client credentials.
+     * 
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param clientCredentialsProvider identifies the token endpoint URL and
+     *     client credentials to be injected into requests
+     * @return a {@code TokenEndpoint} representing access for the provided client
+     */
+    public static TokenEndpoint getTokenEndpoint(
+            HttpProvider httpProvider,
+            ClientCredentialsProvider clientCredentialsProvider) {
+        return new TokenEndpointImpl(reuseClock(clientCredentialsProvider), httpProvider, clientCredentialsProvider, new JacksonSerializer());
+    }
+    
+    
+    
+    
+    
 
     /**
      * Get the ability to run various Token Endpoint API calls to the 
@@ -171,6 +206,26 @@ public class HereAccount {
         Clock clock = null;
         if (null != clientAuthorizationRequestProvider) {
             clock = clientAuthorizationRequestProvider.getClock();
+        }
+        if (null == clock) {
+            clock = new SettableSystemClock();
+        }
+        return clock;
+    }
+    
+    /**
+     * If we can re-use the Clock, then corrections made by HereAccount will agree
+     * with the ones the clientAuthorizationRequestProvider/OAuth1Signer uses.
+     * Otherwise, if clientAuthorizationRequestProvider is null, or its clock is
+     * null, a SettableSystemClock is returned.
+     *
+     * @param clientAuthorizationRequestProvider the authorization provider
+     * @return the clock to use
+     */
+    private static Clock reuseClock(ClientCredentialsProvider clientCredentialsProvider) {
+        Clock clock = null;
+        if (null != clientCredentialsProvider) {
+            clock = clientCredentialsProvider.getClock();
         }
         if (null == clock) {
             clock = new SettableSystemClock();
