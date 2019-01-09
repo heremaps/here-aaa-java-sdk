@@ -53,7 +53,7 @@ public class ErrorResponseTest {
                 null == (actualAction));
 
         String actualCorrelationId = errorResponse.getCorrelationId();
-        assertTrue("expected correlationId " + correlationId + ", actual " + actualCorrelationId,
+        assertTrue("expected correlationId " + null + ", actual " + actualCorrelationId,
                 null == (actualCorrelationId));
 
     }
@@ -86,7 +86,7 @@ public class ErrorResponseTest {
     }
 
     @Test
-    public void test_correlationId() {
+    public void test_allArgs_constructor() {
         errorResponse = new ErrorResponse(error,
                 errorDescription,
                 errorId,
