@@ -113,7 +113,7 @@ public class ErrorResponse {
      * This property is a HERE extension to RFC6749 providing additional data.
      */
     private final String errorId;
-    
+
     /**
      * A more detailed categorized code for the error, specific to the HERE authorization server 
      * semantics.
@@ -131,23 +131,103 @@ public class ErrorResponse {
      * This property is a HERE extension to RFC6749 providing additional data.
      */
     private final String message;
-    
+
+    /**
+     * The title for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String title;
+
+    /**
+     * The HTTP status code for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final Integer status;
+
+    /**
+     * The error code for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String code;
+
+    /**
+     * The cause for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String cause;
+
+    /**
+     * The action for this error response.  Actionable instructions for the user.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String action;
+
+    /**
+     * The unique request correlation id, useful for support questions,
+     * or tracking purposes.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    private final String correlationId;
+
     public ErrorResponse() {
-        this(null, null, null, null, null, null);
+        this(null, null, null, null, null, null,
+                null, null, null, null, null, null);
     }
     
-    public ErrorResponse(String error, 
+    public ErrorResponse(
+            String error,
             String errorDescription,
-          String errorId,
-          Integer httpStatus,
-          Integer errorCode,
-          String message) {
+            String errorId,
+            Integer httpStatus,
+            Integer errorCode,
+            String message) {
+        this(error,
+                errorDescription,
+                errorId,
+                httpStatus,
+                errorCode,
+                message,
+                null, null, null, null, null, null);
+    }
+
+    public ErrorResponse(
+            String error,
+            String errorDescription,
+            String errorId,
+            Integer httpStatus,
+            Integer errorCode,
+            String message,
+            String title,
+            Integer status,
+            String code,
+            String cause,
+            String action,
+            String correlationId) {
         this.error = error;
         this.errorDescription = errorDescription;
         this.httpStatus = httpStatus;
         this.errorId = errorId;
         this.errorCode = errorCode;
         this.message = message;
+
+        this.title = title;
+        this.status = status;
+        this.code = code;
+        this.cause = cause;
+        this.action = action;
+        this.correlationId = correlationId;
     }
     
     /**
@@ -281,12 +361,76 @@ public class ErrorResponse {
     }
 
     /**
+     * The title for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * The HTTP status code for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * The error code for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public String getCode() {
+        return code;
+    }
+
+    /**
+     * The cause for this error response.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public String getCause() {
+        return cause;
+    }
+
+    /**
+     * The action for this error response.  Actionable instructions for the user.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public String getAction() {
+        return action;
+    }
+
+    /**
+     * The unique request correlation id, useful for support questions,
+     * or tracking purposes.
+     *
+     * <p>
+     * This property is a HERE extension to RFC6749 providing additional data.
+     */
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
         return "ErrorResponse [error=" + error + ", errorDescription=" + errorDescription + ", httpStatus=" + httpStatus
-                + ", errorId=" + errorId + ", errorCode=" + errorCode + ", message=" + message + "]";
+                + ", errorId=" + errorId + ", errorCode=" + errorCode + ", message=" + message
+                + ", title=" + title + ", status=" + status + ", code=" + code
+                + ", cause=" + cause + ", action=" + action + ", correlationId=" + correlationId
+                + "]";
     }
-        
+
 }
