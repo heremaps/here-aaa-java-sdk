@@ -90,16 +90,18 @@ public class FromRunAsIdFileProvider
     }
 
     protected void verifyFileIsReadable() {
+        File file;
         try {
             URL url = new URL(getTokenEndpointUrl());
-            File file = Paths.get(url.toURI()).toFile();
-            if (file.exists() && file.canRead()) {
-                return;
-            }
-            throw new RequestProviderException("trouble FromRunAsIdFile " + tokenUrl + " isn't readable");
+            file = Paths.get(url.toURI()).toFile();
         } catch (Exception e) {
-            throw new RequestProviderException("unable to verify whether file is readable " + tokenUrl);
-
+            throw new RequestProviderException("unable to convert url to file " + tokenUrl);
+        }
+        if (!file.exists()) {
+            throw new RequestProviderException("file " + tokenUrl + " does not exist'");
+        }
+        if (!file.canRead()) {
+            throw new RequestProviderException("file " + tokenUrl + " is not readable");
         }
     }
 

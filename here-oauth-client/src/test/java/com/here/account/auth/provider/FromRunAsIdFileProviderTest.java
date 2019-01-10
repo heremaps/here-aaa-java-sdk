@@ -16,8 +16,8 @@
 package com.here.account.auth.provider;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.oauth2.AccessTokenRequest;
@@ -64,6 +64,40 @@ public class FromRunAsIdFileProviderTest {
         this.expectedTokenEndpointUrl = tokenUrl;
         verifyExpected(provider);
     }
+
+    @Test
+    public void test_fileDoesNotExist() throws IOException {
+        String testMethodName = testName.getMethodName();
+        File file = new File(UUID.randomUUID().toString());
+        String tokenUrl = FILE_URL_START + file.getAbsolutePath();
+        provider = new FromRunAsIdFileProvider(new SettableSystemClock(), tokenUrl);
+        this.expectedTokenEndpointUrl = tokenUrl;
+        try {
+            verifyExpected(provider);
+            fail(testMethodName + "() should have thrown an exception, but didn't");
+        } catch (RequestProviderException e) {
+            e.getMessage().contains("does not exist");
+        }
+    }
+
+    @Test
+    public void test_fileIsNotReadable() throws IOException {
+        String testMethodName = testName.getMethodName();
+        File file = File.createTempFile(testMethodName, "");
+        file.deleteOnExit();
+        file.setReadable(false);
+        String tokenUrl = FILE_URL_START + file.getAbsolutePath();
+        provider = new FromRunAsIdFileProvider(new SettableSystemClock(), tokenUrl);
+        this.expectedTokenEndpointUrl = tokenUrl;
+        try {
+            verifyExpected(provider);
+            fail(testMethodName + "() should have thrown an exception, but didn't");
+        } catch (RequestProviderException e) {
+            e.getMessage().contains("is not readable");
+        }
+    }
+
+
 
     static final String FILE_URL_START = "file://";
 
