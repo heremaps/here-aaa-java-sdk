@@ -76,7 +76,7 @@ public class FromRunAsIdFileProviderTest {
             verifyExpected(provider);
             fail(testMethodName + "() should have thrown an exception, but didn't");
         } catch (RequestProviderException e) {
-            e.getMessage().contains("does not exist");
+            assertTrue(e.getMessage().contains("does not exist"));
         }
     }
 
@@ -93,7 +93,7 @@ public class FromRunAsIdFileProviderTest {
             verifyExpected(provider);
             fail(testMethodName + "() should have thrown an exception, but didn't");
         } catch (RequestProviderException e) {
-            e.getMessage().contains("is not readable");
+            assertTrue(e.getMessage().contains("is not readable"));
         }
     }
 
