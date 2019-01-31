@@ -90,16 +90,24 @@ public class FromRunAsIdFileProvider
     }
 
     protected void verifyFileIsReadable() {
+        File file;
         try {
             URL url = new URL(getTokenEndpointUrl());
-            File file = Paths.get(url.toURI()).toFile();
-            if (file.exists() && file.canRead()) {
-                return;
-            }
-            throw new RequestProviderException("trouble FromRunAsIdFile " + tokenUrl + " isn't readable");
+            file = Paths.get(url.toURI()).toFile();
         } catch (Exception e) {
-            throw new RequestProviderException("unable to verify whether file is readable " + tokenUrl);
-
+            throw new RequestProviderException("Unable to get HERE Access Token; unable to convert url to file "
+                    + tokenUrl
+                   + ".  If you were trying to use runAsId, contact HERE support.");
+        }
+        if (!file.exists()) {
+            throw new RequestProviderException("Unable to get HERE Access Token.  File "
+                    + tokenUrl
+                    + " does not exist.  If you were trying to use runAsId, contact HERE support.");
+        }
+        if (!file.canRead()) {
+            throw new RequestProviderException("Unable to get HERE Access Token.  File "
+                    + tokenUrl
+                    + " is not readable.  If you were trying to use runAsId, contact HERE support.");
         }
     }
 
