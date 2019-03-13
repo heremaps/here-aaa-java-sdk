@@ -29,7 +29,7 @@ Server, for use with HERE Services.
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client</artifactId>
-  <version>0.4.16</version>
+  <version>0.4.17</version>
 </dependency>
 ```
 HERE OAuth Client Examples
