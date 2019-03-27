@@ -2,7 +2,7 @@
 
 HERE Authentication, Authorization, and Accounting
 
-Copyright (c) 2016 HERE Europe B.V.
+Copyright (c) 2016-2019 HERE Europe B.V.
 
 Introduction
 ============
