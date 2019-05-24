@@ -105,5 +105,9 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDefaultScope() { return getDelegate().getDefaultScope(); }
 }

@@ -63,6 +63,7 @@ public abstract class AbstractCredentialTezt {
     protected String url;
     protected String accessKeyId;
     protected String accessKeySecret;
+    protected String defaultScope;
     
     @Before
     public void setUp() throws Exception {
@@ -81,9 +82,7 @@ public abstract class AbstractCredentialTezt {
             file = getDefaultCredentialsFile();
         }
         if (null != file) {
-            OAuth1ClientCredentialsProvider propertiesCredentialsProvider = 
-                    new OAuth1ClientCredentialsProvider.FromFile(file);
-            hereCredentialsProvider = propertiesCredentialsProvider;
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider.FromFile(file);
             url = hereCredentialsProvider.getTokenEndpointUrl();
             Field field = OAuth1ClientCredentialsProvider.class.getDeclaredField("oauth1Signer");
             field.setAccessible(true);
@@ -94,6 +93,7 @@ public abstract class AbstractCredentialTezt {
             field = OAuth1Signer.class.getDeclaredField("consumerSecret");
             field.setAccessible(true);
             accessKeySecret = (String) field.get(oauth1Signer);
+            defaultScope = hereCredentialsProvider.getDefaultScope();
         }
         
         // jenkins CI
@@ -101,19 +101,22 @@ public abstract class AbstractCredentialTezt {
                 );
         String accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
         String accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY);
+        String scope = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
         if (isNotBlank(url) && isNotBlank(accessKeyId) && isNotBlank(accessKeySecret)) {
             this.url = url;
             this.accessKeyId = accessKeyId;
             this.accessKeySecret = accessKeySecret;
+            this.defaultScope = scope;
             // System.properties override
-            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, scope);
         }
         
         if (null == hereCredentialsProvider) {
             this.url = "http://mock.example.com";
             this.accessKeyId = "testAccessKeyId";
             this.accessKeySecret = "testAccessKeySecret";
-            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(this.url, this.accessKeyId, this.accessKeySecret);
+            this.defaultScope = "hrn:here-dev:authorization::myrealm:project/my-test-project-0000";
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(this.url, this.accessKeyId, this.accessKeySecret, this.defaultScope);
         }
         
         // verify some credentials will be available

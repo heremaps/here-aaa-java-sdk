@@ -73,6 +73,10 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
         assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
+
+        String actualScope = fromFile.getDefaultScope();
+        assertTrue("scope expected "+expectedScope+", actual "+actualScope,
+                expectedScope.equals(actualScope));
     }
 
     @Test (expected = NullPointerException.class)
@@ -81,6 +85,14 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
 
         fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
         String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
+    }
+
+    @Test (expected = NullPointerException.class)
+    public void test_getDelegateDefaultScopeThrowsNonIOException() throws IOException {
+        createTmpFile();
+
+        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
+        fromFile.getDefaultScope();
     }
 
     @Test

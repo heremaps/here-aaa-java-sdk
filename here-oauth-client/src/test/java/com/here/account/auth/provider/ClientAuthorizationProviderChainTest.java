@@ -43,10 +43,12 @@ public class ClientAuthorizationProviderChainTest {
     String expectedTokenEndpointUrl1 = "expectedTokenEndpointUrl1";
     String expectedAccessKeyId1 = "expectedAccessKeyId1";
     String expectedAccessKeySecret1 = "accessKeySecret1";
+    String expectedTokenScope = "expectedScope";
 
     String tokenEndpointUrl;
     String accessKeyId;
     String accessKeySecret;
+    String tokenScope;
     File file;
 
     protected void createTmpFile() throws IOException {
@@ -87,6 +89,7 @@ public class ClientAuthorizationProviderChainTest {
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, expectedTokenEndpointUrl1);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, expectedAccessKeyId1);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, expectedAccessKeySecret1);
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, expectedTokenScope);
 
         return  new FromSystemProperties();
     }
@@ -95,10 +98,12 @@ public class ClientAuthorizationProviderChainTest {
         tokenEndpointUrl = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY);
         accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
         accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY);
+        tokenScope = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
 
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, "");
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, "");
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, "");
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, "");
 
         return  new FromSystemProperties();
     }
@@ -116,10 +121,14 @@ public class ClientAuthorizationProviderChainTest {
         if (null == accessKeySecret) {
             accessKeySecret = "";
         }
+        if (null == tokenScope) {
+            tokenScope = "";
+        }
 
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, tokenEndpointUrl);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, accessKeyId);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, accessKeySecret);
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, tokenScope);
     }
 
     public ClientAuthorizationRequestProvider getClientAuthorizationRequestProviderFromHerePropertiesFile() throws Exception {
@@ -134,7 +143,8 @@ public class ClientAuthorizationProviderChainTest {
         byte[] bytes = ("here.token.endpoint.url=https://www.example.com/oauth2/token\n"
                 + "here.client.id=my-client-id\n"
                 + "here.access.key.id=my-access-key-id\n"
-                + "here.access.key.secret=my-secret\n")
+                + "here.access.key.secret=my-secret\n"
+                + "here.token.scope=my-scope")
                 .getBytes(StandardCharsets.UTF_8);
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
@@ -207,6 +217,12 @@ public class ClientAuthorizationProviderChainTest {
                 Mockito.matches("\\AOAuth .+\\z"));
         assertTrue("grantType should equal " + ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE,
                 providerChain.getNewAccessTokenRequest().getGrantType().equals(ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE));
+
+        String expectedDefaultScope = clientAuthorizationRequestProvider.getDefaultScope();
+        String actualDefaultScope = providerChain.getDefaultScope();
+
+        assertTrue("defaultScope expected "+expectedDefaultScope+", actual "+ actualDefaultScope,
+                expectedDefaultScope.equals(actualDefaultScope));
 
     }
 }

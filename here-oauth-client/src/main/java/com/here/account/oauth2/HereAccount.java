@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -219,7 +222,7 @@ public class HereAccount {
      * Otherwise, if clientAuthorizationRequestProvider is null, or its clock is
      * null, a SettableSystemClock is returned.
      *
-     * @param clientAuthorizationRequestProvider the authorization provider
+     * @param clientCredentialsProvider the authorization provider
      * @return the clock to use
      */
     private static Clock reuseClock(ClientCredentialsProvider clientCredentialsProvider) {
@@ -328,6 +331,7 @@ public class HereAccount {
         private final String url;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
         private final Serializer serializer;
+        private final String scope;
         
         /**
          * Construct a new ability to obtain authorization from the HERE authorization server.
@@ -348,6 +352,7 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
+            scope = clientAuthorizationProvider.getDefaultScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)
@@ -396,11 +401,12 @@ public class HereAccount {
                                                        int retryFixableErrorsCount)
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
             String method = httpMethod.getMethod();
-            
             HttpProvider.HttpRequest httpRequest;
+            Map<String, List<String>> formParams = authorizationRequest.toFormParams();
+
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
-                clientAuthorizer, method, url, authorizationRequest.toFormParams());
+                clientAuthorizer, method, url, addScopeToFormParams(formParams, authorizationRequest.getScope()));
 
             try {
                 return client.sendMessage(httpRequest, AccessTokenResponse.class,
@@ -410,6 +416,16 @@ public class HereAccount {
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
             }
+        }
+
+        private Map<String, List<String>> addScopeToFormParams(Map<String, List<String>> formParams, String scope) {
+            // If the user supplied a scope, use it. Otherwise use the scope from the configuration data source.
+            String scopeToUse = (null != scope && !scope.isEmpty()) ? scope : this.scope;
+
+            if (null != scopeToUse && !scopeToUse.isEmpty())
+                formParams.put(AccessTokenRequest.SCOPE_FORM, Collections.singletonList(scopeToUse));
+
+            return formParams;
         }
 
         private static final int CLOCK_SKEW_STATUS_CODE = 401;

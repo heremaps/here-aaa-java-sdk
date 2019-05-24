@@ -83,6 +83,8 @@ implements ClientAuthorizationRequestProvider {
                     section.get(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY));
             properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY,
                     section.get(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY));
+            properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY,
+                    section.get(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY));
             return properties;
         }
     }
@@ -111,4 +113,11 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDefaultScope() {
+        return getDelegate().getDefaultScope();
+    }
 }

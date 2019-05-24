@@ -15,6 +15,7 @@
  */
 package com.here.account.auth.provider;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.here.account.http.HttpConstants;
@@ -33,6 +34,7 @@ public class FromPropertiesTest {
     private final String tokenEndpointUrl = "https://www.example.com/token" + UUID.randomUUID();
     private final String accessKeyId = "my-access-key-id" + UUID.randomUUID();
     private final String accessKeySecret = "my-access-key-secret" + UUID.randomUUID();
+    private final String scope = "my-scope-" + UUID.randomUUID();
     private Clock clock;
     private FromProperties fromProperties;
 
@@ -45,13 +47,29 @@ public class FromPropertiesTest {
     public void test_3props_constructor() {
         fromProperties = new FromProperties(clock, tokenEndpointUrl, accessKeyId, accessKeySecret);
 
-        verifyFromProperties();
+        verifyFromProperties(false);
     }
 
-    protected void verifyFromProperties() {
+    @Test
+    public void test_4props_constructor() {
+        fromProperties = new FromProperties(clock, tokenEndpointUrl, accessKeyId, accessKeySecret, scope);
+
+        verifyFromProperties(true);
+    }
+
+    protected void verifyFromProperties(Boolean hasScopeProperty) {
         String actualTokenEndpointUrl = fromProperties.getTokenEndpointUrl();
         assertTrue("expected tokenEndpointUrl " + tokenEndpointUrl + ", actual " + actualTokenEndpointUrl,
                 tokenEndpointUrl.equals(actualTokenEndpointUrl));
+
+        String actualScope = fromProperties.getDefaultScope();
+        if (hasScopeProperty) {
+            assertTrue("expected scope " + scope + ", actual " + actualScope, scope.equals(actualScope));
+        } else {
+            assertNull("expected scope NULL, actual " + actualScope, actualScope);
+        }
+
+
         HttpProvider.HttpRequestAuthorizer authorizer = fromProperties.getClientAuthorizer();
         assertTrue("authorizer was null", null != authorizer);
         HttpProvider.HttpRequest mockHttpRequest = Mockito.mock(HttpProvider.HttpRequest.class);
@@ -78,10 +96,11 @@ public class FromPropertiesTest {
         properties.put("here.token.endpoint.url", tokenEndpointUrl);
         properties.put("here.access.key.id", accessKeyId);
         properties.put("here.access.key.secret", accessKeySecret);
+        properties.put("here.token.scope", scope);
 
         fromProperties = new FromProperties(clock, properties);
 
-        verifyFromProperties();
+        verifyFromProperties(true);
     }
 
     @Test(expected = NullPointerException.class) // OAuth1ClientCredentialsProvider complains
@@ -91,10 +110,11 @@ public class FromPropertiesTest {
         properties.put("here.token.endpoint.url", tokenEndpointUrl);
         properties.put("here.access.keyid", accessKeyId);
         properties.put("here.access.key.secret", accessKeySecret);
+        properties.put("here.token.scope", scope);
 
         fromProperties = new FromProperties(clock, properties);
 
-        verifyFromProperties();
+        verifyFromProperties(true);
     }
 
     @Test(expected = NullPointerException.class) // OAuth1ClientCredentialsProvider complains
@@ -104,10 +124,11 @@ public class FromPropertiesTest {
         properties.put("here.token.endpoint.url", tokenEndpointUrl);
         properties.put("here.access.key.id", accessKeyId);
         properties.put("here.access.keysecret", accessKeySecret);
+        properties.put("here.token.scope", scope);
 
         fromProperties = new FromProperties(clock, properties);
 
-        verifyFromProperties();
+        verifyFromProperties(true);
     }
 
     @Test(expected = AssertionError.class) // tokenEndpoint doesn't match
@@ -117,11 +138,24 @@ public class FromPropertiesTest {
         properties.put("here.token.endpointurl", tokenEndpointUrl);
         properties.put("here.access.key.id", accessKeyId);
         properties.put("here.access.key.secret", accessKeySecret);
+        properties.put("here.token.scope", scope);
 
         fromProperties = new FromProperties(clock, properties);
 
-        verifyFromProperties();
+        verifyFromProperties(true);
     }
 
+    @Test(expected = AssertionError.class) // scope doesn't match
+    public void test_properties_badscope_constructor() {
+        Properties properties = new Properties();
 
+        properties.put("here.token.endpoint.url", tokenEndpointUrl);
+        properties.put("here.access.key.id", accessKeyId);
+        properties.put("here.access.key.secret", accessKeySecret);
+        properties.put("here.token.default.scope", scope);
+
+        fromProperties = new FromProperties(clock, properties);
+
+        verifyFromProperties(true);
+    }
 }

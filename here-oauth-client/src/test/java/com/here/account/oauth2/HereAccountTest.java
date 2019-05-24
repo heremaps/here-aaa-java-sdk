@@ -48,28 +48,28 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void testGetTokenNullUrl() throws Exception {
         HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider(null, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(null, accessKeyId, accessKeySecret, defaultScope));
     }
     
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullAccessKeyId() throws Exception {
         HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider(url, null, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, null, accessKeySecret, defaultScope));
     }
     
     @Test(expected=NullPointerException.class)
     public void testGetTokenNullAccessKeySecret() throws Exception {
         HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, null));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, null, defaultScope));
     }
     
     @Test
     public void testGetTokenInvalidUrl() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider("bogus", accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider("bogus", accessKeyId, accessKeySecret, defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -92,7 +92,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void testGetToken_MissingRequiredParameter() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         
         AccessTokenRequest missingParameterRequest = new AccessTokenRequest(null) {
 
@@ -130,7 +130,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                 mockHttpProvider(dummyResponse(200, 
                                                "bogus".getBytes().length, 
                                                new ByteArrayInputStream("bogus".getBytes("UTF-8")))),
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -146,7 +146,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                 mockHttpProvider(dummyResponse(400, 
                                                "bogus".getBytes().length, 
                                                new ByteArrayInputStream("bogus".getBytes("UTF-8")))),
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret", defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -164,7 +164,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                 mockHttpProvider(dummyResponse(400, 
                                                responseBody.getBytes().length, 
                                                new ByteArrayInputStream(responseBody.getBytes("UTF-8")))),
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "mySecret"));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "mySecret", defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -180,7 +180,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
     @Test
     public void test_getNewAccessTokenRequest() {
-        OAuth1ClientCredentialsProvider clientAuthorizationRequestProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
+        OAuth1ClientCredentialsProvider clientAuthorizationRequestProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope);
         Assert.assertThat(clientAuthorizationRequestProvider.getNewAccessTokenRequest(), instanceOf(AccessTokenRequest.class));
     }
 
@@ -230,7 +230,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void testGetTokenHttpExceptionExecuting() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 mockThrowingHttpProvider(new HttpException("error")),
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -244,7 +244,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void testGetTokenIOExceptionExecuting() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 mockThrowingHttpProvider(new IOException("error")),
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -380,7 +380,8 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
         HttpResponse tokenHttpResponse = Mockito.mock(HttpResponse.class);
         String expectedAccessToken = "abc."+UUID.randomUUID().toString()+".xyz";
-        String responseBody = getResponseBody(expectedAccessToken);
+        String expectedScope = "hrn:here:authorization::myrealm:project/my-project-0000";
+        String responseBody = getResponseBody(expectedAccessToken, expectedScope);
         byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
 
         Mockito.doReturn(200)
@@ -459,7 +460,8 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
         HttpResponse tokenHttpResponse = Mockito.mock(HttpResponse.class);
         String expectedAccessToken = "abc."+UUID.randomUUID().toString()+".xyz";
-        String responseBody = getResponseBody(expectedAccessToken);
+        String expectedScope = "hrn:here:authorization::myrealm:project/my-project-0000";
+        String responseBody = getResponseBody(expectedAccessToken, expectedScope);
         byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
 
         Mockito.doReturn(200)
@@ -514,6 +516,9 @@ public class HereAccountTest extends AbstractCredentialTezt {
         String accessToken = accessTokenResponse.getAccessToken();
         assertTrue("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
                 expectedAccessToken.equals(accessToken));
+        String scope = accessTokenResponse.getScope();
+        assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                expectedScope.equals(scope));
 
         Mockito.verify(mockHttpProvider, Mockito.times(3))
                 .execute(Mockito.any(HttpProvider.HttpRequest.class));
@@ -531,7 +536,8 @@ public class HereAccountTest extends AbstractCredentialTezt {
         File file = File.createTempFile(UUID.randomUUID().toString(), ".tmp");
         try {
             final String expectedAccessToken = "ey23.45";
-            writeToFile(file, getResponseBody(expectedAccessToken));
+            final String expectedScope = "hrn:here:authorization::myrealm:project/my-project-0000";
+            writeToFile(file, getResponseBody(expectedAccessToken, expectedScope));
 
             Mockito.doReturn("file://" + file.getAbsolutePath())
                     .when(mockClientAuthorizationRequestProvider).getTokenEndpointUrl();
@@ -544,14 +550,17 @@ public class HereAccountTest extends AbstractCredentialTezt {
             String accessToken = accessTokenResponse.getAccessToken();
             assertTrue("expected access token " + expectedAccessToken + ", actual " + accessToken,
                     expectedAccessToken.equals(accessToken));
+            String scope = accessTokenResponse.getScope();
+            assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                    expectedScope.equals(scope));
         } finally {
             file.delete();
         }
 
     }
 
-    protected static String getResponseBody(String expectedAccessToken) {
-        return "{\"access_token\":\""+expectedAccessToken+"\",\"expires_in\":54321}";
+    protected static String getResponseBody(String expectedAccessToken, String scope) {
+        return "{\"access_token\":\""+expectedAccessToken+"\",\"expires_in\":54321,\"scope\":\""+scope+"\"}";
     }
 
     @Test(expected = RequestExecutionException.class)
@@ -619,7 +628,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                                  dummyResponse(200,
                                                validToken2.getBytes().length,
                                                new ByteArrayInputStream(validToken2.getBytes("UTF-8")))),
-                new OAuth1ClientCredentialsProvider(mySettableClock, url, accessKeyId, accessKeySecret),
+                new OAuth1ClientCredentialsProvider(mySettableClock, url, accessKeyId, accessKeySecret, defaultScope),
                 new JacksonSerializer());
         
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.
@@ -704,7 +713,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 mockHttpProvider,
                 new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret)
+                        url, accessKeyId, accessKeySecret, defaultScope)
         );
 
         Long expiresIn = 50L;

@@ -39,6 +39,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     private final Clock clock;
     private final String tokenEndpointUrl;
     private final OAuth1Signer oauth1Signer;
+    private final String defaultScope;
     
     /**
      * Construct a new {@code OAuth1ClientCredentialsProvider} that points to
@@ -48,17 +49,20 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      * @param tokenEndpointUrl the full URL of the OAuth2.0 token endpoint
      * @param accessKeyId the access key id to be used as a client credential
      * @param accessKeySecret the access key secret to be used as a client credential
+     * @param defaultScope    scope of the access token when one is requested, null=no scope
      */
     public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
                                            String accessKeyId,
-                                           String accessKeySecret) {
-        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret);
+                                           String accessKeySecret,
+                                           String defaultScope) {
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, defaultScope);
     }
 
     public OAuth1ClientCredentialsProvider(Clock clock,
                                            String tokenEndpointUrl,
                                            String accessKeyId,
-                                           String accessKeySecret
+                                           String accessKeySecret,
+                                           String defaultScope
                                            ) {
         Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
@@ -68,6 +72,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         this.clock = clock;
         this.tokenEndpointUrl = tokenEndpointUrl;
         this.oauth1Signer = new OAuth1Signer(clock, accessKeyId, accessKeySecret);
+        this.defaultScope = defaultScope;
     }
 
     /**
@@ -108,6 +113,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         public static final String TOKEN_ENDPOINT_URL_PROPERTY = "here.token.endpoint.url";
         public static final String ACCESS_KEY_ID_PROPERTY = "here.access.key.id";
         public static final String ACCESS_KEY_SECRET_PROPERTY = "here.access.key.secret";
+        public static final String TOKEN_SCOPE_PROPERTY = "here.token.scope";
 
         /**
          * Builds an {@link OAuth1ClientCredentialsProvider} by pulling the
@@ -119,7 +125,8 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         public FromProperties(Properties properties) {
             super(properties.getProperty(TOKEN_ENDPOINT_URL_PROPERTY),
                   properties.getProperty(ACCESS_KEY_ID_PROPERTY),
-                  properties.getProperty(ACCESS_KEY_SECRET_PROPERTY));
+                  properties.getProperty(ACCESS_KEY_SECRET_PROPERTY),
+                  properties.getProperty(TOKEN_SCOPE_PROPERTY));
         }
     }
 
@@ -180,4 +187,11 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         return HttpMethods.POST;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDefaultScope() {
+        return defaultScope;
+    }
 }

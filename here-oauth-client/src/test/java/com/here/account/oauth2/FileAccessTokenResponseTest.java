@@ -33,11 +33,12 @@ public class FileAccessTokenResponseTest {
         String idToken = null;
         int secondsFromNow = 45;
         Long exp = (System.currentTimeMillis() / 1000L) + secondsFromNow;
+        String expectedScope = "my-scope";
         
         response = new FileAccessTokenResponse( accessToken, 
                  tokenType,
                  expiresIn,  refreshToken,  idToken,
-                 exp);
+                 exp, expectedScope);
         
         String actualAccessToken = response.getAccessToken();
         assertTrue("accessToken didn't match expected "+accessToken+", actual "+actualAccessToken,
@@ -53,5 +54,9 @@ public class FileAccessTokenResponseTest {
         Long actualExp = response.getExp();
         assertTrue("expected exp " + exp + ", actual " + actualExp,
                 exp.equals(actualExp));
+
+        String actualScope = response.getScope();
+        assertTrue("expected scope " + expectedScope + ", actual " + actualScope,
+                expectedScope.equals(actualScope));
     }
 }

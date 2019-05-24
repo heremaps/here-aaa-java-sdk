@@ -103,6 +103,10 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
         assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
 
+        String actualScope = clientAuthorizationRequestProvider.getDefaultScope();
+        assertTrue("scope expected "+expectedScope+", actual "+actualScope,
+                expectedScope.equals(actualScope));
+
         HttpRequestAuthorizer httpRequestAuthorizer = clientAuthorizationRequestProvider.getClientAuthorizer();
         assertTrue("httpRequestAuthorizer was null", null != httpRequestAuthorizer);
 

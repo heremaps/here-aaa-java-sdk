@@ -30,14 +30,24 @@ public class FromProperties extends ClientCredentialsGrantRequestProvider
     private final Properties properties;
 
     public FromProperties(Clock clock, String tokenEndpointUrl, String accessKeyId, String accessKeySecret) {
-        this(clock, getProperties(tokenEndpointUrl, accessKeyId, accessKeySecret));
+        this(clock, tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
+    public FromProperties(Clock clock, String tokenEndpointUrl, String accessKeyId, String accessKeySecret, String scope) {
+        this(clock, getProperties(tokenEndpointUrl, accessKeyId, accessKeySecret, scope));
     }
 
     static Properties getProperties(String tokenEndpointUrl, String accessKeyId, String accessKeySecret) {
+        return getProperties(tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
+    static Properties getProperties(String tokenEndpointUrl, String accessKeyId, String accessKeySecret, String scope) {
         Properties properties = new Properties();
         properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, tokenEndpointUrl);
         properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, accessKeyId);
         properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, accessKeySecret);
+        if (null != scope)
+            properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, scope);
         return properties;
     }
 
@@ -72,5 +82,13 @@ public class FromProperties extends ClientCredentialsGrantRequestProvider
     @Override
     public HttpConstants.HttpMethods getHttpMethod() {
         return HttpConstants.HttpMethods.POST;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDefaultScope() {
+        return getDelegate().getDefaultScope();
     }
 }

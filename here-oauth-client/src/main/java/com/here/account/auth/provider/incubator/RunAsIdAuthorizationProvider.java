@@ -48,15 +48,18 @@ public class RunAsIdAuthorizationProvider
             "http://localhost:8001/token";
 
     private final String tokenEndpointUrl;
+    private final String defaultScope;
     
     public RunAsIdAuthorizationProvider() {
-        this(new SettableSystemClock(), RUN_AS_ID_TOKEN_ENDPOINT_URL);
+        this(new SettableSystemClock(), RUN_AS_ID_TOKEN_ENDPOINT_URL, null);
     }
 
     public RunAsIdAuthorizationProvider(Clock clock,
-                                        String tokenEndpointUrl) {
+                                        String tokenEndpointUrl,
+                                        String defaultScope) {
         super(clock);
         this.tokenEndpointUrl = tokenEndpointUrl;
+        this.defaultScope = defaultScope;
     }
     
     /**
@@ -101,5 +104,12 @@ public class RunAsIdAuthorizationProvider
     public HttpMethods getHttpMethod() {
         return HttpMethods.GET;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDefaultScope() {
+        return defaultScope;
+    }
 }

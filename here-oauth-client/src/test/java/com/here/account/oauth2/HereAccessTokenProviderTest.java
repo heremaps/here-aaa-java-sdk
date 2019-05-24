@@ -39,6 +39,7 @@ public class HereAccessTokenProviderTest {
 
     HttpProvider mockHttpProvider;
     String expectedAccessToken;
+    String expectedScope;
     ClientAuthorizationRequestProvider clientAuthorizationRequestProvider;
 
     @Before
@@ -46,7 +47,8 @@ public class HereAccessTokenProviderTest {
         mockHttpProvider = Mockito.mock(HttpProvider.class);
         HttpProvider.HttpResponse httpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
         expectedAccessToken = "ey789."+ UUID.randomUUID().toString()+".878";
-        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken);
+        expectedScope = "scope."+ UUID.randomUUID().toString();
+        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken, expectedScope);
         byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
         Mockito.when(httpResponse.getStatusCode()).thenReturn(200);
         Mockito.when(httpResponse.getResponseBody()).thenReturn(new ByteArrayInputStream(bytes));
@@ -77,6 +79,9 @@ public class HereAccessTokenProviderTest {
             public Clock getClock() {
                 return Clock.SYSTEM;
             }
+
+            @Override
+            public String getDefaultScope() { return "hrn:here-dev:authorization::myrealm:project/my-test-project-0000"; }
         };
 
     }
@@ -116,6 +121,9 @@ public class HereAccessTokenProviderTest {
             String accessToken = accessTokenResponse.getAccessToken();
             assertTrue("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
                     expectedAccessToken.equals(accessToken));
+            String scope = accessTokenResponse.getScope();
+            assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                    expectedScope.equals(scope));
         }
     }
 
@@ -134,6 +142,9 @@ public class HereAccessTokenProviderTest {
             String accessToken = accessTokenResponse.getAccessToken();
             assertTrue("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
                     expectedAccessToken.equals(accessToken));
+            String scope = accessTokenResponse.getScope();
+            assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                    expectedScope.equals(scope));
         }
     }
 
@@ -150,6 +161,9 @@ public class HereAccessTokenProviderTest {
             String accessToken = accessTokenResponse.getAccessToken();
             assertTrue("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
                     expectedAccessToken.equals(accessToken));
+            String scope = accessTokenResponse.getScope();
+            assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                    expectedScope.equals(scope));
         }
     }
 
@@ -163,7 +177,7 @@ public class HereAccessTokenProviderTest {
         AccessTokenResponse deserializedAccessTokenResponse = new AccessTokenResponse(
                  expectedAccessToken,
                  tokenType,
-                 expiresIn,  refreshToken,  idToken
+                 expiresIn,  refreshToken,  idToken, expectedScope
         );
         Mockito.when(jsonSerializer.jsonToPojo(Mockito.any(InputStream.class), Mockito.any(Class.class)))
                 .thenReturn(deserializedAccessTokenResponse);
@@ -180,6 +194,9 @@ public class HereAccessTokenProviderTest {
             String accessToken = accessTokenResponse.getAccessToken();
             assertTrue("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
                     expectedAccessToken.equals(accessToken));
+            String scope = accessTokenResponse.getScope();
+            assertTrue("expected scope " + expectedScope + ", actual " + scope,
+                    expectedScope.equals(scope));
         }
     }
 

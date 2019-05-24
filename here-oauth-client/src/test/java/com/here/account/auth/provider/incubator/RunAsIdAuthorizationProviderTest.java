@@ -72,13 +72,20 @@ public class RunAsIdAuthorizationProviderTest {
     @Test
     public void test_getTokenEndpointUrl_different() {
         String expectedTokenEndpointUrl = "http://www.example.com/token";
+        String expectedScope = "hrn:here-dev:authorization::myrealm:project/my-test-project-0000";
         runAsIdAuthorizationProvider = new RunAsIdAuthorizationProvider(
                 new SettableSystemClock(),
-                expectedTokenEndpointUrl);
+                expectedTokenEndpointUrl,
+                expectedScope);
         String actualTokenEndpointUrl = runAsIdAuthorizationProvider.getTokenEndpointUrl();
         assertTrue("expected tokenEndpointUrl " + expectedTokenEndpointUrl
                 + ", actual " + actualTokenEndpointUrl, 
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
+
+        String actualScope = runAsIdAuthorizationProvider.getDefaultScope();
+        assertTrue("expected scope " + expectedScope
+                + ", actual " + actualScope,
+                expectedScope.equals(actualScope));
     }
     
     @Test

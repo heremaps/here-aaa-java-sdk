@@ -57,7 +57,7 @@ public class JavadocsIT extends AbstractCredentialTezt {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         
         String hereAccessToken = tokenEndpoint.requestToken(
                 new ClientCredentialsGrantRequest()).getAccessToken();
@@ -71,7 +71,7 @@ public class JavadocsIT extends AbstractCredentialTezt {
         // set up url, accessKeyId, and accessKeySecret.
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 ApacheHttpClientProvider.builder().build(), 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope));
         // call this once and keep a reference to freshToken, such as in your beans
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.requestAutoRefreshingToken(
                 new ClientCredentialsGrantRequest());
