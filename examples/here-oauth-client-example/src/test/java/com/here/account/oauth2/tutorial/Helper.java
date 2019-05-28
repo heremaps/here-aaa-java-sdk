@@ -43,13 +43,14 @@ public class Helper {
 
     public static OAuth1ClientCredentialsProvider getSystemCredentials() {
         OAuth1ClientCredentialsProvider credentials = null;
-        String url = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY
-        );
+        String url = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY);
         String accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
         String accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY);
+        String scope = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
+
         if (isNotBlank(url) && isNotBlank(accessKeyId) && isNotBlank(accessKeySecret)) {
             // System.properties override
-            credentials = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret);
+            credentials = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, scope);
         }
         return credentials;
     }

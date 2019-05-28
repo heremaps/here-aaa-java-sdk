@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -68,7 +69,7 @@ public class ClientAuthorizationProviderChainTest {
     public ClientAuthorizationRequestProvider getClientAuthorizationRequestProviderFromIniFile() throws Exception {
         createTmpFile();
         FromHereCredentialsIniStreamTest test = new FromHereCredentialsIniStreamTest();
-        byte[] bytes = test.getDefaultIniStreamContents();
+        byte[] bytes = test.getDefaultIniStreamContents(false);
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
             outputStream.flush();
@@ -221,8 +222,11 @@ public class ClientAuthorizationProviderChainTest {
         String expectedDefaultScope = clientAuthorizationRequestProvider.getDefaultScope();
         String actualDefaultScope = providerChain.getDefaultScope();
 
-        assertTrue("defaultScope expected "+expectedDefaultScope+", actual "+ actualDefaultScope,
-                expectedDefaultScope.equals(actualDefaultScope));
-
+        if (null == expectedDefaultScope) {
+            assertNull("expected scope to be NULL, actual " + actualDefaultScope, actualDefaultScope);
+        } else {
+            assertTrue("defaultScope expected " + expectedDefaultScope + ", actual " + actualDefaultScope,
+                    expectedDefaultScope.equals(actualDefaultScope));
+        }
     }
 }

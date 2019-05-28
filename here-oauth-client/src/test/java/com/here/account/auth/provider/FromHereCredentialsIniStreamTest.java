@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -58,7 +59,7 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
         };
 
         try (InputStream inputStream = new ByteArrayInputStream(
-                getDefaultIniStreamContents()))
+                getDefaultIniStreamContents(false)))
         {
             fromHereCredentialsIniStream = new FromHereCredentialsIniStream(myClock, inputStream);
 
@@ -91,7 +92,7 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
     public void test_basic_default_stream() throws IOException {
 
         try (InputStream inputStream = new ByteArrayInputStream(
-                getDefaultIniStreamContents()))
+                getDefaultIniStreamContents(false)))
         {
             fromHereCredentialsIniStream = new FromHereCredentialsIniStream(inputStream);
             verifyExpected(fromHereCredentialsIniStream);
@@ -104,8 +105,12 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
 
         String actualScope = clientAuthorizationRequestProvider.getDefaultScope();
-        assertTrue("scope expected "+expectedScope+", actual "+actualScope,
-                expectedScope.equals(actualScope));
+        if (null == expectedScope) {
+            assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
+        } else {
+            assertTrue("defaultScope expected " + expectedScope + ", actual " + actualScope,
+                    expectedScope.equals(actualScope));
+        }
 
         HttpRequestAuthorizer httpRequestAuthorizer = clientAuthorizationRequestProvider.getClientAuthorizer();
         assertTrue("httpRequestAuthorizer was null", null != httpRequestAuthorizer);

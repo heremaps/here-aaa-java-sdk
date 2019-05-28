@@ -23,6 +23,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -39,11 +40,11 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         file.deleteOnExit();
     }
 
-    protected void createTmpFileWithContent() throws IOException {
+    protected void createTmpFileWithContent(Boolean includeScope) throws IOException {
         createTmpFile();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(new String(getDefaultIniStreamContents(), StandardCharsets.UTF_8));
+        bw.write(new String(getDefaultIniStreamContents(includeScope), StandardCharsets.UTF_8));
         bw.close();
     }
 
@@ -67,16 +68,12 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
 
     @Test
     public void test_getDelegate() throws IOException {
-        createTmpFileWithContent();
+        createTmpFileWithContent(false);
 
         fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
         String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
         assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
-
-        String actualScope = fromFile.getDefaultScope();
-        assertTrue("scope expected "+expectedScope+", actual "+actualScope,
-                expectedScope.equals(actualScope));
     }
 
     @Test (expected = NullPointerException.class)
@@ -85,14 +82,6 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
 
         fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
         String actualTokenEndpointUrl = fromFile.getTokenEndpointUrl();
-    }
-
-    @Test (expected = NullPointerException.class)
-    public void test_getDelegateDefaultScopeThrowsNonIOException() throws IOException {
-        createTmpFile();
-
-        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
-        fromFile.getDefaultScope();
     }
 
     @Test
@@ -104,13 +93,12 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         assertTrue("default file name expected "+expectedName+", actual "+actualName, expectedName.equals(actualName));
     }
 
-
     @Test
     public void test_basic_file() throws IOException {
-        createTmpFileWithContent();
+        createTmpFile();
 
         FromHereCredentialsIniStreamTest otherTezt = new FromHereCredentialsIniStreamTest();
-        byte[] bytes = otherTezt.getDefaultIniStreamContents();
+        byte[] bytes = otherTezt.getDefaultIniStreamContents(false);
 
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
@@ -129,5 +117,24 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         HttpMethods expectedHttpMethod = HttpMethods.POST;
         assertTrue("httpMethod expected " + expectedHttpMethod + ", actual " + httpMethod,
                 expectedHttpMethod.equals(httpMethod));
+    }
+
+    @Test
+    public void test_getScope_whenSpecified() throws IOException {
+        createTmpFileWithContent(true);
+
+        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
+        String actualScope = fromFile.getDefaultScope();
+        assertTrue("scope expected "+expectedScope+", actual "+actualScope,
+                expectedScope.equals(actualScope));
+    }
+
+    @Test
+    public void test_getScope_whenNotSpecified() throws IOException {
+        createTmpFileWithContent(false);
+
+        fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
+        String actualScope = fromFile.getDefaultScope();
+        assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
     }
 }

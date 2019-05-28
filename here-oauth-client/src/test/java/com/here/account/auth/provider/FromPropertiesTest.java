@@ -66,7 +66,7 @@ public class FromPropertiesTest {
         if (hasScopeProperty) {
             assertTrue("expected scope " + scope + ", actual " + actualScope, scope.equals(actualScope));
         } else {
-            assertNull("expected scope NULL, actual " + actualScope, actualScope);
+            assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
         }
 
 

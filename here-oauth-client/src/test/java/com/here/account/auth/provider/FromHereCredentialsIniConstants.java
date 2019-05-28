@@ -38,9 +38,9 @@ public abstract class FromHereCredentialsIniConstants {
     protected String accessKeyId = "accessKeyId";
     protected String accessKeySecret = "accessKeySecret";
     protected String scope = "scope";
-    protected String expectedScope = scope;
+    protected String expectedScope = null;
 
-    protected byte[] getDefaultIniStreamContents() {
+    protected byte[] getDefaultIniStreamContents(Boolean includeScope) {
         StringBuilder buf = new StringBuilder()
                 .append(SECTION_START)
                 .append(TEST_DEFAULT_INI_SECTION_NAME)
@@ -61,12 +61,16 @@ public abstract class FromHereCredentialsIniConstants {
                 .append(EQUALS)
                 .append(accessKeySecret)
                 .append(NEWLINE)
-
-                .append(TEST_SCOPE_PROPERTY)
-                .append(EQUALS)
-                .append(scope)
-                .append(NEWLINE)
                 ;
+
+        if (includeScope) {
+            expectedScope = scope;
+            buf.append(TEST_SCOPE_PROPERTY)
+               .append(EQUALS)
+               .append(scope)
+               .append(NEWLINE)
+               ;
+        }
 
         return buf.toString().getBytes(StandardCharsets.UTF_8);
     }
