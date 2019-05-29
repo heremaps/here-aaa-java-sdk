@@ -123,6 +123,7 @@ public class FromRunAsIdFileProvider
     }
     
     protected IdentityTokenRequest getRequest() {
+        // scope for pipeline access tokens will come from the file
         return new IdentityTokenRequest();
     }
     

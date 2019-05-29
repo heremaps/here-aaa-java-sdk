@@ -406,7 +406,7 @@ public class HereAccount {
 
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
-                clientAuthorizer, method, url, addScopeToFormParams(formParams, authorizationRequest.getScope()));
+                clientAuthorizer, method, url, formParams);
 
             try {
                 return client.sendMessage(httpRequest, AccessTokenResponse.class,
@@ -416,16 +416,6 @@ public class HereAccount {
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
             }
-        }
-
-        private Map<String, List<String>> addScopeToFormParams(Map<String, List<String>> formParams, String scope) {
-            // If the user supplied a scope, use it. Otherwise use the scope from the configuration data source.
-            String scopeToUse = (null != scope && !scope.isEmpty()) ? scope : this.scope;
-
-            if (null != scopeToUse && !scopeToUse.isEmpty())
-                formParams.put(AccessTokenRequest.SCOPE_FORM, Collections.singletonList(scopeToUse));
-
-            return formParams;
         }
 
         private static final int CLOCK_SKEW_STATUS_CODE = 401;

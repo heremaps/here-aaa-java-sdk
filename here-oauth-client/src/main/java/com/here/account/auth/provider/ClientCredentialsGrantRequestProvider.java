@@ -33,7 +33,9 @@ public abstract class ClientCredentialsGrantRequestProvider
      */
     @Override
     public AccessTokenRequest getNewAccessTokenRequest() {
-        return new ClientCredentialsGrantRequest();
+        AccessTokenRequest req= new ClientCredentialsGrantRequest();
+        req.setScope(getDefaultScope());
+        return req;
     }
-    
+
 }

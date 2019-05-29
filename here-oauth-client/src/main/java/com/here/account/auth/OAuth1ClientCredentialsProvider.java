@@ -176,7 +176,9 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      */
     @Override
     public AccessTokenRequest getNewAccessTokenRequest() {
-        return new ClientCredentialsGrantRequest();
+        AccessTokenRequest req = new ClientCredentialsGrantRequest();
+        req.setScope(defaultScope);
+        return req;
     }
     
     /**
