@@ -46,7 +46,7 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
         
         this.signIn = HereAccount.getTokenEndpoint(
                 httpProvider,
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, defaultScope)
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, scope)
         );
     }
     
@@ -117,7 +117,7 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
             }
 
             @Override
-            public String getDefaultScope() { return "hrn:here-dev:authorization::myrealm:project/my-test-project-0000"; }
+            public String getScope() { return "hrn:here-dev:authorization::rlm0000:project/my-test-project-0000"; }
         };
         
         this.signIn = HereAccount.getTokenEndpoint(
@@ -165,7 +165,7 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
     public void test_signIn_fatFinger() throws Exception {
         this.signIn = HereAccount.getTokenEndpoint(
                 httpProvider,
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "fat" + accessKeySecret, defaultScope)
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "fat" + accessKeySecret, scope)
         );
 
         try{

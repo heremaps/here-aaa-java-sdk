@@ -219,14 +219,14 @@ public class ClientAuthorizationProviderChainTest {
         assertTrue("grantType should equal " + ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE,
                 providerChain.getNewAccessTokenRequest().getGrantType().equals(ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE));
 
-        String expectedDefaultScope = clientAuthorizationRequestProvider.getDefaultScope();
-        String actualDefaultScope = providerChain.getDefaultScope();
+        String expectedScope = clientAuthorizationRequestProvider.getScope();
+        String actualScope = providerChain.getScope();
 
-        if (null == expectedDefaultScope) {
-            assertNull("expected scope to be NULL, actual " + actualDefaultScope, actualDefaultScope);
+        if (null == expectedScope) {
+            assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
         } else {
-            assertTrue("defaultScope expected " + expectedDefaultScope + ", actual " + actualDefaultScope,
-                    expectedDefaultScope.equals(actualDefaultScope));
+            assertTrue("scope expected " + expectedScope + ", actual " + actualScope,
+                    expectedScope.equals(actualScope));
         }
     }
 }

@@ -39,7 +39,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     private final Clock clock;
     private final String tokenEndpointUrl;
     private final OAuth1Signer oauth1Signer;
-    private final String defaultScope;
+    private final String scope;
     
     /**
      * Construct a new {@code OAuth1ClientCredentialsProvider} that points to
@@ -49,20 +49,20 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      * @param tokenEndpointUrl the full URL of the OAuth2.0 token endpoint
      * @param accessKeyId the access key id to be used as a client credential
      * @param accessKeySecret the access key secret to be used as a client credential
-     * @param defaultScope    scope of the access token when one is requested, null=no scope
+     * @param scope    scope of the access token when one is requested, null=no scope
      */
     public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
                                            String accessKeyId,
                                            String accessKeySecret,
-                                           String defaultScope) {
-        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, defaultScope);
+                                           String scope) {
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, scope);
     }
 
     public OAuth1ClientCredentialsProvider(Clock clock,
                                            String tokenEndpointUrl,
                                            String accessKeyId,
                                            String accessKeySecret,
-                                           String defaultScope
+                                           String scope
                                            ) {
         Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
@@ -72,7 +72,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         this.clock = clock;
         this.tokenEndpointUrl = tokenEndpointUrl;
         this.oauth1Signer = new OAuth1Signer(clock, accessKeyId, accessKeySecret);
-        this.defaultScope = defaultScope;
+        this.scope = scope;
     }
 
     /**
@@ -177,7 +177,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     @Override
     public AccessTokenRequest getNewAccessTokenRequest() {
         AccessTokenRequest req = new ClientCredentialsGrantRequest();
-        req.setScope(defaultScope);
+        req.setScope(scope);
         return req;
     }
     
@@ -193,7 +193,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      * {@inheritDoc}
      */
     @Override
-    public String getDefaultScope() {
-        return defaultScope;
+    public String getScope() {
+        return scope;
     }
 }

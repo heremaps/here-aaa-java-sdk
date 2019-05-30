@@ -40,7 +40,7 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
         
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 httpProvider, 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret", defaultScope));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret", scope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -63,7 +63,7 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 httpProvider, 
                 new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret, defaultScope));
+                        url, accessKeyId, accessKeySecret, scope));
         
         AccessTokenResponse accessTokenResponse = tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
         assertTrue("accessTokenResponse was null", null != accessTokenResponse);

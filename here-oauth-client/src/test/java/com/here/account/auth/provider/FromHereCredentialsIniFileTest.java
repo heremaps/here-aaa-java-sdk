@@ -124,7 +124,7 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         createTmpFileWithContent(true);
 
         fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
-        String actualScope = fromFile.getDefaultScope();
+        String actualScope = fromFile.getScope();
         assertTrue("scope expected "+expectedScope+", actual "+actualScope,
                 expectedScope.equals(actualScope));
     }
@@ -134,7 +134,7 @@ public class FromHereCredentialsIniFileTest extends FromHereCredentialsIniConsta
         createTmpFileWithContent(false);
 
         fromFile = new FromHereCredentialsIniFile(file, TEST_DEFAULT_INI_SECTION_NAME);
-        String actualScope = fromFile.getDefaultScope();
+        String actualScope = fromFile.getScope();
         assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
     }
 }

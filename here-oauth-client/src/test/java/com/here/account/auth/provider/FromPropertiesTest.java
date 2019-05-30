@@ -25,7 +25,6 @@ import com.here.account.util.SettableSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.matchers.Null;
 
 import java.util.*;
 
@@ -62,7 +61,7 @@ public class FromPropertiesTest {
         assertTrue("expected tokenEndpointUrl " + tokenEndpointUrl + ", actual " + actualTokenEndpointUrl,
                 tokenEndpointUrl.equals(actualTokenEndpointUrl));
 
-        String actualScope = fromProperties.getDefaultScope();
+        String actualScope = fromProperties.getScope();
         if (hasScopeProperty) {
             assertTrue("expected scope " + scope + ", actual " + actualScope, scope.equals(actualScope));
         } else {

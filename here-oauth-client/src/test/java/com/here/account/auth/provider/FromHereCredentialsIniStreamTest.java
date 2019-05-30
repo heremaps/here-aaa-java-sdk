@@ -104,11 +104,11 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
         assertTrue("tokenEndpointUrl expected "+expectedTokenEndpointUrl+", actual "+actualTokenEndpointUrl,
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
 
-        String actualScope = clientAuthorizationRequestProvider.getDefaultScope();
+        String actualScope = clientAuthorizationRequestProvider.getScope();
         if (null == expectedScope) {
             assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
         } else {
-            assertTrue("defaultScope expected " + expectedScope + ", actual " + actualScope,
+            assertTrue("scope expected " + expectedScope + ", actual " + actualScope,
                     expectedScope.equals(actualScope));
         }
 

@@ -63,7 +63,7 @@ public abstract class AbstractCredentialTezt {
     protected String url;
     protected String accessKeyId;
     protected String accessKeySecret;
-    protected String defaultScope;
+    protected String scope;
     
     @Before
     public void setUp() throws Exception {
@@ -93,7 +93,7 @@ public abstract class AbstractCredentialTezt {
             field = OAuth1Signer.class.getDeclaredField("consumerSecret");
             field.setAccessible(true);
             accessKeySecret = (String) field.get(oauth1Signer);
-            defaultScope = hereCredentialsProvider.getDefaultScope();
+            scope = hereCredentialsProvider.getScope();
         }
         
         // jenkins CI
@@ -106,7 +106,7 @@ public abstract class AbstractCredentialTezt {
             this.url = url;
             this.accessKeyId = accessKeyId;
             this.accessKeySecret = accessKeySecret;
-            this.defaultScope = scope;
+            this.scope = scope;
             // System.properties override
             hereCredentialsProvider = new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, scope);
         }
@@ -115,8 +115,8 @@ public abstract class AbstractCredentialTezt {
             this.url = "http://mock.example.com";
             this.accessKeyId = "testAccessKeyId";
             this.accessKeySecret = "testAccessKeySecret";
-            this.defaultScope = "hrn:here-dev:authorization::myrealm:project/my-test-project-0000";
-            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(this.url, this.accessKeyId, this.accessKeySecret, this.defaultScope);
+            this.scope = "hrn:here-dev:authorization::rlm0000:project/my-test-project-0000";
+            hereCredentialsProvider = new OAuth1ClientCredentialsProvider(this.url, this.accessKeyId, this.accessKeySecret, this.scope);
         }
         
         // verify some credentials will be available

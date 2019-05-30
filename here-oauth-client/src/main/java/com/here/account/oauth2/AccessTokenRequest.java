@@ -131,7 +131,7 @@ public abstract class AccessTokenRequest {
      * openid : Specifies the idToken is expected in the response
      * sdp:[List of groupId separated by ',']
      *  or
-     * hrn:here:authorization::myrealm:project/my-project-0000
+     * hrn:here:authorization::rlm0000:project/my-project-0000
      * A projectHRN for a Project-scoped token
      * 
      * @return the scope
@@ -150,7 +150,7 @@ public abstract class AccessTokenRequest {
      * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
      * GROUP-84ba52de-f80b-4047-a024-33d81e6153df".
      *  or
-     * hrn:here:authorization::myrealm:project/my-project-0000
+     * hrn:here:authorization::rlm0000:project/my-project-0000
      * A projectHRN for a Project-scoped token
      * 
      * @param scope the scope to set

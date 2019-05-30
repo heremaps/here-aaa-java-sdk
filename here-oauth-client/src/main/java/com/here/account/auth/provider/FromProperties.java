@@ -88,7 +88,7 @@ public class FromProperties extends ClientCredentialsGrantRequestProvider
      * {@inheritDoc}
      */
     @Override
-    public String getDefaultScope() {
-        return getDelegate().getDefaultScope();
+    public String getScope() {
+        return getDelegate().getScope();
     }
 }

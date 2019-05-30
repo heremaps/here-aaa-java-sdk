@@ -181,15 +181,19 @@ public class HereAccessTokenProviderIT {
             String accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
             String accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY);
             String scope = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
-            if (notEmpty(tokenEndpointUrl) && notEmpty(accessKeyId) && notEmpty(accessKeySecret) && notEmpty(scope)) {
+            if (notEmpty(tokenEndpointUrl) && notEmpty(accessKeyId) && notEmpty(accessKeySecret)) {
                 outputStream.write((OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY
                         + "=" + tokenEndpointUrl + "\n").getBytes(StandardCharsets.UTF_8));
                 outputStream.write((OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY 
                         + "=" + accessKeyId + "\n").getBytes(StandardCharsets.UTF_8));
                 outputStream.write((OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY 
                         + "=" + accessKeySecret + "\n").getBytes(StandardCharsets.UTF_8));
-                outputStream.write((OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY
-                        + "=" + scope + "\n").getBytes(StandardCharsets.UTF_8));
+
+                // scope is optional
+                if (notEmpty(scope)) {
+                    outputStream.write((OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY
+                            + "=" + scope + "\n").getBytes(StandardCharsets.UTF_8));
+                }
             } else {
                 Properties properties = OAuth1ClientCredentialsProvider.getPropertiesFromFile(file);
                 for (Entry<Object, Object> property : properties.entrySet()) {

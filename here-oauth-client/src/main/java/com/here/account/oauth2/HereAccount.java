@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -352,7 +351,7 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
-            scope = clientAuthorizationProvider.getDefaultScope();
+            scope = clientAuthorizationProvider.getScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)
@@ -402,11 +401,10 @@ public class HereAccount {
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
             String method = httpMethod.getMethod();
             HttpProvider.HttpRequest httpRequest;
-            Map<String, List<String>> formParams = authorizationRequest.toFormParams();
 
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
-                clientAuthorizer, method, url, formParams);
+                clientAuthorizer, method, url, authorizationRequest.toFormParams());
 
             try {
                 return client.sendMessage(httpRequest, AccessTokenResponse.class,

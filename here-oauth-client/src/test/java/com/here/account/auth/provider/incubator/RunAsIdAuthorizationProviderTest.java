@@ -15,6 +15,7 @@
  */
 package com.here.account.auth.provider.incubator;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -72,20 +73,16 @@ public class RunAsIdAuthorizationProviderTest {
     @Test
     public void test_getTokenEndpointUrl_different() {
         String expectedTokenEndpointUrl = "http://www.example.com/token";
-        String expectedScope = "hrn:here-dev:authorization::myrealm:project/my-test-project-0000";
         runAsIdAuthorizationProvider = new RunAsIdAuthorizationProvider(
                 new SettableSystemClock(),
-                expectedTokenEndpointUrl,
-                expectedScope);
+                expectedTokenEndpointUrl);
         String actualTokenEndpointUrl = runAsIdAuthorizationProvider.getTokenEndpointUrl();
         assertTrue("expected tokenEndpointUrl " + expectedTokenEndpointUrl
                 + ", actual " + actualTokenEndpointUrl, 
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
 
-        String actualScope = runAsIdAuthorizationProvider.getDefaultScope();
-        assertTrue("expected scope " + expectedScope
-                + ", actual " + actualScope,
-                expectedScope.equals(actualScope));
+        String actualScope = runAsIdAuthorizationProvider.getScope();
+        assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
     }
     
     @Test

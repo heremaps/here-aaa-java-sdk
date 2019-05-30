@@ -48,8 +48,7 @@ public class FromRunAsIdFileProvider
             "file:///dev/shm/identity/access-token";
 
     private final String tokenUrl;
-    private final String defaultScope;
-    
+
     public FromRunAsIdFileProvider() {
         this(new SettableSystemClock());
     }
@@ -59,13 +58,8 @@ public class FromRunAsIdFileProvider
     }
     
     public FromRunAsIdFileProvider(Clock clock, String tokenUrl) {
-        this(clock, tokenUrl, null);
-    }
-
-    public FromRunAsIdFileProvider(Clock clock, String tokenUrl, String defaultScope) {
         super(clock);
         this.tokenUrl = tokenUrl;
-        this.defaultScope = defaultScope;
     }
 
     /**
@@ -139,7 +133,7 @@ public class FromRunAsIdFileProvider
      * {@inheritDoc}
      */
     @Override
-    public String getDefaultScope() {
-        return defaultScope;
+    public String getScope() {
+        return null;
     }
 }

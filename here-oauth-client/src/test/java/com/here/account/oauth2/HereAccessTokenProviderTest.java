@@ -81,7 +81,7 @@ public class HereAccessTokenProviderTest {
             }
 
             @Override
-            public String getDefaultScope() { return "hrn:here-dev:authorization::myrealm:project/my-test-project-0000"; }
+            public String getScope() { return "hrn:here-dev:authorization::rlm0000:project/my-test-project-0000"; }
         };
 
     }

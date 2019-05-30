@@ -98,7 +98,7 @@ implements ClientAuthorizationRequestProvider {
      * {@inheritDoc}
      */
     @Override
-    public String getDefaultScope() {
-        return getClientCredentialsProvider().getDefaultScope();
+    public String getScope() {
+        return getClientCredentialsProvider().getScope();
     }
 }
