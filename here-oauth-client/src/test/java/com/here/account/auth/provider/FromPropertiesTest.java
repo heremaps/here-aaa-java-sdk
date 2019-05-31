@@ -33,7 +33,7 @@ public class FromPropertiesTest {
     private final String tokenEndpointUrl = "https://www.example.com/token" + UUID.randomUUID();
     private final String accessKeyId = "my-access-key-id" + UUID.randomUUID();
     private final String accessKeySecret = "my-access-key-secret" + UUID.randomUUID();
-    private final String scope = "my-scope-" + UUID.randomUUID();
+    private final String scope = "hrn:here:authorization::rlm0000:project/my-project-" + UUID.randomUUID();
     private Clock clock;
     private FromProperties fromProperties;
 

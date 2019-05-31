@@ -47,7 +47,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     public void testGetTokenNullUrl() throws Exception {
         HereAccount.getTokenEndpoint(
                 getHttpProvider(), 
-                new OAuth1ClientCredentialsProvider(null, accessKeyId, accessKeySecret, scope));
+                new OAuth1ClientCredentialsProvider((String)null, accessKeyId, accessKeySecret, scope));
     }
     
     @Test(expected=NullPointerException.class)
@@ -605,7 +605,6 @@ public class HereAccountTest extends AbstractCredentialTezt {
         } else {
             responseBody.append(",\"scope\":\""+scope+"\"}");
         }
-        System.out.println("****sw body="+responseBody.toString());
         return responseBody.toString();
     }
 

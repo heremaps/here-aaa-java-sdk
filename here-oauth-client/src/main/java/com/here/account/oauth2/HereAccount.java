@@ -326,6 +326,7 @@ public class HereAccount {
         private final HttpProvider httpProvider;
         private final HttpMethods httpMethod;
         private final String url;
+        private final String scope;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
         private final Serializer serializer;
 
@@ -348,6 +349,7 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
+            this.scope = clientAuthorizationProvider.getScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)
@@ -397,6 +399,10 @@ public class HereAccount {
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
             String method = httpMethod.getMethod();
             HttpProvider.HttpRequest httpRequest;
+
+            if (null != scope) {
+                authorizationRequest.setScope(scope);
+            }
 
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
