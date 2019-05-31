@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -330,8 +328,7 @@ public class HereAccount {
         private final String url;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
         private final Serializer serializer;
-        private final String scope;
-        
+
         /**
          * Construct a new ability to obtain authorization from the HERE authorization server.
          * 
@@ -351,7 +348,6 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
-            scope = clientAuthorizationProvider.getScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)

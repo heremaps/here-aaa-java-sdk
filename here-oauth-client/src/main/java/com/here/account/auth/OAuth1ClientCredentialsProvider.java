@@ -49,8 +49,13 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      * @param tokenEndpointUrl the full URL of the OAuth2.0 token endpoint
      * @param accessKeyId the access key id to be used as a client credential
      * @param accessKeySecret the access key secret to be used as a client credential
-     * @param scope    scope of the access token when one is requested, null=no scope
      */
+    public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
+                                           String accessKeyId,
+                                           String accessKeySecret) {
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
     public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
                                            String accessKeyId,
                                            String accessKeySecret,
@@ -61,9 +66,17 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     public OAuth1ClientCredentialsProvider(Clock clock,
                                            String tokenEndpointUrl,
                                            String accessKeyId,
+                                           String accessKeySecret
+                                           ) {
+        this(clock, tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
+    public OAuth1ClientCredentialsProvider(Clock clock,
+                                           String tokenEndpointUrl,
+                                           String accessKeyId,
                                            String accessKeySecret,
                                            String scope
-                                           ) {
+    ) {
         Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
         Objects.requireNonNull(accessKeyId, "accessKeyId is required");
