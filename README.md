@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/heremaps/here-aaa-java-sdk.svg?branch=master)](https://travis-ci.org/heremaps/here-aaa-java-sdk)
+[![Build Status](https://travis-ci.com/heremaps/here-aaa-java-sdk.svg?branch=master)](https://travis-ci.com/heremaps/here-aaa-java-sdk)
 
 HERE Authentication, Authorization, and Accounting
 
