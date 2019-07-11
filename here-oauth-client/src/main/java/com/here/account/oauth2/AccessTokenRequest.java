@@ -69,6 +69,8 @@ public abstract class AccessTokenRequest {
     private Long expiresIn;
 
     private String scope;
+    private transient Map<String, String> additionalHeaders = null;
+    private transient String correlationId = null;
     
     protected AccessTokenRequest(String grantType) {
         this.grantType = grantType;
@@ -151,6 +153,32 @@ public abstract class AccessTokenRequest {
      */
     public AccessTokenRequest setScope(String scope) {
         this.scope = scope;
+        return this;
+    }
+
+    /**
+     * Get any additional headers that will be added to the token request.
+     *
+     * @return the additional headers
+     */
+    public Map<String, String> getAdditionalHeaders() { return additionalHeaders; }
+
+    public AccessTokenRequest setAdditionalHeaders(Map<String, String> additionalHeaders) {
+        this.additionalHeaders = additionalHeaders;
+        return this;
+    }
+
+    /**
+     * Get the correlationId (the unique value for tracking a request across services and within a service).
+     *
+     * @return the correlationId
+     */
+    public String getCorrelationId() {
+        return this.correlationId;
+    }
+
+    public AccessTokenRequest setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
         return this;
     }
 

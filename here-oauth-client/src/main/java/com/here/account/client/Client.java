@@ -15,13 +15,6 @@
  */
 package com.here.account.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.logging.Logger;
-
-import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
@@ -29,6 +22,12 @@ import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.Serializer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.logging.Logger;
 
 /**
  * A Client that talks to a Resource Server, in OAuth2-speak.
@@ -177,15 +176,10 @@ public class Client {
                         clientAuthorizer, method, url, jsonBody);
         }
 
-        if (null != additionalHeaders) {
-            for (Map.Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
-                String name = additionalHeader.getKey();
-                String value = additionalHeader.getValue();
-                httpRequest.addHeader(name, value);
-            }
-        }
+        // If there's additional headers, add them to the request
+        HttpRequest httpRequestWithAdditonalHeaders = addAdditionalHeaders(httpRequest, additionalHeaders);
 
-        return sendMessage(httpRequest, responseClass,
+        return sendMessage(httpRequestWithAdditonalHeaders, responseClass,
                 errorResponseClass, newExceptionFunction);
     }
     
@@ -249,4 +243,22 @@ public class Client {
         }
     }
 
+    /**
+     * Add additional headers to the request
+     *
+     * @param httpRequest           the request
+     * @param additionalHeaders     additional headers
+     * @return  httpRequest with additional headers
+     */
+    private HttpProvider.HttpRequest addAdditionalHeaders(HttpProvider.HttpRequest httpRequest,
+                                                          Map<String, String> additionalHeaders) {
+        if (null != additionalHeaders) {
+            for (Map.Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
+                String name = additionalHeader.getKey();
+                String value = additionalHeader.getValue();
+                httpRequest.addHeader(name, value);
+            }
+        }
+        return httpRequest;
+    }
 }
