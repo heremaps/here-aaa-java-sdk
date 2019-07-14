@@ -142,7 +142,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
     @Test
     public void testGetTokenInvalidErrorResponse() throws Exception {
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
-                mockHttpProvider(dummyResponse(400, 
+                mockHttpProvider(dummyResponse(400,
                                                "bogus".getBytes().length, 
                                                new ByteArrayInputStream("bogus".getBytes("UTF-8")))),
                 new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
@@ -151,7 +151,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
             Assert.fail("Expected ResponseParsingException");
         } catch (ResponseParsingException rpe) {
-            
+
         }
     }
     
@@ -650,6 +650,15 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public InputStream getResponseBody() throws IOException {
                 return body;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> responseHeader = new HashMap<String, List<String>>();
+                List<String> responseTypes = new ArrayList<String>();
+                responseTypes.add(HttpConstants.CONTENT_TYPE_JSON);
+                responseHeader.put(HttpConstants.CONTENT_TYPE, responseTypes);
+                return responseHeader;
             }
         };
     }

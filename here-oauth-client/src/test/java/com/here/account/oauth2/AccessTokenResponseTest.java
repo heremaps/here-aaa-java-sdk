@@ -15,10 +15,26 @@
  */
 package com.here.account.oauth2;
 
-import org.junit.Assert;
+import com.here.account.auth.OAuth1Signer;
+import com.here.account.http.HttpConstants;
+import com.here.account.http.HttpException;
+import com.here.account.http.HttpProvider;
+import com.here.account.util.Clock;
+import org.apache.http.HttpStatus;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-public class AccessTokenResponseTest {
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
+
+public class AccessTokenResponseTest extends AbstractCredentialTezt{
 
     @Test
     public void testIdTokenIsSetViaConstructor() {
@@ -26,6 +42,86 @@ public class AccessTokenResponseTest {
         AccessTokenResponse response = new AccessTokenResponse("accessToken",
                 "testType", 1200L, "testToken", expectedIdToken);
 
-        Assert.assertEquals(response.getIdToken(), expectedIdToken);
+        assertEquals(response.getIdToken(), expectedIdToken);
+    }
+
+    @Test
+    public void test_nonJSON_response_from_HA() throws IOException, HttpException {
+        OAuth1Signer mockOauth1Signer = new OAuth1Signer(accessKeyId, accessKeySecret);
+        String body = createMockHttpResponseBody();
+
+        ClientCredentialsProvider mockClientCredentialsProvider = Mockito.mock(ClientCredentialsProvider.class);
+        Mockito.doReturn(Clock.SYSTEM)
+                .when(mockClientCredentialsProvider).getClock();
+        Mockito.doReturn("https://www.example.com/oauth2/token")
+                .when(mockClientCredentialsProvider).getTokenEndpointUrl();
+        Mockito.doReturn(mockOauth1Signer)
+                .when(mockClientCredentialsProvider).getClientAuthorizer();
+        Mockito.doReturn(HttpConstants.HttpMethods.POST)
+                .when(mockClientCredentialsProvider).getHttpMethod();
+
+        HttpProvider.HttpRequest mockHttpRequest = Mockito.mock(HttpProvider.HttpRequest.class);
+        Mockito.doNothing()
+                .when(mockHttpRequest).addHeader(Mockito.anyString(), Mockito.anyString());
+
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        Mockito.when(mockHttpProvider.getRequest(Mockito.any(HttpProvider.HttpRequestAuthorizer.class), anyString(),
+                anyString(), Mockito.any(Map.class)))
+                .thenReturn(mockHttpRequest);
+        final HttpProvider.HttpResponse mockHttpResponse = new HttpProvider.HttpResponse() {
+            @Override
+            public int getStatusCode() {
+                return HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED;
+            }
+
+            @Override
+            public long getContentLength() {
+                return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> responseHeader = new HashMap<String, List<String>>();
+                List<String> responseTypes = new ArrayList<String>();
+                responseTypes.add("text/html");
+                responseHeader.put(HttpConstants.CONTENT_TYPE, responseTypes);
+                return responseHeader;
+            }
+
+            @Override
+            public InputStream getResponseBody() {
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                return new ByteArrayInputStream(bytes);
+            }
+        };
+        Mockito.when(mockHttpProvider.execute(Mockito.any())).thenReturn(mockHttpResponse);
+
+        AccessTokenRequest accessTokenRequest = new ClientCredentialsGrantRequest();
+        accessTokenRequest.setAdditionalHeaders(Collections.singletonMap("testKey", "testValue"));
+        accessTokenRequest.setExpiresIn(1L);
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(mockHttpProvider, mockClientCredentialsProvider);
+
+        // expect the request to throw an exception, then validate the exception contents
+        try {
+            tokenEndpoint.requestToken(accessTokenRequest);
+        } catch (AccessTokenException ate) {
+            assertEquals("Expected proxyAuthenticationRequired error code",
+                    HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED, ate.getStatusCode());
+            assertEquals("Expected proxyAuthenticationRequired error code",
+                    HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED, ate.getErrorResponse().getHttpStatus().intValue());
+            assertEquals("Expected text in error response message field", body, ate.getErrorResponse().getMessage());
+            return;
+        }
+        fail("Non-JSON response exception not thrown");
+    }
+
+    private String createMockHttpResponseBody() {
+        return "<html>\n" +
+                "<header><title>This is an error response</title></header>\n" +
+                "<body>\n" +
+                "Error response\n" +
+                "</body>\n" +
+                "</html>";
     }
 }

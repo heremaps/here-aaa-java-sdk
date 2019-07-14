@@ -15,19 +15,27 @@
  */
 package com.here.account.client;
 
+import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
+import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
 import com.here.account.util.CloseUtil;
+import com.here.account.util.OAuthConstants;
 import com.here.account.util.Serializer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * A Client that talks to a Resource Server, in OAuth2-speak.
@@ -76,6 +84,8 @@ public class Client {
         return new Builder();
     }
 
+    private static final Pattern START_PATTERN = Pattern.compile("\\A");
+    private static final String LOWERCASE_CONTENT_TYPE_JSON = HttpConstants.CONTENT_TYPE_JSON.toLowerCase();
     private final HttpProvider httpProvider;
     private final Serializer serializer;
     private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
@@ -206,8 +216,8 @@ public class Client {
             BiFunction<Integer, U, RuntimeException> newExceptionFunction) 
             throws RequestExecutionException, ResponseParsingException {
         // blocking
-        HttpProvider.HttpResponse httpResponse = null;
-        InputStream jsonInputStream = null;
+        HttpProvider.HttpResponse httpResponse;
+        InputStream jsonInputStream;
 
         try {
             httpResponse = httpProvider.execute(httpRequest);
@@ -223,17 +233,19 @@ public class Client {
                     return null;
                 }
                 try {
-                    return serializer.jsonToPojo(jsonInputStream,
-                            responseClass);
+                    return serializer.jsonToPojo(jsonInputStream, responseClass);
                 } catch (Exception e) {
                     throw new ResponseParsingException(e);
                 }
             } else {
                 U errorResponse;
                 try {
-                    errorResponse = serializer.jsonToPojo(jsonInputStream, errorResponseClass);
+                    if (isResponseTypeJson(httpResponse)) {
+                        errorResponse = serializer.jsonToPojo(jsonInputStream, errorResponseClass);
+                    } else {
+                        errorResponse = instantiateErrorResponseClass(errorResponseClass, jsonInputStream, statusCode);
+                    }
                 } catch (Exception e) {
-                    // if there is trouble parsing the error
                     throw new ResponseParsingException(e);
                 }
                 throw newExceptionFunction.apply(statusCode, errorResponse);
@@ -241,6 +253,68 @@ public class Client {
         } finally {
             CloseUtil.nullSafeCloseThrowingUnchecked(jsonInputStream);
         }
+    }
+
+    /**
+     * Return whether the response-type is JSON
+     *
+     * @param response   the HTTP response
+     * @return  true-the response-type is JSON, false-the response-type is not JSON
+     */
+    private boolean isResponseTypeJson(HttpProvider.HttpResponse response) {
+        Map<String, List<String>> headers = response.getHeaders();
+        List<String> responseTypes = headers.get(HttpConstants.CONTENT_TYPE);
+
+        for (String aResponseType: responseTypes) {
+            if (aResponseType.toLowerCase().trim().startsWith(LOWERCASE_CONTENT_TYPE_JSON)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Create an instance of the specified errorResponseClass
+     *
+     * @param errorResponseClass    the Response Error class
+     * @param responseBody          the response body
+     * @param statusCode            HTTP status code
+     * @param <U>                   the Response Error parameterized type
+     * @return                      an instance of the Response Error class
+     */
+    private <U> U instantiateErrorResponseClass(Class<U> errorResponseClass, InputStream responseBody, int statusCode) {
+        try {
+            U errorResponse;
+
+            if (errorResponseClass.isAssignableFrom(ErrorResponse.class)) {
+                Constructor<U> ctor = errorResponseClass.getConstructor(String.class, String.class, String.class,
+                        Integer.class, Integer.class, String.class);
+                errorResponse = ctor.newInstance(null, null, null, statusCode, null, convertStreamToString(responseBody));
+            } else {
+                Constructor<U> ctor = errorResponseClass.getConstructor();
+                errorResponse = ctor.newInstance();
+            }
+
+            return errorResponse;
+        } catch (NoSuchMethodException nsme) {
+            throw new RequestExecutionException("Internal Error: "+errorResponseClass.getName()+" has no default constructor");
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            throw new RequestExecutionException("Internal Error: "+errorResponseClass.getName()+" cannot be constructed", ex);
+        }
+    }
+
+    /**
+     * Convert an inputStream to a String
+     *
+     * @param is    input stream to convert
+     * @return      String equivilant of the inputStream
+     */
+    private String convertStreamToString(InputStream is) {
+        Scanner s = new Scanner(is, OAuthConstants.UTF_8_STRING).useDelimiter(START_PATTERN);
+        // regex \A, matches the beginning of input. This tells Scanner to read the entire stream,
+        // from beginning to the next beginning (and there isn't one) so the entire stream is read.
+        String str = s.hasNext() ? s.next() : "";
+        return str.substring(0, Math.min(1024, str.length()));
     }
 
     /**
