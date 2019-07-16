@@ -21,6 +21,7 @@ import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.TimestampResponse;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.*;
 
 import java.io.Closeable;
@@ -129,7 +130,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class HereAccount {
-    
+
+
     /**
      * This class cannot be instantiated.
      */
@@ -317,8 +319,6 @@ public class HereAccount {
         @Deprecated
         public static final String HTTP_METHOD_POST = "POST";
 
-        private static final String X_CORRELATION_ID = "X-Correlation-ID";
-
         private final boolean currentTimeMillisSettable;
         private final Clock clock;
         private final SettableClock settableClock;
@@ -398,7 +398,7 @@ public class HereAccount {
                                                        int retryFixableErrorsCount)
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
             String method = httpMethod.getMethod();
-            
+
             HttpProvider.HttpRequest httpRequest;
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
@@ -406,11 +406,15 @@ public class HereAccount {
             addAdditionalHeaders(httpRequest, authorizationRequest);
 
             try {
-                return client.sendMessage(httpRequest,
+                AccessTokenResponse response = client.sendMessage(httpRequest,
                         AccessTokenResponse.class, ErrorResponse.class,
                         (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
+                if (null != authorizationRequest.getCorrelationId()) {
+                    response.setCorrelationId(authorizationRequest.getCorrelationId());
+                }
+                return response;
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
             }
@@ -431,7 +435,7 @@ public class HereAccount {
             }
             String correlationId = authorizationRequest.getCorrelationId();
             if (null != correlationId) {
-                httpRequest.addHeader(X_CORRELATION_ID, correlationId);
+                httpRequest.addHeader(OlpHttpMessage.X_CORRELATION_ID, correlationId);
             }
         }
 
