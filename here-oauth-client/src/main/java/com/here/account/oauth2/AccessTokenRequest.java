@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.JacksonSerializer;
 
 /**
@@ -30,7 +31,7 @@ import com.here.account.util.JacksonSerializer;
  * @author kmccrack
  *
  */
-public abstract class AccessTokenRequest {
+public abstract class AccessTokenRequest implements OlpHttpMessage {
     
     /**
      * expiresIn; the parameter name for "expires in" when conveyed in a JSON body.
@@ -169,14 +170,17 @@ public abstract class AccessTokenRequest {
     }
 
     /**
-     * Get the correlationId (the unique value for tracking a request across services and within a service).
-     *
-     * @return the correlationId
+     * {@inheritDoc}
      */
+    @Override
     public String getCorrelationId() {
         return this.correlationId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public AccessTokenRequest setCorrelationId(String correlationId) {
         this.correlationId = correlationId;
         return this;

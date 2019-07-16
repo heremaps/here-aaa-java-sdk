@@ -18,8 +18,8 @@ package com.here.account.client;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
-import com.here.account.oauth2.RequestExecutionException;
-import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.oauth2.*;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.Serializer;
 
@@ -164,7 +164,6 @@ public class Client {
             BiFunction<Integer, U, RuntimeException> newExceptionFunction)
             throws RequestExecutionException, ResponseParsingException {
 
-
         HttpProvider.HttpRequest httpRequest;
         if (null == request) {
             httpRequest = httpProvider.getRequest(
@@ -179,8 +178,16 @@ public class Client {
         // If there's additional headers, add them to the request
         HttpRequest httpRequestWithAdditonalHeaders = addAdditionalHeaders(httpRequest, additionalHeaders);
 
-        return sendMessage(httpRequestWithAdditonalHeaders, responseClass,
+        T response = sendMessage(httpRequestWithAdditonalHeaders, responseClass,
                 errorResponseClass, newExceptionFunction);
+
+        if (null != additionalHeaders
+                && additionalHeaders.containsKey(HereAccount.X_CORRELATION_ID)
+                && responseClass.isInstance(OlpHttpMessage.class)) {
+            ((AccessTokenResponse)response).setCorrelationId(additionalHeaders.get(HereAccount.X_CORRELATION_ID));
+        }
+
+        return response;
     }
     
     /**

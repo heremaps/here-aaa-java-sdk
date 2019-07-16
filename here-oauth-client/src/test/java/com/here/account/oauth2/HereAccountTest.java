@@ -37,8 +37,7 @@ import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 
 public class HereAccountTest extends AbstractCredentialTezt {
@@ -893,5 +892,21 @@ public class HereAccountTest extends AbstractCredentialTezt {
         // verify the expected value added to the request header
         Mockito.verify(mockHttpRequest, times(1)).addHeader(Mockito.anyString(), Mockito.anyString());
         Mockito.verify(mockHttpRequest, times(1)).addHeader(correlationIdKey, correlationId);
+    }
+
+    @Test
+    public void test_requestResponse_with_correlationId() {
+        String expectedCorrelationId = "abc123";
+        HttpProvider httpProvider = getHttpProvider();
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret));
+
+        AccessTokenRequest accessTokenRequest = new ClientCredentialsGrantRequest();
+        accessTokenRequest.setCorrelationId(expectedCorrelationId);
+        AccessTokenResponse token = tokenEndpoint.requestToken(accessTokenRequest);
+
+        assertEquals(expectedCorrelationId, token.getCorrelationId());
     }
 }
