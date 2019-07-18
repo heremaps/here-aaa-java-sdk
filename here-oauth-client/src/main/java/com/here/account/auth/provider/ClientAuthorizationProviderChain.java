@@ -59,6 +59,16 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
      * The exact sequence of providers is subject to change in future releases, as
      * new providers are added.
      *
+     * <p>
+     * Currently, the default ClientCredentialsProviderChain uses
+     * <ul>
+     *     <li>System properties</li>
+     *     <li>~/.here/credentials.ini file</li>
+     *     <li>~/.here/credentials.properties file</li>
+     *     <li>file:///dev/shm/identity/access-token file</li>
+     * </ul>
+     * </p>
+     *
      * @param clock the clock implementation to use
      * @return the ClientAuthorizationProviderChain with default implementations in preference order
      */

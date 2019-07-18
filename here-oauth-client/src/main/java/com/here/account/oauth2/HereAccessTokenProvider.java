@@ -96,11 +96,7 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
     
     /**
      * By default the Builder uses
-     * <ul>
-     *     <li>System properties</li>
-     *     <li>~/.here/credentials.ini file</li>
-     *     <li>~/.here/credentials.properties file</li>
-     * </ul> for credentials,
+     * {@link ClientAuthorizationProviderChain#getNewDefaultClientCredentialsProviderChain(Clock)} for credentials,
      * the ApacheHttpClientProvider,
      * and the "always fresh" Access Token.
      */
