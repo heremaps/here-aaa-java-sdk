@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,10 +44,12 @@ public class ClientAuthorizationProviderChainTest {
     String expectedTokenEndpointUrl1 = "expectedTokenEndpointUrl1";
     String expectedAccessKeyId1 = "expectedAccessKeyId1";
     String expectedAccessKeySecret1 = "accessKeySecret1";
+    String expectedTokenScope = "expectedScope";
 
     String tokenEndpointUrl;
     String accessKeyId;
     String accessKeySecret;
+    String tokenScope;
     File file;
 
     protected void createTmpFile() throws IOException {
@@ -66,7 +69,7 @@ public class ClientAuthorizationProviderChainTest {
     public ClientAuthorizationRequestProvider getClientAuthorizationRequestProviderFromIniFile() throws Exception {
         createTmpFile();
         FromHereCredentialsIniStreamTest test = new FromHereCredentialsIniStreamTest();
-        byte[] bytes = test.getDefaultIniStreamContents();
+        byte[] bytes = test.getDefaultIniStreamContents(false);
         try (OutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
             outputStream.flush();
@@ -87,6 +90,7 @@ public class ClientAuthorizationProviderChainTest {
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, expectedTokenEndpointUrl1);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, expectedAccessKeyId1);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, expectedAccessKeySecret1);
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, expectedTokenScope);
 
         return  new FromSystemProperties();
     }
@@ -95,10 +99,12 @@ public class ClientAuthorizationProviderChainTest {
         tokenEndpointUrl = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY);
         accessKeyId = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY);
         accessKeySecret = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY);
+        tokenScope = System.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
 
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, "");
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, "");
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, "");
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, "");
 
         return  new FromSystemProperties();
     }
@@ -116,10 +122,14 @@ public class ClientAuthorizationProviderChainTest {
         if (null == accessKeySecret) {
             accessKeySecret = "";
         }
+        if (null == tokenScope) {
+            tokenScope = "";
+        }
 
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, tokenEndpointUrl);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, accessKeyId);
         System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, accessKeySecret);
+        System.setProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, tokenScope);
     }
 
     public ClientAuthorizationRequestProvider getClientAuthorizationRequestProviderFromHerePropertiesFile() throws Exception {
@@ -134,7 +144,8 @@ public class ClientAuthorizationProviderChainTest {
         byte[] bytes = ("here.token.endpoint.url=https://www.example.com/oauth2/token\n"
                 + "here.client.id=my-client-id\n"
                 + "here.access.key.id=my-access-key-id\n"
-                + "here.access.key.secret=my-secret\n")
+                + "here.access.key.secret=my-secret\n"
+                + "here.token.scope=my-scope")
                 .getBytes(StandardCharsets.UTF_8);
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
@@ -208,5 +219,14 @@ public class ClientAuthorizationProviderChainTest {
         assertTrue("grantType should equal " + ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE,
                 providerChain.getNewAccessTokenRequest().getGrantType().equals(ClientCredentialsGrantRequest.CLIENT_CREDENTIALS_GRANT_TYPE));
 
+        String expectedScope = clientAuthorizationRequestProvider.getScope();
+        String actualScope = providerChain.getScope();
+
+        if (null == expectedScope) {
+            assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
+        } else {
+            assertTrue("scope expected " + expectedScope + ", actual " + actualScope,
+                    expectedScope.equals(actualScope));
+        }
     }
 }

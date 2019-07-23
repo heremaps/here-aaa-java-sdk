@@ -38,9 +38,14 @@ public class AccessTokenResponseTest extends AbstractCredentialTezt{
 
     @Test
     public void testIdTokenIsSetViaConstructor() {
+        String expectedAccessToken = "testAccessToken";
+        String expectedTokenType = "testType";
+        long expectedExpiresIn = 1200L;
+        String expectedRefreshToken = "testRefreshToken";
         String expectedIdToken = "idToken";
-        AccessTokenResponse response = new AccessTokenResponse("accessToken",
-                "testType", 1200L, "testToken", expectedIdToken);
+        String expectedScope = "scope123";
+        AccessTokenResponse response = new AccessTokenResponse(expectedAccessToken,
+                expectedTokenType, expectedExpiresIn, expectedRefreshToken, expectedIdToken, expectedScope);
 
         assertEquals(response.getIdToken(), expectedIdToken);
     }

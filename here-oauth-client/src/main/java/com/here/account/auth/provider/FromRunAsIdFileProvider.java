@@ -15,16 +15,8 @@
  */
 package com.here.account.auth.provider;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-
-import com.here.account.auth.provider.AbstractClientAuthorizationRequestProvider;
-import com.here.account.http.HttpConstants;
-import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
+import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.identity.bo.IdentityTokenRequest;
@@ -32,6 +24,12 @@ import com.here.account.oauth2.AccessTokenRequest;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
+
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Gets authorization Access Tokens from an identity access token file.
@@ -50,7 +48,7 @@ public class FromRunAsIdFileProvider
             "file:///dev/shm/identity/access-token";
 
     private final String tokenUrl;
-    
+
     public FromRunAsIdFileProvider() {
         this(new SettableSystemClock());
     }
@@ -63,7 +61,7 @@ public class FromRunAsIdFileProvider
         super(clock);
         this.tokenUrl = tokenUrl;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -119,6 +117,7 @@ public class FromRunAsIdFileProvider
     }
     
     protected IdentityTokenRequest getRequest() {
+        // scope for pipeline access tokens will come from the file
         return new IdentityTokenRequest();
     }
     
@@ -130,4 +129,11 @@ public class FromRunAsIdFileProvider
         return HttpMethods.GET;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope() {
+        return null;
+    }
 }
