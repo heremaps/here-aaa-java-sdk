@@ -16,6 +16,7 @@
 package com.here.account.oauth2;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
+import com.here.account.auth.OAuth1Signer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
@@ -32,14 +33,13 @@ import org.mockito.stubbing.OngoingStubbing;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
+
+import static org.mockito.Mockito.times;
 
 public class HereAccountTest extends AbstractCredentialTezt {
     
@@ -356,7 +356,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
             verifyExpected(e, 401, 401204);
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(2))
+        Mockito.verify(mockHttpProvider, times(2))
                 .execute(Mockito.any(HttpProvider.HttpRequest.class));
     }
 
@@ -446,7 +446,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
             verifyExpected(e, 401, 401204);
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(3))
+        Mockito.verify(mockHttpProvider, times(3))
                 .execute(Mockito.any(HttpProvider.HttpRequest.class));
     }
 
@@ -529,7 +529,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         assertTrue("expected scope " + expectedScope + ", actual " + scope,
                 expectedScope.equals(scope));
 
-        Mockito.verify(mockHttpProvider, Mockito.times(3))
+        Mockito.verify(mockHttpProvider, times(3))
                 .execute(Mockito.any(HttpProvider.HttpRequest.class));
     }
 
@@ -806,5 +806,147 @@ public class HereAccountTest extends AbstractCredentialTezt {
         AccessTokenRequest accessTokenRequest = new IdentityTokenRequest();
         // we will get an error as the apache http response is null.
         tokenEndpoint.requestToken(accessTokenRequest);
+    }
+
+    @Test
+    public void test_requestHeader_with_additionalHeader_and_correlationId() throws Exception{
+        String testKey = "testKey";
+        String testValue = "testValue";
+        String correlationIdKey = "X-Correlation-ID";
+        String correlationId = "abc123";
+
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockHttpProvider")
+//                        .verboseLogging()
+        );
+        String body = "{\"access_token\":\"my-token\",\"expires_in\":50}";
+
+        final HttpProvider.HttpResponse mockHttpResponse = new HttpProvider.HttpResponse() {
+            @Override
+            public int getStatusCode() {
+                return 200;
+            }
+
+            @Override
+            public long getContentLength() {
+                return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public InputStream getResponseBody() throws IOException {
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                return new ByteArrayInputStream(bytes);
+            }
+        };
+        Mockito.when(mockHttpProvider.execute(Mockito.any())).thenReturn(mockHttpResponse);
+
+        OAuth1Signer mockOauth1Signer = new OAuth1Signer(accessKeyId, accessKeySecret);
+
+        ClientCredentialsProvider mockClientCredentialsProvider = Mockito.mock(ClientCredentialsProvider.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockClientCredentialsProvider")
+//                        .verboseLogging()
+        );
+        Mockito.doReturn("https://www.example.com/oauth2/token")
+                .when(mockClientCredentialsProvider).getTokenEndpointUrl();
+        Mockito.doReturn(mockOauth1Signer)
+                .when(mockClientCredentialsProvider).getClientAuthorizer();
+        Mockito.doReturn(HttpConstants.HttpMethods.POST)
+                .when(mockClientCredentialsProvider).getHttpMethod();
+
+        HttpProvider.HttpRequest mockHttpRequest = Mockito.mock(HttpProvider.HttpRequest.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockHttpRequest")
+//                        .verboseLogging()
+        );
+        Mockito.when(mockHttpProvider.getRequest(Mockito.any(HttpProvider.HttpRequestAuthorizer.class),
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(Map.class))).thenReturn(mockHttpRequest);
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(mockHttpProvider, mockClientCredentialsProvider);
+
+        AccessTokenRequest accessTokenRequest = new ClientCredentialsGrantRequest();
+        accessTokenRequest.setAdditionalHeaders(Collections.singletonMap(testKey, testValue));
+        accessTokenRequest.setCorrelationId(correlationId);
+        accessTokenRequest.setExpiresIn(1L);    // no need for a long lived token
+
+        tokenEndpoint.requestToken(accessTokenRequest);
+
+        // verify the expected values added to the request header
+        Mockito.verify(mockHttpRequest, times(2)).addHeader(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(mockHttpRequest, times(1)).addHeader(testKey, testValue);
+        Mockito.verify(mockHttpRequest, times(1)).addHeader(correlationIdKey, correlationId);
+    }
+
+    @Test
+    public void test_requestHeader_with_correlationId() throws Exception{
+        String correlationIdKey = "X-Correlation-ID";
+        String correlationId = "fooBarBaz";
+
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockHttpProvider")
+//                        .verboseLogging()
+        );
+        String body = "{\"access_token\":\"my-token\",\"expires_in\":50}";
+
+        final HttpProvider.HttpResponse mockHttpResponse = new HttpProvider.HttpResponse() {
+            @Override
+            public int getStatusCode() {
+                return 200;
+            }
+
+            @Override
+            public long getContentLength() {
+                return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public InputStream getResponseBody() throws IOException {
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                return new ByteArrayInputStream(bytes);
+            }
+        };
+        Mockito.when(mockHttpProvider.execute(Mockito.any())).thenReturn(mockHttpResponse);
+
+        OAuth1Signer mockOauth1Signer = new OAuth1Signer(accessKeyId, accessKeySecret);
+
+        ClientCredentialsProvider mockClientCredentialsProvider = Mockito.mock(ClientCredentialsProvider.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockClientCredentialsProvider")
+//                        .verboseLogging()
+        );
+        Mockito.doReturn("https://www.example.com/oauth2/token")
+                .when(mockClientCredentialsProvider).getTokenEndpointUrl();
+        Mockito.doReturn(mockOauth1Signer)
+                .when(mockClientCredentialsProvider).getClientAuthorizer();
+        Mockito.doReturn(HttpConstants.HttpMethods.POST)
+                .when(mockClientCredentialsProvider).getHttpMethod();
+
+        HttpProvider.HttpRequest mockHttpRequest = Mockito.mock(HttpProvider.HttpRequest.class
+//                , Mockito
+//                        .withSettings()
+//                        .name("mockHttpRequest")
+//                        .verboseLogging()
+        );
+        Mockito.when(mockHttpProvider.getRequest(Mockito.any(HttpProvider.HttpRequestAuthorizer.class),
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(Map.class))).thenReturn(mockHttpRequest);
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(mockHttpProvider, mockClientCredentialsProvider);
+
+        AccessTokenRequest accessTokenRequest = new ClientCredentialsGrantRequest();
+        accessTokenRequest.setCorrelationId(correlationId);
+        accessTokenRequest.setExpiresIn(1L);    // no need for a long lived token
+
+        tokenEndpoint.requestToken(accessTokenRequest);
+
+        // verify the expected value added to the request header
+        Mockito.verify(mockHttpRequest, times(1)).addHeader(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(mockHttpRequest, times(1)).addHeader(correlationIdKey, correlationId);
     }
 }

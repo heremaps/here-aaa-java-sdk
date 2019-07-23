@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -316,6 +317,8 @@ public class HereAccount {
         @Deprecated
         public static final String HTTP_METHOD_POST = "POST";
 
+        private static final String X_CORRELATION_ID = "X-Correlation-ID";
+
         private final boolean currentTimeMillisSettable;
         private final Clock clock;
         private final SettableClock settableClock;
@@ -369,7 +372,6 @@ public class HereAccount {
                 settableClock = null;
                 timestampUrl = null;
             }
-
         }
         
         protected AccessTokenResponse requestTokenFromFile() 
@@ -407,14 +409,35 @@ public class HereAccount {
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
                 clientAuthorizer, method, url, authorizationRequest.toFormParams());
+            addAdditionalHeaders(httpRequest, authorizationRequest);
 
             try {
-                return client.sendMessage(httpRequest, AccessTokenResponse.class,
-                        ErrorResponse.class, (statusCode, errorResponse) -> {
+                return client.sendMessage(httpRequest,
+                        AccessTokenResponse.class, ErrorResponse.class,
+                        (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
+            }
+        }
+
+        /**
+         * Adds additional headers to httpRequest, and the correlationId to the header (iff there is one)
+         *
+         * @param httpRequest the httpRequest to send
+         * @param authorizationRequest  the authorization request
+         */
+        private void addAdditionalHeaders(HttpProvider.HttpRequest httpRequest, AccessTokenRequest authorizationRequest) {
+            Map<String, String> headers = authorizationRequest.getAdditionalHeaders();
+            if (null != headers) {
+                for (Map.Entry<String, String> header : headers.entrySet()) {
+                    httpRequest.addHeader(header.getKey(), header.getValue());
+                }
+            }
+            String correlationId = authorizationRequest.getCorrelationId();
+            if (null != correlationId) {
+                httpRequest.addHeader(X_CORRELATION_ID, correlationId);
             }
         }
 
