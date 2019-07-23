@@ -94,4 +94,11 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope() {
+        return getClientCredentialsProvider().getScope();
+    }
 }

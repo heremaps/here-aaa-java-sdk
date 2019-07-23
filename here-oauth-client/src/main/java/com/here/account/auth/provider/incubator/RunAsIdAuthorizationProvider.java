@@ -48,7 +48,7 @@ public class RunAsIdAuthorizationProvider
             "http://localhost:8001/token";
 
     private final String tokenEndpointUrl;
-    
+
     public RunAsIdAuthorizationProvider() {
         this(new SettableSystemClock(), RUN_AS_ID_TOKEN_ENDPOINT_URL);
     }
@@ -101,5 +101,12 @@ public class RunAsIdAuthorizationProvider
     public HttpMethods getHttpMethod() {
         return HttpMethods.GET;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope() {
+        return null;
+    }
 }

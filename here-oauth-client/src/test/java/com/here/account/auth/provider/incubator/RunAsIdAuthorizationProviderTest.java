@@ -15,6 +15,7 @@
  */
 package com.here.account.auth.provider.incubator;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -79,6 +80,9 @@ public class RunAsIdAuthorizationProviderTest {
         assertTrue("expected tokenEndpointUrl " + expectedTokenEndpointUrl
                 + ", actual " + actualTokenEndpointUrl, 
                 expectedTokenEndpointUrl.equals(actualTokenEndpointUrl));
+
+        String actualScope = runAsIdAuthorizationProvider.getScope();
+        assertNull("expected scope to be NULL, actual " + actualScope, actualScope);
     }
     
     @Test

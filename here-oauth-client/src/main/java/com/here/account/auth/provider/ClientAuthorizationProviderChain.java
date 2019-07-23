@@ -141,5 +141,11 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
         return getClientCredentialsProvider().getClock();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope() {
+        return getClientCredentialsProvider().getScope();
+    }
 }
