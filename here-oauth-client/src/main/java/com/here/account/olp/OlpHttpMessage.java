@@ -1,12 +1,14 @@
 package com.here.account.olp;
 
 public interface OlpHttpMessage {
+    String X_CORRELATION_ID = "X-Correlation-ID";
+
     /**
      * Get the correlationId (the unique value for tracking a request across services and within a service).
      *
      * @return the correlationId
      */
-    public String getCorrelationId();
+    String getCorrelationId();
 
     /**
      * Set the correlationId (the unique value for tracking a request across services and within a service).

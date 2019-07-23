@@ -25,12 +25,14 @@ import com.here.account.util.Serializer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A Client that talks to a Resource Server, in OAuth2-speak.
+ * An OLP Client that talks to an OLP Resource Server, in OAuth2-speak.
  * It is expected that a wrapper class invokes methods on an instance 
  * of this class, so that simple Java create(), read(), update(), 
  * and delete() methods can be written with POJOs.
@@ -178,16 +180,8 @@ public class Client {
         // If there's additional headers, add them to the request
         HttpRequest httpRequestWithAdditonalHeaders = addAdditionalHeaders(httpRequest, additionalHeaders);
 
-        T response = sendMessage(httpRequestWithAdditonalHeaders, responseClass,
+        return sendMessage(httpRequestWithAdditonalHeaders, responseClass,
                 errorResponseClass, newExceptionFunction);
-
-        if (null != additionalHeaders
-                && additionalHeaders.containsKey(HereAccount.X_CORRELATION_ID)
-                && responseClass.isInstance(OlpHttpMessage.class)) {
-            ((AccessTokenResponse)response).setCorrelationId(additionalHeaders.get(HereAccount.X_CORRELATION_ID));
-        }
-
-        return response;
     }
     
     /**
@@ -224,14 +218,17 @@ public class Client {
         }
 
         int statusCode = httpResponse.getStatusCode();
+        String correlationId = getCorrelationId(httpResponse);
         try {
             if (200 == statusCode || 201 == statusCode || 204 == statusCode) {
                 if (204 == statusCode && responseClass.equals(Void.class)) {
                     return null;
                 }
                 try {
-                    return serializer.jsonToPojo(jsonInputStream,
+                    T response = serializer.jsonToPojo(jsonInputStream,
                             responseClass);
+                    setCorrelationId(response, responseClass, correlationId);
+                    return response;
                 } catch (Exception e) {
                     throw new ResponseParsingException(e);
                 }
@@ -251,6 +248,39 @@ public class Client {
     }
 
     /**
+     * Set the correlationId on the specified response if it implements OlpHttpMessage.
+     *
+     * @param response the response POJO
+     * @param responseClass the Class of the response POJO
+     * @param correlationId the correlationId, or null if there is none
+     * @param <T> the parameterized type of response
+     */
+    private <T> void setCorrelationId(T response, Class<T> responseClass, String correlationId) {
+        if (null != correlationId && null != response
+                && OlpHttpMessage.class.isAssignableFrom(responseClass)) {
+            ((OlpHttpMessage) response).setCorrelationId(correlationId);
+        }
+    }
+
+    /**
+     * Get the X-Correlation-ID header value from the httpResponse.
+     *
+     * @param httpResponse the httpResponse message
+     * @return the X-Correlation-ID, if there was one, or null
+     */
+    private String getCorrelationId(HttpProvider.HttpResponse httpResponse) {
+        Map<String, List<String>> headers = null != httpResponse ? httpResponse.getHeaders() : null;
+        List<String> values = null != headers ? headers.get(OlpHttpMessage.X_CORRELATION_ID) : null;
+        if (null != values && values.size() > 0) {
+            String correlationId = values.get(0);
+            if (null != correlationId && LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + correlationId);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Add additional headers to the request
      *
      * @param httpRequest           the request
@@ -264,6 +294,9 @@ public class Client {
                 String name = additionalHeader.getKey();
                 String value = additionalHeader.getValue();
                 httpRequest.addHeader(name, value);
+                if (OlpHttpMessage.X_CORRELATION_ID.equals(name) && value != null && LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + value);
+                }
             }
         }
         return httpRequest;

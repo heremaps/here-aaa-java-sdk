@@ -645,7 +645,15 @@ public class HereAccountTest extends AbstractCredentialTezt {
             public long getContentLength() {
                 return contentLength;
             }
-            
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                //headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
+            }
+
+
             @Override
             public InputStream getResponseBody() throws IOException {
                 return body;
@@ -689,6 +697,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public long getContentLength() {
                 return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                //headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
             }
 
             @Override
@@ -779,6 +794,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             }
 
             @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
+            }
+
+            @Override
             public InputStream getResponseBody() throws IOException {
                 byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
                 return new ByteArrayInputStream(bytes);
@@ -847,6 +869,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public long getContentLength() {
                 return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
             }
 
             @Override

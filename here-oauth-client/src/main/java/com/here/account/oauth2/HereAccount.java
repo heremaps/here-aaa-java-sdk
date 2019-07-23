@@ -21,6 +21,7 @@ import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.TimestampResponse;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.*;
 
 import java.io.Closeable;
@@ -129,7 +130,6 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class HereAccount {
-    public static final String X_CORRELATION_ID = "X-Correlation-ID";
 
 
     /**
@@ -432,13 +432,10 @@ public class HereAccount {
                 for (Map.Entry<String, String> header : headers.entrySet()) {
                     httpRequest.addHeader(header.getKey(), header.getValue());
                 }
-                if (headers.containsKey(X_CORRELATION_ID))
-                    LOGGER.fine(X_CORRELATION_ID+": "+headers.get(X_CORRELATION_ID));
             }
             String correlationId = authorizationRequest.getCorrelationId();
             if (null != correlationId) {
-                httpRequest.addHeader(X_CORRELATION_ID, correlationId);
-                LOGGER.fine(X_CORRELATION_ID+": "+correlationId);
+                httpRequest.addHeader(OlpHttpMessage.X_CORRELATION_ID, correlationId);
             }
         }
 
