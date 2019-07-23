@@ -277,6 +277,7 @@ public class Client {
             if (null != correlationId && LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + correlationId);
             }
+            return correlationId;
         }
         return null;
     }

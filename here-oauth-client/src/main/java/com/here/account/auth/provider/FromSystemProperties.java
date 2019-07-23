@@ -61,7 +61,8 @@ implements ClientAuthorizationRequestProvider {
                 clock,
                 properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, DEFAULT_TOKEN_ENDPOINT_URL),
                 properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY),
-                properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY)
+                properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY),
+                properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY)
         );
     }
 
@@ -89,4 +90,11 @@ implements ClientAuthorizationRequestProvider {
         return HttpMethods.POST;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope()  {
+        return getDelegate().getScope();
+    }
 }

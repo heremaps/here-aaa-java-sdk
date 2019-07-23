@@ -26,6 +26,7 @@ public abstract class FromHereCredentialsIniConstants {
     protected static final String TEST_TOKEN_ENDPOINT_URL_PROPERTY = "here.token.endpoint.url";
     protected static final String TEST_ACCESS_KEY_ID_PROPERTY = "here.access.key.id";
     protected static final String TEST_ACCESS_KEY_SECRET_PROPERTY = "here.access.key.secret";
+    protected static final String TEST_SCOPE_PROPERTY = "here.token.scope";
 
     protected static final String SECTION_START = "[";
     protected static final String SECTION_END = "]";
@@ -36,8 +37,10 @@ public abstract class FromHereCredentialsIniConstants {
     protected String expectedTokenEndpointUrl = tokenEndpointUrl;
     protected String accessKeyId = "accessKeyId";
     protected String accessKeySecret = "accessKeySecret";
+    protected String scope = "scope";
+    protected String expectedScope = null;
 
-    protected byte[] getDefaultIniStreamContents() {
+    protected byte[] getDefaultIniStreamContents(Boolean includeScope) {
         StringBuilder buf = new StringBuilder()
                 .append(SECTION_START)
                 .append(TEST_DEFAULT_INI_SECTION_NAME)
@@ -59,6 +62,15 @@ public abstract class FromHereCredentialsIniConstants {
                 .append(accessKeySecret)
                 .append(NEWLINE)
                 ;
+
+        if (includeScope) {
+            expectedScope = scope;
+            buf.append(TEST_SCOPE_PROPERTY)
+               .append(EQUALS)
+               .append(scope)
+               .append(NEWLINE)
+               ;
+        }
 
         return buf.toString().getBytes(StandardCharsets.UTF_8);
     }

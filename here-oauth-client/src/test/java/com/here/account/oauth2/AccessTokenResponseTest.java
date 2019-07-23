@@ -22,11 +22,21 @@ public class AccessTokenResponseTest {
 
     @Test
     public void testIdTokenIsSetViaConstructor() {
+        String expectedAccessToken = "testAccessToken";
+        String expectedTokenType = "testType";
+        long expectedExpiresIn = 1200L;
+        String expectedRefreshToken = "testRefreshToken";
         String expectedIdToken = "idToken";
-        AccessTokenResponse response = new AccessTokenResponse("accessToken",
-                "testType", 1200L, "testToken", expectedIdToken);
+        String expectedScope = "scope123";
+        AccessTokenResponse response = new AccessTokenResponse(expectedAccessToken,
+                expectedTokenType, expectedExpiresIn, expectedRefreshToken, expectedIdToken, expectedScope);
 
-        Assert.assertEquals(response.getIdToken(), expectedIdToken);
+        Assert.assertEquals(expectedAccessToken, response.getAccessToken());
+        Assert.assertEquals(expectedTokenType, response.getTokenType());
+        Assert.assertEquals((long)expectedExpiresIn, (long)response.getExpiresIn());
+        Assert.assertEquals(expectedRefreshToken, response.getRefreshToken());
+        Assert.assertEquals(expectedIdToken, response.getIdToken());
+        Assert.assertEquals(expectedScope, response.getScope());
     }
 
     @Test

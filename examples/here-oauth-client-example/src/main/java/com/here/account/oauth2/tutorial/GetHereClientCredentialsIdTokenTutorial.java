@@ -26,6 +26,10 @@ public class GetHereClientCredentialsIdTokenTutorial extends HereClientCredentia
             AccessTokenResponse token =
                     tokenEndpoint.requestToken(accessTokenRequest);
             String idToken = token.getIdToken();
+            if (null == idToken) {
+                throw new RuntimeException("idToken was null");
+            }
+
             if (args.isVerbose()) {
                 System.out.println("Id Token: " + idToken);
             } else {

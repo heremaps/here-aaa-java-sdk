@@ -329,9 +329,10 @@ public class HereAccount {
         private final HttpProvider httpProvider;
         private final HttpMethods httpMethod;
         private final String url;
+        private final String scope;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
         private final Serializer serializer;
-        
+
         /**
          * Construct a new ability to obtain authorization from the HERE authorization server.
          * 
@@ -351,6 +352,7 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
+            this.scope = clientAuthorizationProvider.getScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)
@@ -400,6 +402,11 @@ public class HereAccount {
             String method = httpMethod.getMethod();
 
             HttpProvider.HttpRequest httpRequest;
+
+            if (null != scope) { // && null == authorizationRequest.getScope()) {
+                authorizationRequest.setScope(scope);
+            }
+
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
                 clientAuthorizer, method, url, authorizationRequest.toFormParams());
@@ -411,9 +418,6 @@ public class HereAccount {
                         (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
-                if (null != authorizationRequest.getCorrelationId()) {
-                    response.setCorrelationId(authorizationRequest.getCorrelationId());
-                }
                 return response;
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);

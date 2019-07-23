@@ -74,20 +74,26 @@ public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
     private final String idToken;
 
     private transient String correlationId;
+  
+    /**
+     * Requested scope of the access token. Supported scope-types are openId or project.
+     */
+    @JsonProperty("scope")
+    private final String scope;
 
     public AccessTokenResponse() {
-        this(null, null, null, null,  null);
+        this(null, null, null, null, null, null);
     }
 
-    public AccessTokenResponse(String accessToken,
-            String tokenType,
-            Long expiresIn, String refreshToken, String idToken) {
+    public AccessTokenResponse(String accessToken, String tokenType, Long expiresIn,
+                               String refreshToken, String idToken, String scope) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
         this.refreshToken = refreshToken;
         this.startTimeMilliseconds = System.currentTimeMillis();
         this.idToken = idToken;
+        this.scope = scope;
     }
 
     /**
@@ -169,7 +175,6 @@ public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
         return idToken;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -186,4 +191,10 @@ public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
         this.correlationId = correlationId;
         return this;
     }
+
+    /**
+     * Scope the token has access to.
+     * @return  null, openId or project scope
+     */
+    public String getScope() { return scope; }
 }

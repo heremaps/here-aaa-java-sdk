@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.here.account.util.SettableSystemClock;
@@ -40,7 +41,7 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
         
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 httpProvider, 
-                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret"));
+                new OAuth1ClientCredentialsProvider(url, accessKeyId, "invalidSecret", scope));
         
         try {
             tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
@@ -59,16 +60,21 @@ public abstract class AbstractHereAccountProviderTezt extends AbstractCredential
     @Test
     public void testGetToken() throws Exception {
         HttpProvider httpProvider = getHttpProvider();
-        
+
         TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
                 httpProvider, 
                 new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
-                        url, accessKeyId, accessKeySecret));
-        
+                        url, accessKeyId, accessKeySecret, scope));
+
         AccessTokenResponse accessTokenResponse = tokenEndpoint.requestToken(new ClientCredentialsGrantRequest());
         assertTrue("accessTokenResponse was null", null != accessTokenResponse);
         String accessToken = accessTokenResponse.getAccessToken();
         assertTrue("accessToken was null or zero-length", null != accessToken && accessToken.length() > 0);
+
+        // if a scope value was specified to the ClientCredentialsProvider, verify it is in the response
+        if (null != scope && !scope.trim().isEmpty()) {
+            assertEquals("scope in request and response should be the same", scope, accessTokenResponse.getScope());
+        }
     }
 
 }
