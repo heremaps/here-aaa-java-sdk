@@ -15,12 +15,15 @@
  */
 package com.here.account.oauth2;
 
+import com.here.account.auth.NoAuthorizer;
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.auth.OAuth1Signer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
+import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.http.java.JavaHttpProvider;
 import com.here.account.identity.bo.IdentityTokenRequest;
 import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
@@ -28,6 +31,7 @@ import com.here.account.util.SettableSystemClock;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
@@ -369,6 +373,76 @@ public class HereAccountTest extends AbstractCredentialTezt {
         int errorCode2 = errorResponse2.getErrorCode();
         assertTrue("errorCode2 was expected " + expectedErrorCode + ", actual " + errorCode2,
                 expectedErrorCode == errorCode2);
+    }
+
+    @Test
+    public void test_defaultScope_overridden() throws IOException, HttpException {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        //HttpProvider spy = Mockito.spy(mockHttpProvider);
+
+        ClientCredentialsProvider credentials = new ClientCredentialsProvider() {
+            @Override
+            public String getTokenEndpointUrl() {
+                return "https://www.example.com/token";
+            }
+
+            @Override
+            public HttpProvider.HttpRequestAuthorizer getClientAuthorizer() {
+                return new NoAuthorizer();
+            }
+
+            @Override
+            public AccessTokenRequest getNewAccessTokenRequest() {
+                return new ClientCredentialsGrantRequest();
+            }
+
+            @Override
+            public HttpConstants.HttpMethods getHttpMethod() {
+                return HttpConstants.HttpMethods.POST;
+            }
+
+            @Override
+            public Clock getClock() {
+                return Clock.SYSTEM;
+            }
+
+            @Override
+            public String getScope() {
+                return "hrn:here-dev:authorization::rlm00001:project/my-project";
+            }
+        };
+
+        HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
+        InputStream inputStream = new ByteArrayInputStream("{}".getBytes(StandardCharsets.UTF_8));
+        Mockito.doReturn(200)
+                .when(mockHttpResponse).getStatusCode();
+        Mockito.doReturn(inputStream)
+                .when(mockHttpResponse).getResponseBody();
+
+        Mockito.doReturn(mockHttpResponse)
+                .when(mockHttpProvider).execute(Mockito.any(HttpProvider.HttpRequest.class));
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockHttpProvider,
+                credentials);
+        AccessTokenRequest accessTokenRequest  =  new
+                ClientCredentialsGrantRequest();
+        accessTokenRequest.setScope("openid");
+        AccessTokenResponse token =
+                tokenEndpoint.requestToken(accessTokenRequest);
+        String idToken = token.getIdToken();
+
+        Map<String, List<String>> expectedMap = new HashMap<String, List<String>>();
+        expectedMap.put("scope", Collections.singletonList("openid"));
+        expectedMap.put("grant_type", Collections.singletonList("client_credentials"));
+
+        /*
+        httpRequest = httpProvider.getRequest(
+                clientAuthorizer, method, url, authorizationRequest.toFormParams());
+                */
+        Mockito.verify(mockHttpProvider, times(1))
+                .getRequest(Mockito.any(HttpProvider.HttpRequestAuthorizer.class), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.eq(expectedMap));
     }
 
     @Test
