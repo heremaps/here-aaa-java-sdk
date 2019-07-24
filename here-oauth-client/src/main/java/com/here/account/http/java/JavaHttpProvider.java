@@ -135,6 +135,7 @@ public class JavaHttpProvider implements HttpProvider {
                 String requestBodyJson) {
             this.method = method;
             this.url = url;
+            this.additionalHeaders = new HashMap<String, String>();
             
             contentType = HttpConstants.CONTENT_TYPE_JSON;
             body = requestBodyJson.getBytes(HttpConstants.ENCODING_CHARSET);
@@ -146,6 +147,7 @@ public class JavaHttpProvider implements HttpProvider {
                 Map<String, List<String>> formParams) {
             this.method = method;
             this.url = url;
+            this.additionalHeaders = new HashMap<String, String>();
             
             try {
                 contentType = HttpConstants.CONTENT_TYPE_FORM_URLENCODED;

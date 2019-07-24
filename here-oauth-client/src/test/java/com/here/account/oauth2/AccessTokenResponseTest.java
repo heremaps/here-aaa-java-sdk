@@ -38,4 +38,12 @@ public class AccessTokenResponseTest {
         Assert.assertEquals(expectedIdToken, response.getIdToken());
         Assert.assertEquals(expectedScope, response.getScope());
     }
+
+    @Test
+    public void testGetSetCorrelationId() {
+        String expectedCorrelationId = "testCorrelationId";
+        AccessTokenResponse response = new AccessTokenResponse();
+        response.setCorrelationId(expectedCorrelationId);
+        Assert.assertEquals(expectedCorrelationId, response.getCorrelationId());
+    }
 }

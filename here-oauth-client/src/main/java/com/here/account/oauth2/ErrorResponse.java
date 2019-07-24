@@ -365,6 +365,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     *
+     * @return the title
      */
     public String getTitle() {
         return title;
@@ -375,6 +377,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     *
+     * @return the status
      */
     public Integer getStatus() {
         return status;
@@ -385,6 +389,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     *
+     * @return the error code
      */
     public String getCode() {
         return code;
@@ -395,6 +401,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     *
+     * @return the cause for this error response
      */
     public String getCause() {
         return cause;
@@ -405,6 +413,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     *
+     * @return the action for this error response
      */
     public String getAction() {
         return action;
@@ -416,6 +426,8 @@ public class ErrorResponse {
      *
      * <p>
      * This property is a HERE extension to RFC6749 providing additional data.
+     * 
+     * @return the correlationId
      */
     public String getCorrelationId() {
         return correlationId;

@@ -701,7 +701,15 @@ public class HereAccountTest extends AbstractCredentialTezt {
             public long getContentLength() {
                 return contentLength;
             }
-            
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                //headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
+            }
+
+
             @Override
             public InputStream getResponseBody() throws IOException {
                 return body;
@@ -745,6 +753,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public long getContentLength() {
                 return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                //headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
             }
 
             @Override
@@ -813,7 +828,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
         String testKey = "testKey";
         String testValue = "testValue";
         String correlationIdKey = "X-Correlation-ID";
-        String correlationId = "abc123";
+        final String correlationId = "abc123";
 
         HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class
 //                , Mockito
@@ -832,6 +847,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public long getContentLength() {
                 return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
             }
 
             @Override
@@ -873,7 +895,12 @@ public class HereAccountTest extends AbstractCredentialTezt {
         accessTokenRequest.setCorrelationId(correlationId);
         accessTokenRequest.setExpiresIn(1L);    // no need for a long lived token
 
-        tokenEndpoint.requestToken(accessTokenRequest);
+        AccessTokenResponse accessTokenResponse = tokenEndpoint.requestToken(accessTokenRequest);
+
+        assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+        String actualCorrelationId = accessTokenResponse.getCorrelationId();
+        assertTrue("accessTokenResponse.getCorrelationId() was expected " + correlationId + ", actual " + actualCorrelationId,
+        correlationId.equals(actualCorrelationId));
 
         // verify the expected values added to the request header
         Mockito.verify(mockHttpRequest, times(2)).addHeader(Mockito.anyString(), Mockito.anyString());
@@ -903,6 +930,13 @@ public class HereAccountTest extends AbstractCredentialTezt {
             @Override
             public long getContentLength() {
                 return body.getBytes(StandardCharsets.UTF_8).length;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                Map<String, List<String>> headers = new HashMap<String, List<String>>();
+                headers.put(correlationIdKey, Collections.singletonList(correlationId));
+                return headers;
             }
 
             @Override
@@ -943,10 +977,30 @@ public class HereAccountTest extends AbstractCredentialTezt {
         accessTokenRequest.setCorrelationId(correlationId);
         accessTokenRequest.setExpiresIn(1L);    // no need for a long lived token
 
-        tokenEndpoint.requestToken(accessTokenRequest);
+        AccessTokenResponse response = tokenEndpoint.requestToken(accessTokenRequest);
+        assertTrue("response was null", null != response);
+        String actualCorrelationId = response.getCorrelationId();
+        assertTrue("correlationId was expected " + correlationId + ", actual " + actualCorrelationId,
+        correlationId.equals(actualCorrelationId));
 
         // verify the expected value added to the request header
         Mockito.verify(mockHttpRequest, times(1)).addHeader(Mockito.anyString(), Mockito.anyString());
         Mockito.verify(mockHttpRequest, times(1)).addHeader(correlationIdKey, correlationId);
+    }
+
+    @Test
+    public void test_requestResponse_with_correlationId() {
+        String expectedCorrelationId = "abc123";
+        HttpProvider httpProvider = getHttpProvider();
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                httpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret));
+
+        AccessTokenRequest accessTokenRequest = new ClientCredentialsGrantRequest();
+        accessTokenRequest.setCorrelationId(expectedCorrelationId);
+        AccessTokenResponse token = tokenEndpoint.requestToken(accessTokenRequest);
+
+        assertEquals(expectedCorrelationId, token.getCorrelationId());
     }
 }
