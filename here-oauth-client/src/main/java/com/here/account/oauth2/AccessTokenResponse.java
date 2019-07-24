@@ -16,6 +16,7 @@
 package com.here.account.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
 
 /**
@@ -26,7 +27,7 @@ import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
  * @author kmccrack
  *
  */
-public class AccessTokenResponse implements ExpiringResponse {
+public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
 
     /**
      * access_token
@@ -72,6 +73,8 @@ public class AccessTokenResponse implements ExpiringResponse {
     @JsonProperty("id_token")
     private final String idToken;
 
+    private transient String correlationId;
+  
     /**
      * Requested scope of the access token. Supported scope-types are openId or project.
      */
@@ -170,6 +173,23 @@ public class AccessTokenResponse implements ExpiringResponse {
 
     public String getIdToken() {
         return idToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCorrelationId() {
+        return this.correlationId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AccessTokenResponse setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+        return this;
     }
 
     /**

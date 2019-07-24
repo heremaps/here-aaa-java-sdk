@@ -129,4 +129,12 @@ public class AccessTokenResponseTest extends AbstractCredentialTezt{
                 "</body>\n" +
                 "</html>";
     }
+
+    @Test
+    public void testGetSetCorrelationId() {
+        String expectedCorrelationId = "testCorrelationId";
+        AccessTokenResponse response = new AccessTokenResponse();
+        response.setCorrelationId(expectedCorrelationId);
+        assertEquals(expectedCorrelationId, response.getCorrelationId());
+    }
 }

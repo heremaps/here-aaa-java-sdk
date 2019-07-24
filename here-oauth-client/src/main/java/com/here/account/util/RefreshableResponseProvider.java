@@ -251,6 +251,8 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
 
   /**
    * Schedule the next refresh with the specified timeout duration
+   *
+   * @param millis  time (msec) in the future to schedule the refresh
    */
   protected void scheduleTokenRefresh(long millis) {
     if (!started) {

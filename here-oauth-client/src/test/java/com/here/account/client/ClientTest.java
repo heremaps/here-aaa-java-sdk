@@ -15,8 +15,6 @@
  */
 package com.here.account.client;
 
-import static org.junit.Assert.fail;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
@@ -25,6 +23,7 @@ import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.Serializer;
@@ -33,12 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,14 +40,17 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 
-class FakeResponse {
+class FakeResponse implements OlpHttpMessage {
     @JsonProperty("access_token")
     private final String accessToken;
     @JsonProperty("token_type")
     private final String tokenType;
+
+    private String correlationId;
 
     public FakeResponse() {
         this(null, null);
@@ -70,6 +67,12 @@ class FakeResponse {
 
     public String getTokenType() {
         return this.tokenType;
+    }
+
+    public String getCorrelationId() { return this.correlationId; }
+    public OlpHttpMessage setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+        return this;
     }
 }
 
@@ -103,10 +106,11 @@ class FakeRequest {
 }
 
 public class ClientTest {
-
+    private static String expectedCorrelationId = "testCorrId";
     Serializer serializer = new JacksonSerializer();
     HttpProvider.HttpRequest mockHttpRequest;
     HttpProvider.HttpResponse mockHttpResponse;
+    Map<String, List<String>> mockResponseHeader;
     HttpProvider mockHttpProvider;
     HttpProvider.HttpRequestAuthorizer mockHttpRequestAuthorizer;
     FakeResponse expectedResponseObject;
@@ -117,7 +121,12 @@ public class ClientTest {
         mockHttpProvider = mock(HttpProvider.class);
         mockHttpRequestAuthorizer = mock(HttpProvider.HttpRequestAuthorizer.class);
         mockHttpResponse = mock(HttpProvider.HttpResponse.class);
+        List<String> mockCorrelationIdHeaderValue = new ArrayList<String>();
+        mockCorrelationIdHeaderValue.add(expectedCorrelationId);
+        mockResponseHeader = new HashMap<String, List<String>>();
+        mockResponseHeader.put(OlpHttpMessage.X_CORRELATION_ID, mockCorrelationIdHeaderValue);
         expectedResponseObject = new FakeResponse("testAccessToken", "Bearer");
+        expectedResponseObject.setCorrelationId(expectedCorrelationId);
         String responseString = serializer.objectToJson(expectedResponseObject);
         InputStream inputStream = new ByteArrayInputStream(responseString.getBytes("UTF-8"));
         Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(inputStream);
@@ -206,6 +215,7 @@ public class ClientTest {
                 });
         assertTrue(expectedResponseObject.getAccessToken().equals(actualResponse.getAccessToken()));
         assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
+        assertTrue(expectedResponseObject.getCorrelationId().equals(actualResponse.getCorrelationId()));
     }
 
     @Test
@@ -421,5 +431,8 @@ public class ClientTest {
         }
     }
 
+    @Test
+    public void test_response_correlationId() {
 
+    }
 }

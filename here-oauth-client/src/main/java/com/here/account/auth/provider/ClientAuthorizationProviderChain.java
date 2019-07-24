@@ -67,7 +67,6 @@ public class ClientAuthorizationProviderChain implements ClientAuthorizationRequ
      *     <li>~/.here/credentials.properties file</li>
      *     <li>file:///dev/shm/identity/access-token file</li>
      * </ul>
-     * </p>
      *
      * @param clock the clock implementation to use
      * @return the ClientAuthorizationProviderChain with default implementations in preference order
