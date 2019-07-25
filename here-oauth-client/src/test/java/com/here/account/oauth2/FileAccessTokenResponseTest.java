@@ -29,8 +29,15 @@ import java.nio.file.Paths;
 
 public class FileAccessTokenResponseTest {
 
-    FileAccessTokenResponse response;
-    
+    private FileAccessTokenResponse response;
+
+    private File tmpFile;
+    private Serializer serializer;
+
+    private long prevStartTimeMillis;
+    private long prevExp;
+    private long prevExpiresIn;
+
     @Test
     public void test_expiresIn() {
         String accessToken = "my-access-token";
@@ -142,10 +149,4 @@ public class FileAccessTokenResponseTest {
         }
     }
 
-    File tmpFile;
-    Serializer serializer;
-
-    long prevStartTimeMillis;
-    long prevExp;
-    long prevExpiresIn;
 }
