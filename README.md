@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.org/heremaps/here-aaa-java-sdk.svg?branch=master)](https://travis-ci.org/heremaps/here-aaa-java-sdk)
+[![Build Status](https://travis-ci.com/heremaps/here-aaa-java-sdk.svg?branch=master)](https://travis-ci.com/heremaps/here-aaa-java-sdk)
 
 HERE Authentication, Authorization, and Accounting
-
-Copyright (c) 2016-2019 HERE Europe B.V.
 
 Introduction
 ============
@@ -178,3 +176,8 @@ A third option is to get an id_token
 - get Id Token via `com.here.account.oauth2.HereAccount`'s `TokenEndpoint.requestToken(..)` approach by setting the
 scope field in the request.
 
+# License
+
+Copyright (C) 2016-2019 HERE Europe B.V.
+
+See the [LICENSE](./LICENSE) file in the root of this project for license details.
