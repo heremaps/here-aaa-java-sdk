@@ -403,7 +403,7 @@ public class HereAccount {
 
             HttpProvider.HttpRequest httpRequest;
 
-            if (null != scope) { // && null == authorizationRequest.getScope()) {
+            if (null != scope && null == authorizationRequest.getScope()) {
                 authorizationRequest.setScope(scope);
             }
 
