@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.JacksonSerializer;
 
 /**
@@ -30,7 +31,7 @@ import com.here.account.util.JacksonSerializer;
  * @author kmccrack
  *
  */
-public abstract class AccessTokenRequest {
+public abstract class AccessTokenRequest implements OlpHttpMessage {
     
     /**
      * expiresIn; the parameter name for "expires in" when conveyed in a JSON body.
@@ -69,6 +70,8 @@ public abstract class AccessTokenRequest {
     private Long expiresIn;
 
     private String scope;
+    private transient Map<String, String> additionalHeaders = null;
+    private transient String correlationId = null;
     
     protected AccessTokenRequest(String grantType) {
         this.grantType = grantType;
@@ -125,11 +128,14 @@ public abstract class AccessTokenRequest {
      * Requesting Claims using Scope Values</a>.
      * 
      * <p>
-     * The example value is "openid
+     * The example values are "openid
      * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
      * GROUP-84ba52de-f80b-4047-a024-33d81e6153df"
      * openid : Specifies the idToken is expected in the response
      * sdp:[List of groupId separated by ',']
+     *  or
+     * hrn:here:authorization::rlm0000:project/my-project-0000
+     * A projectHRN for a Project-scoped token
      * 
      * @return the scope
      */
@@ -143,14 +149,47 @@ public abstract class AccessTokenRequest {
      * Requesting Claims using Scope Values</a>.
      * 
      * <p>
-     * The example value is "openid
+     * The example values are "openid
      * sdp:GROUP-6bb1bfd9-8bdc-46c2-85cd-754068aa9497,
      * GROUP-84ba52de-f80b-4047-a024-33d81e6153df".
+     *  or
+     * hrn:here:authorization::rlm0000:project/my-project-0000
+     * A projectHRN for a Project-scoped token
      * 
      * @param scope the scope to set
+     * @return  this
      */
     public AccessTokenRequest setScope(String scope) {
         this.scope = scope;
+        return this;
+    }
+
+    /**
+     * Get any additional headers that will be added to the token request.
+     *
+     * @return the additional headers
+     */
+    public Map<String, String> getAdditionalHeaders() { return additionalHeaders; }
+
+    public AccessTokenRequest setAdditionalHeaders(Map<String, String> additionalHeaders) {
+        this.additionalHeaders = additionalHeaders;
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCorrelationId() {
+        return this.correlationId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AccessTokenRequest setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
         return this;
     }
 

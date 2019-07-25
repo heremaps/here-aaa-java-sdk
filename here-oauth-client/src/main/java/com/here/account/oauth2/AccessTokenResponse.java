@@ -16,6 +16,7 @@
 package com.here.account.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
 
 /**
@@ -26,7 +27,7 @@ import com.here.account.util.RefreshableResponseProvider.ExpiringResponse;
  * @author kmccrack
  *
  */
-public class AccessTokenResponse implements ExpiringResponse {
+public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
 
     /**
      * access_token
@@ -67,24 +68,32 @@ public class AccessTokenResponse implements ExpiringResponse {
      * The start time in milliseconds, for this object, at the time it was 
      * constructed.
      */
-    private final Long startTimeMilliseconds;
+    private transient final Long startTimeMilliseconds;
 
     @JsonProperty("id_token")
     private final String idToken;
 
+    private transient String correlationId;
+
+    /**
+     * Requested scope of the access token. Supported scope-types are openId or project.
+     */
+    @JsonProperty("scope")
+    private final String scope;
+
     public AccessTokenResponse() {
-        this(null, null, null, null,  null);
+        this(null, null, null, null, null, null);
     }
 
-    public AccessTokenResponse(String accessToken,
-            String tokenType,
-            Long expiresIn, String refreshToken, String idToken) {
+    public AccessTokenResponse(String accessToken, String tokenType, Long expiresIn,
+                               String refreshToken, String idToken, String scope) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
         this.expiresIn = expiresIn;
         this.refreshToken = refreshToken;
         this.startTimeMilliseconds = System.currentTimeMillis();
         this.idToken = idToken;
+        this.scope = scope;
     }
 
     /**
@@ -166,4 +175,26 @@ public class AccessTokenResponse implements ExpiringResponse {
         return idToken;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCorrelationId() {
+        return this.correlationId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AccessTokenResponse setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+        return this;
+    }
+
+    /**
+     * Scope the token has access to.
+     * @return  null, openId or project scope
+     */
+    public String getScope() { return scope; }
 }

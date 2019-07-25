@@ -39,6 +39,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     private final Clock clock;
     private final String tokenEndpointUrl;
     private final OAuth1Signer oauth1Signer;
+    private final String scope;
     
     /**
      * Construct a new {@code OAuth1ClientCredentialsProvider} that points to
@@ -52,7 +53,14 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
     public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
                                            String accessKeyId,
                                            String accessKeySecret) {
-        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret);
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
+    public OAuth1ClientCredentialsProvider(String tokenEndpointUrl,
+                                           String accessKeyId,
+                                           String accessKeySecret,
+                                           String scope) {
+        this(new SettableSystemClock(), tokenEndpointUrl, accessKeyId, accessKeySecret, scope);
     }
 
     public OAuth1ClientCredentialsProvider(Clock clock,
@@ -60,6 +68,15 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
                                            String accessKeyId,
                                            String accessKeySecret
                                            ) {
+        this(clock, tokenEndpointUrl, accessKeyId, accessKeySecret, null);
+    }
+
+    public OAuth1ClientCredentialsProvider(Clock clock,
+                                           String tokenEndpointUrl,
+                                           String accessKeyId,
+                                           String accessKeySecret,
+                                           String scope
+    ) {
         Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
         Objects.requireNonNull(accessKeyId, "accessKeyId is required");
@@ -68,6 +85,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         this.clock = clock;
         this.tokenEndpointUrl = tokenEndpointUrl;
         this.oauth1Signer = new OAuth1Signer(clock, accessKeyId, accessKeySecret);
+        this.scope = scope;
     }
 
     /**
@@ -108,6 +126,7 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         public static final String TOKEN_ENDPOINT_URL_PROPERTY = "here.token.endpoint.url";
         public static final String ACCESS_KEY_ID_PROPERTY = "here.access.key.id";
         public static final String ACCESS_KEY_SECRET_PROPERTY = "here.access.key.secret";
+        public static final String TOKEN_SCOPE_PROPERTY = "here.token.scope";
 
         /**
          * Builds an {@link OAuth1ClientCredentialsProvider} by pulling the
@@ -119,7 +138,8 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         public FromProperties(Properties properties) {
             super(properties.getProperty(TOKEN_ENDPOINT_URL_PROPERTY),
                   properties.getProperty(ACCESS_KEY_ID_PROPERTY),
-                  properties.getProperty(ACCESS_KEY_SECRET_PROPERTY));
+                  properties.getProperty(ACCESS_KEY_SECRET_PROPERTY),
+                  properties.getProperty(TOKEN_SCOPE_PROPERTY));
         }
     }
 
@@ -169,7 +189,9 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
      */
     @Override
     public AccessTokenRequest getNewAccessTokenRequest() {
-        return new ClientCredentialsGrantRequest();
+        AccessTokenRequest req = new ClientCredentialsGrantRequest();
+        req.setScope(scope);
+        return req;
     }
     
     /**
@@ -180,4 +202,11 @@ public class OAuth1ClientCredentialsProvider implements ClientCredentialsProvide
         return HttpMethods.POST;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getScope() {
+        return scope;
+    }
 }

@@ -15,23 +15,34 @@
  */
 package com.here.account.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.logging.Logger;
-
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
+import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
+import com.here.account.util.OAuthConstants;
 import com.here.account.util.Serializer;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.BiFunction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
 /**
- * A Client that talks to a Resource Server, in OAuth2-speak.
+ * An OLP Client that talks to an OLP Resource Server, in OAuth2-speak.
  * It is expected that a wrapper class invokes methods on an instance 
  * of this class, so that simple Java create(), read(), update(), 
  * and delete() methods can be written with POJOs.
@@ -77,6 +88,8 @@ public class Client {
         return new Builder();
     }
 
+    private static final Pattern START_PATTERN = Pattern.compile("\\A");
+    private static final String LOWERCASE_CONTENT_TYPE_JSON = HttpConstants.CONTENT_TYPE_JSON.toLowerCase();
     private final HttpProvider httpProvider;
     private final Serializer serializer;
     private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
@@ -165,7 +178,6 @@ public class Client {
             BiFunction<Integer, U, RuntimeException> newExceptionFunction)
             throws RequestExecutionException, ResponseParsingException {
 
-
         HttpProvider.HttpRequest httpRequest;
         if (null == request) {
             httpRequest = httpProvider.getRequest(
@@ -177,15 +189,10 @@ public class Client {
                         clientAuthorizer, method, url, jsonBody);
         }
 
-        if (null != additionalHeaders) {
-            for (Map.Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
-                String name = additionalHeader.getKey();
-                String value = additionalHeader.getValue();
-                httpRequest.addHeader(name, value);
-            }
-        }
+        // If there's additional headers, add them to the request
+        HttpRequest httpRequestWithAdditonalHeaders = addAdditionalHeaders(httpRequest, additionalHeaders);
 
-        return sendMessage(httpRequest, responseClass,
+        return sendMessage(httpRequestWithAdditonalHeaders, responseClass,
                 errorResponseClass, newExceptionFunction);
     }
     
@@ -212,8 +219,8 @@ public class Client {
             BiFunction<Integer, U, RuntimeException> newExceptionFunction) 
             throws RequestExecutionException, ResponseParsingException {
         // blocking
-        HttpProvider.HttpResponse httpResponse = null;
-        InputStream jsonInputStream = null;
+        HttpProvider.HttpResponse httpResponse;
+        InputStream jsonInputStream;
 
         try {
             httpResponse = httpProvider.execute(httpRequest);
@@ -223,23 +230,29 @@ public class Client {
         }
 
         int statusCode = httpResponse.getStatusCode();
+        String correlationId = getCorrelationId(httpResponse);
         try {
             if (200 == statusCode || 201 == statusCode || 204 == statusCode) {
                 if (204 == statusCode && responseClass.equals(Void.class)) {
                     return null;
                 }
                 try {
-                    return serializer.jsonToPojo(jsonInputStream,
+                    T response = serializer.jsonToPojo(jsonInputStream,
                             responseClass);
+                    setCorrelationId(response, responseClass, correlationId);
+                    return response;
                 } catch (Exception e) {
                     throw new ResponseParsingException(e);
                 }
             } else {
                 U errorResponse;
                 try {
-                    errorResponse = serializer.jsonToPojo(jsonInputStream, errorResponseClass);
+                    if (isResponseTypeJson(httpResponse)) {
+                        errorResponse = serializer.jsonToPojo(jsonInputStream, errorResponseClass);
+                    } else {
+                        errorResponse = instantiateErrorResponseClass(errorResponseClass, jsonInputStream, statusCode);
+                    }
                 } catch (Exception e) {
-                    // if there is trouble parsing the error
                     throw new ResponseParsingException(e);
                 }
                 throw newExceptionFunction.apply(statusCode, errorResponse);
@@ -249,4 +262,121 @@ public class Client {
         }
     }
 
+    /**
+     * Return whether the response-type is JSON
+     *
+     * @param response   the HTTP response
+     * @return  true-the response-type is JSON, false-the response-type is not JSON
+     */
+    private boolean isResponseTypeJson(HttpProvider.HttpResponse response) {
+        Map<String, List<String>> headers = response.getHeaders();
+        List<String> responseTypes = headers.get(HttpConstants.CONTENT_TYPE);
+
+        for (String aResponseType: responseTypes) {
+            if (aResponseType.toLowerCase().trim().startsWith(LOWERCASE_CONTENT_TYPE_JSON)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Create an instance of the specified errorResponseClass
+     *
+     * @param errorResponseClass    the Response Error class
+     * @param responseBody          the response body
+     * @param statusCode            HTTP status code
+     * @param <U>                   the Response Error parameterized type
+     * @return                      an instance of the Response Error class
+     */
+    private <U> U instantiateErrorResponseClass(Class<U> errorResponseClass, InputStream responseBody, int statusCode) {
+        try {
+            U errorResponse;
+
+            if (errorResponseClass.isAssignableFrom(ErrorResponse.class)) {
+                Constructor<U> ctor = errorResponseClass.getConstructor(String.class, String.class, String.class,
+                        Integer.class, Integer.class, String.class);
+                errorResponse = ctor.newInstance(null, null, null, statusCode, null, convertStreamToString(responseBody));
+            } else {
+                Constructor<U> ctor = errorResponseClass.getConstructor();
+                errorResponse = ctor.newInstance();
+            }
+
+            return errorResponse;
+        } catch (NoSuchMethodException nsme) {
+            throw new RequestExecutionException("Internal Error: "+errorResponseClass.getName()+" has no default constructor");
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            throw new RequestExecutionException("Internal Error: "+errorResponseClass.getName()+" cannot be constructed", ex);
+        }
+    }
+
+    /**
+     * Convert an inputStream to a String
+     *
+     * @param is    input stream to convert
+     * @return      String equivilant of the inputStream
+     */
+    private String convertStreamToString(InputStream is) {
+        Scanner s = new Scanner(is, OAuthConstants.UTF_8_STRING).useDelimiter(START_PATTERN);
+        // regex \A, matches the beginning of input. This tells Scanner to read the entire stream,
+        // from beginning to the next beginning (and there isn't one) so the entire stream is read.
+        String str = s.hasNext() ? s.next() : "";
+        return str.substring(0, Math.min(1024, str.length()));
+    }
+  
+  /**
+     * Set the correlationId on the specified response if it implements OlpHttpMessage.
+     *
+     * @param response the response POJO
+     * @param responseClass the Class of the response POJO
+     * @param correlationId the correlationId, or null if there is none
+     * @param <T> the parameterized type of response
+     */
+    private <T> void setCorrelationId(T response, Class<T> responseClass, String correlationId) {
+        if (null != correlationId && null != response
+                && OlpHttpMessage.class.isAssignableFrom(responseClass)) {
+            ((OlpHttpMessage) response).setCorrelationId(correlationId);
+        }
+    }
+
+    /**
+     * Get the X-Correlation-ID header value from the httpResponse.
+     *
+     * @param httpResponse the httpResponse message
+     * @return the X-Correlation-ID, if there was one, or null
+     */
+    private String getCorrelationId(HttpProvider.HttpResponse httpResponse) {
+        Map<String, List<String>> headers = null != httpResponse ? httpResponse.getHeaders() : null;
+        List<String> values = null != headers ? headers.get(OlpHttpMessage.X_CORRELATION_ID) : null;
+        if (null != values && values.size() > 0) {
+            String correlationId = values.get(0);
+            if (null != correlationId && LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + correlationId);
+            }
+            return correlationId;
+        }
+        return null;
+    }
+
+    /**
+     * Add additional headers to the request
+     *
+     * @param httpRequest           the request
+     * @param additionalHeaders     additional headers
+     * @return  httpRequest with additional headers
+     */
+    private HttpProvider.HttpRequest addAdditionalHeaders(HttpProvider.HttpRequest httpRequest,
+                                                          Map<String, String> additionalHeaders) {
+        if (null != additionalHeaders) {
+            for (Map.Entry<String, String> additionalHeader : additionalHeaders.entrySet()) {
+                String name = additionalHeader.getKey();
+                String value = additionalHeader.getValue();
+                httpRequest.addHeader(name, value);
+                if (OlpHttpMessage.X_CORRELATION_ID.equals(name) && value != null && LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + value);
+                }
+            }
+        }
+        return httpRequest;
+    }
 }

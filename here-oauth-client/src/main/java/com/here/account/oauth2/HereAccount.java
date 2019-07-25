@@ -21,6 +21,7 @@ import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.TimestampResponse;
+import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.*;
 
 import java.io.Closeable;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -128,7 +130,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class HereAccount {
-    
+
+
     /**
      * This class cannot be instantiated.
      */
@@ -219,7 +222,7 @@ public class HereAccount {
      * Otherwise, if clientAuthorizationRequestProvider is null, or its clock is
      * null, a SettableSystemClock is returned.
      *
-     * @param clientAuthorizationRequestProvider the authorization provider
+     * @param clientCredentialsProvider the authorization provider
      * @return the clock to use
      */
     private static Clock reuseClock(ClientCredentialsProvider clientCredentialsProvider) {
@@ -326,9 +329,10 @@ public class HereAccount {
         private final HttpProvider httpProvider;
         private final HttpMethods httpMethod;
         private final String url;
+        private final String scope;
         private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
         private final Serializer serializer;
-        
+
         /**
          * Construct a new ability to obtain authorization from the HERE authorization server.
          * 
@@ -348,6 +352,7 @@ public class HereAccount {
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
             this.clientAuthorizer = clientAuthorizationProvider.getClientAuthorizer();
             this.httpMethod = clientAuthorizationProvider.getHttpMethod();
+            this.scope = clientAuthorizationProvider.getScope();
 
             this.client = Client.builder()
                     .withHttpProvider(httpProvider)
@@ -367,7 +372,6 @@ public class HereAccount {
                 settableClock = null;
                 timestampUrl = null;
             }
-
         }
         
         protected AccessTokenResponse requestTokenFromFile() 
@@ -396,19 +400,46 @@ public class HereAccount {
                                                        int retryFixableErrorsCount)
                 throws AccessTokenException, RequestExecutionException, ResponseParsingException {            
             String method = httpMethod.getMethod();
-            
+
             HttpProvider.HttpRequest httpRequest;
+
+            if (null != scope) { // && null == authorizationRequest.getScope()) {
+                authorizationRequest.setScope(scope);
+            }
+
             // OAuth2.0 uses application/x-www-form-urlencoded
             httpRequest = httpProvider.getRequest(
                 clientAuthorizer, method, url, authorizationRequest.toFormParams());
+            addAdditionalHeaders(httpRequest, authorizationRequest);
 
             try {
-                return client.sendMessage(httpRequest, AccessTokenResponse.class,
-                        ErrorResponse.class, (statusCode, errorResponse) -> {
+                AccessTokenResponse response = client.sendMessage(httpRequest,
+                        AccessTokenResponse.class, ErrorResponse.class,
+                        (statusCode, errorResponse) -> {
                             return new AccessTokenException(statusCode, errorResponse);
                         });
+                return response;
             } catch (AccessTokenException e) {
                 return handleFixableErrors(authorizationRequest, retryFixableErrorsCount, e);
+            }
+        }
+
+        /**
+         * Adds additional headers to httpRequest, and the correlationId to the header (iff there is one)
+         *
+         * @param httpRequest the httpRequest to send
+         * @param authorizationRequest  the authorization request
+         */
+        private void addAdditionalHeaders(HttpProvider.HttpRequest httpRequest, AccessTokenRequest authorizationRequest) {
+            Map<String, String> headers = authorizationRequest.getAdditionalHeaders();
+            if (null != headers) {
+                for (Map.Entry<String, String> header : headers.entrySet()) {
+                    httpRequest.addHeader(header.getKey(), header.getValue());
+                }
+            }
+            String correlationId = authorizationRequest.getCorrelationId();
+            if (null != correlationId) {
+                httpRequest.addHeader(OlpHttpMessage.X_CORRELATION_ID, correlationId);
             }
         }
 

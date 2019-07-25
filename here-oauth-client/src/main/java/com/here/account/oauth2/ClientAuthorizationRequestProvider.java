@@ -67,5 +67,11 @@ public interface ClientAuthorizationRequestProvider {
      * @return the Clock in use.
      */
     Clock getClock();
-    
+
+    /**
+     * Get the token scope.
+     *
+     * @return the scope
+     */
+    String getScope();
 }

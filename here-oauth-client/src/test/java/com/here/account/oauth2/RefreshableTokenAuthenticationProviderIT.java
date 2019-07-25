@@ -43,7 +43,7 @@ public class RefreshableTokenAuthenticationProviderIT extends AbstractCredential
 
         TokenEndpoint tokenEndpoint = 
                 HereAccount.getTokenEndpoint(httpProvider,  
-                                             new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret)
+                                             new OAuth1ClientCredentialsProvider(url, accessKeyId, accessKeySecret, scope)
                         );
         long optionalRefreshIntervalMillis = 100L;
         this.provider = new RefreshableResponseProvider<AccessTokenResponse>(
