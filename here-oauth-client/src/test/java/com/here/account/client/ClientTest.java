@@ -16,6 +16,7 @@
 package com.here.account.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.AccessTokenException;
@@ -130,10 +131,18 @@ public class ClientTest {
         InputStream inputStream = new ByteArrayInputStream(responseString.getBytes("UTF-8"));
         Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(inputStream);
         Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(200);
-        Mockito.when(mockHttpResponse.getHeaders()).thenReturn(mockResponseHeader);
+        Mockito.when(mockHttpResponse.getHeaders()).thenReturn(createMockResponseHeader());
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenReturn(mockHttpResponse);
         Mockito.when(mockHttpProvider.getRequest(Mockito.any(HttpProvider.HttpRequestAuthorizer.class), anyString(), anyString(), anyString()))
                 .thenReturn(mockHttpRequest);
+    }
+
+    private Map<String, List<String>> createMockResponseHeader() {
+        Map<String, List<String>> responseHeader = new HashMap<String, List<String>>();
+        List<String> responseTypes = new ArrayList<String>();
+        responseTypes.add(HttpConstants.CONTENT_TYPE_JSON);
+        responseHeader.put(HttpConstants.CONTENT_TYPE, responseTypes);
+        return responseHeader;
     }
 
     @Test
@@ -147,7 +156,7 @@ public class ClientTest {
         assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
     }
 
-    @Test(expected = AccessTokenException.class)
+    @Test(expected = ResponseParsingException.class)
     public void test_sendMessage2_error() throws UnsupportedEncodingException, IOException, HttpException {
         HttpProvider.HttpResponse mockHttpResponse = mock(HttpProvider.HttpResponse.class);
         ErrorResponse expectedErrorResponse = new ErrorResponse("testError", "testErrorDesc",
