@@ -68,13 +68,13 @@ public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
      * The start time in milliseconds, for this object, at the time it was 
      * constructed.
      */
-    private final Long startTimeMilliseconds;
+    private transient final Long startTimeMilliseconds;
 
     @JsonProperty("id_token")
     private final String idToken;
 
     private transient String correlationId;
-  
+
     /**
      * Requested scope of the access token. Supported scope-types are openId or project.
      */
