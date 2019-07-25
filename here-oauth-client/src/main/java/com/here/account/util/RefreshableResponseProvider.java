@@ -239,14 +239,15 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
    */
   //@VisibleForTesting
   long nextRefreshInterval() {
+    //remove a few seconds to give time to refresh before token expires
+    long nextRefreshUsingExpiresIn = TimeUnit.SECONDS.toMillis(
+              Math.max(refreshResponse.getExpiresIn() - REFRESH_BACKOFF_SECONDS, MIN_REFRESH_SECONDS)
+      );
     if (refreshIntervalMillis != null) {
-      return refreshIntervalMillis;
+      return Math.min(nextRefreshUsingExpiresIn, refreshIntervalMillis);
     }
 
-    //remove a few seconds to give time to refresh before token expires
-    return TimeUnit.SECONDS.toMillis(
-        Math.max(refreshResponse.getExpiresIn() - REFRESH_BACKOFF_SECONDS, MIN_REFRESH_SECONDS)
-    );
+    return nextRefreshUsingExpiresIn;
   }
 
   /**
