@@ -85,6 +85,12 @@ public class AccessTokenResponse implements ExpiringResponse, OlpHttpMessage {
         this(null, null, null, null, null, null);
     }
 
+    @Deprecated
+    public AccessTokenResponse(String accessToken, String tokenType, Long expiresIn,
+                               String refreshToken, String idToken) {
+        this(accessToken, tokenType, expiresIn, refreshToken, idToken, null);
+    }
+
     public AccessTokenResponse(String accessToken, String tokenType, Long expiresIn,
                                String refreshToken, String idToken, String scope) {
         this.accessToken = accessToken;
