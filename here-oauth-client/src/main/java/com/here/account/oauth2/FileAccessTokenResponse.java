@@ -55,6 +55,35 @@ public class FileAccessTokenResponse extends AccessTokenResponse {
         this(null, null, null, null,  null, null, null);
     }
 
+    /**
+     * Please use {@link #FileAccessTokenResponse(String, String, Long, String, String, Long, String)}.
+     *
+     * @param accessToken the accessToken
+     * @param tokenType the tokenType, for example "bearer"
+     * @param expiresIn the expiresIn, in seconds to expiration
+     * @param refreshToken the refreshToken
+     * @param idToken the idToken
+     * @param exp the expiration time in UTC seconds
+     */
+    @Deprecated
+    public FileAccessTokenResponse(String accessToken,
+                                   String tokenType,
+                                   Long expiresIn, String refreshToken, String idToken,
+                                   Long exp) {
+        this(accessToken, tokenType, expiresIn, refreshToken, idToken, exp, null);
+    }
+
+    /**
+     * Construct a FileAccessTokenResponse with the specified values.
+     *
+     * @param accessToken the accessToken
+     * @param tokenType the tokenType, for example "bearer"
+     * @param expiresIn the expiresIn, in seconds to expiration
+     * @param refreshToken the refreshToken
+     * @param idToken the idToken
+     * @param exp the expiration time in UTC seconds
+     * @param scope the scope of the accessToken, if applicable
+     */
     public FileAccessTokenResponse(String accessToken,
             String tokenType,
             Long expiresIn, String refreshToken, String idToken,
