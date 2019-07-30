@@ -122,7 +122,6 @@ public interface HttpProvider extends Closeable {
 
         default Map<String, List<String>> getHeaders() {
             return Collections.emptyMap();
-            //throw new UnsupportedOperationException();
         }
         
     }
