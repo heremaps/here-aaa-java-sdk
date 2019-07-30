@@ -17,6 +17,8 @@ package com.here.account.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 /**
  * The POJO representation of an OAuth2.0 HERE authorization server error response.
  * See also the 
@@ -431,6 +433,36 @@ public class ErrorResponse {
      */
     public String getCorrelationId() {
         return correlationId;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ErrorResponse that = (ErrorResponse) o;
+        return Objects.equals(error, that.error) &&
+                Objects.equals(errorDescription, that.errorDescription) &&
+                Objects.equals(httpStatus, that.httpStatus) &&
+                Objects.equals(errorId, that.errorId) &&
+                Objects.equals(errorCode, that.errorCode) &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(title, that.title) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(code, that.code) &&
+                Objects.equals(cause, that.cause) &&
+                Objects.equals(action, that.action) &&
+                Objects.equals(correlationId, that.correlationId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(error, errorDescription, httpStatus, errorId, errorCode, message, title, status, code, cause, action, correlationId);
     }
 
     /**

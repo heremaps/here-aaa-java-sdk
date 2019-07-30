@@ -272,6 +272,12 @@ public class Client {
         Map<String, List<String>> headers = response.getHeaders();
         List<String> responseTypes = headers.get(HttpConstants.CONTENT_TYPE);
 
+        if (null == responseTypes || responseTypes.isEmpty()) {
+            // the burden of proof is on the Server specifying a non-JSON Content-Type.
+            // if there was no Content-Type specified, we default to JSON.
+            return true;
+        }
+
         for (String aResponseType: responseTypes) {
             if (aResponseType.toLowerCase().trim().startsWith(LOWERCASE_CONTENT_TYPE_JSON)) {
                 return true;
