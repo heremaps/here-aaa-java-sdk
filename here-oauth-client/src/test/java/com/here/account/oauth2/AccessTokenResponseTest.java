@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertTrue;
+
 import com.here.account.auth.OAuth1Signer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
@@ -48,6 +50,40 @@ public class AccessTokenResponseTest extends AbstractCredentialTezt{
                 expectedTokenType, expectedExpiresIn, expectedRefreshToken, expectedIdToken, expectedScope);
 
         assertEquals(response.getIdToken(), expectedIdToken);
+    }
+
+    @Test
+    public void test_backwardscompatible_constructor() {
+        String accessToken = "accessToken";
+        String tokenType = "tokenType";
+        Long expiresIn = 3600L;
+        String refreshToken = null;
+        String idToken = null;
+        String expectedScope = null;
+
+        AccessTokenResponse accessTokenResponse = new AccessTokenResponse( accessToken,  tokenType,  expiresIn,
+                 refreshToken,  idToken);
+        String actualAccessToken = accessTokenResponse.getAccessToken();
+        assertTrue("expected accessToken " + accessToken + ", actual " + actualAccessToken,
+                accessToken.equals(actualAccessToken));
+        String actualTokenType = accessTokenResponse.getTokenType();
+        assertTrue("expected tokenType " + tokenType + ", actual " + actualTokenType,
+                tokenType.equals(actualTokenType));
+        long actualExpiresIn = accessTokenResponse.getExpiresIn();
+        assertTrue("expected expiresIn " + expiresIn + ", actual " + actualExpiresIn,
+                expiresIn.equals(actualExpiresIn));
+        String actualRefreshToken = accessTokenResponse.getRefreshToken();
+        assertTrue("expected refreshToken " + refreshToken + ", actual " + actualRefreshToken,
+                null == actualRefreshToken);
+        String actualIdToken = accessTokenResponse.getIdToken();
+        assertTrue("expected idToken " + idToken + ", actual " + actualIdToken,
+                null == actualIdToken);
+
+        String actualScope = accessTokenResponse.getScope();
+        assertTrue("expected scope " + expectedScope + ", actual " + actualScope,
+                null == actualScope);
+
+
     }
 
     @Test

@@ -156,7 +156,9 @@ public class ClientTest {
         assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
     }
 
-    @Test(expected = ResponseParsingException.class)
+    // this test was previously catching a NullPointerException, wrapping it in a thrown ResponseParsingException,
+    // as a result of the the HttpResponse having no Content-Type header, and Client lacking the null-check.
+    @Test(expected = AccessTokenException.class)
     public void test_sendMessage2_error() throws UnsupportedEncodingException, IOException, HttpException {
         HttpProvider.HttpResponse mockHttpResponse = mock(HttpProvider.HttpResponse.class);
         ErrorResponse expectedErrorResponse = new ErrorResponse("testError", "testErrorDesc",
@@ -168,10 +170,19 @@ public class ClientTest {
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenReturn(mockHttpResponse);
 
         Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).build();
-        client.sendMessage(mockHttpRequest, FakeResponse.class,
-                ErrorResponse.class, (statusCode, errorResponse) -> {
-                    return new AccessTokenException(statusCode, errorResponse);
-                });
+        try {
+
+            client.sendMessage(mockHttpRequest, FakeResponse.class,
+                    ErrorResponse.class, (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+            fail("should have thrown exception, but didn't");
+        } catch (AccessTokenException e) {
+            ErrorResponse actualErrorResponse = e.getErrorResponse();
+            assertTrue("errorResponse was expected " + expectedErrorResponse + ", actual " + actualErrorResponse,
+                expectedErrorResponse.equals(actualErrorResponse));
+            throw e;
+        }
     }
 
     @Test(expected = ResponseParsingException.class)

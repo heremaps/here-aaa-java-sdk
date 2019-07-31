@@ -39,6 +39,43 @@ public class FileAccessTokenResponseTest {
     private long prevExpiresIn;
 
     @Test
+    public void test_backwardcompatible_6_arg_constructor_noscope() {
+        String accessToken = "accessToken";
+        String tokenType = "bearer";
+        Long expiresIn = 123L;
+        String refreshToken = "refreshToken";
+        String idToken = "idToken";
+        Long exp = expiresIn + (System.currentTimeMillis() / 1000L);
+
+        response = new FileAccessTokenResponse(accessToken, tokenType, expiresIn, refreshToken, idToken, exp);
+
+        String actualAccessToken = response.getAccessToken();
+        assertTrue("expected accessToken " + accessToken + ", actual " + actualAccessToken,
+                accessToken.equals(actualAccessToken));
+        String actualTokenType = response.getTokenType();
+        assertTrue("expected tokenType " + tokenType + ", actual " + actualTokenType,
+                tokenType.equals(actualTokenType));
+        Long actualExpiresIn = response.getExpiresIn();
+        long high = expiresIn;
+        long low = expiresIn - 5;
+        assertTrue("expected expiresIn " + expiresIn + ", actual " + actualExpiresIn,
+                low <= actualExpiresIn && actualExpiresIn <= high);
+        String actualRefreshToken = response.getRefreshToken();
+        assertTrue("expected refreshToken " + refreshToken + ", actual " + actualRefreshToken,
+                refreshToken.equals(actualRefreshToken));
+        String actualIdToken = response.getIdToken();
+        assertTrue("expected idToken " + idToken + ", actual " + actualIdToken,
+                idToken.equals(actualIdToken));
+        Long actualExp = response.getExp();
+        assertTrue("expected exp " +  exp + ", actual " + actualExp,
+                exp.equals(actualExp));
+        String actualScope = response.getScope();
+        assertTrue("expected scope null, actual " + actualScope,
+                null == actualScope);
+
+    }
+
+    @Test
     public void test_expiresIn() {
         String accessToken = "my-access-token";
         String tokenType = null;

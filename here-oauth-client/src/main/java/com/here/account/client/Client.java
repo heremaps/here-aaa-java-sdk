@@ -269,15 +269,28 @@ public class Client {
      * @return  true-the response-type is JSON, false-the response-type is not JSON
      */
     private boolean isResponseTypeJson(HttpProvider.HttpResponse response) {
-        Map<String, List<String>> headers = response.getHeaders();
-        List<String> responseTypes = headers.get(HttpConstants.CONTENT_TYPE);
+        try {
+            Map<String, List<String>> headers = response.getHeaders();
+            List<String> responseTypes = headers.get(HttpConstants.CONTENT_TYPE);
 
-        for (String aResponseType: responseTypes) {
-            if (aResponseType.toLowerCase().trim().startsWith(LOWERCASE_CONTENT_TYPE_JSON)) {
+            if (null == responseTypes || responseTypes.isEmpty()) {
+                // the burden of proof is on the Server specifying a non-JSON Content-Type.
+                // if there was no Content-Type specified, we default to JSON.
                 return true;
             }
+
+            for (String aResponseType : responseTypes) {
+                if (aResponseType.toLowerCase().trim().startsWith(LOWERCASE_CONTENT_TYPE_JSON)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (UnsupportedOperationException e) {
+            // the default getHeaders implementation for backward-compatibility will come here.
+            // there's no way to get the Content-Type in this case,
+            // so return true for these providers.
+            return true;
         }
-        return false;
     }
 
     /**
@@ -346,14 +359,20 @@ public class Client {
      * @return the X-Correlation-ID, if there was one, or null
      */
     private String getCorrelationId(HttpProvider.HttpResponse httpResponse) {
-        Map<String, List<String>> headers = null != httpResponse ? httpResponse.getHeaders() : null;
-        List<String> values = null != headers ? headers.get(OlpHttpMessage.X_CORRELATION_ID) : null;
-        if (null != values && values.size() > 0) {
-            String correlationId = values.get(0);
-            if (null != correlationId && LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + correlationId);
+        try {
+            Map<String, List<String>> headers = null != httpResponse ? httpResponse.getHeaders() : null;
+            List<String> values = null != headers ? headers.get(OlpHttpMessage.X_CORRELATION_ID) : null;
+            if (null != values && values.size() > 0) {
+                String correlationId = values.get(0);
+                if (null != correlationId && LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(OlpHttpMessage.X_CORRELATION_ID + ": " + correlationId);
+                }
+                return correlationId;
             }
-            return correlationId;
+        } catch (UnsupportedOperationException e) {
+            // the default getHeaders implementation for backward-compatibility will come here.
+            // there's no way to get the correlation id in this case,
+            // so return null for these providers.
         }
         return null;
     }

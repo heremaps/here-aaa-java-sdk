@@ -73,5 +73,7 @@ public interface ClientAuthorizationRequestProvider {
      *
      * @return the scope
      */
-    String getScope();
+    default String getScope() {
+        return null;
+    }
 }
