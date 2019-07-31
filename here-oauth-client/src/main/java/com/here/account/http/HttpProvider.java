@@ -18,7 +18,6 @@ package com.here.account.http;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +114,7 @@ public interface HttpProvider extends Closeable {
 
         /**
          * Returns all the headers from the response
-         * @return returns a Map of headers if the method implementation returns the headers
+         * @return returns a Map of headers if the method implementation returns the headers 
          *      or throws Unsupported Operation Exception if the method is not implemented
          */
 
