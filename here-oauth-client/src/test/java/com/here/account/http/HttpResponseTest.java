@@ -1,6 +1,6 @@
 package com.here.account.http;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class HttpResponseTest {
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void test_backwardcompatible_HttpResponse_getHeaders() {
         final String bodyString = "bodyString";
         final byte[] bodyBytes = bodyString.getBytes(StandardCharsets.UTF_8);
@@ -38,7 +38,6 @@ public class HttpResponseTest {
         };
 
         Map<String, List<String>> headers = httpResponse.getHeaders();
-        assertTrue("headers was null", null != headers);
-        assertTrue("headers was not empty", headers.isEmpty());
+        fail("should have thrown UnsupportedOperationException, but didn't");
     }
 }

@@ -114,14 +114,13 @@ public interface HttpProvider extends Closeable {
         InputStream getResponseBody() throws IOException;
 
         /**
-         * Returns all the headers from the response.
-         *
-         * @return returns a Map of headers,
-         *      or an empty map if the implementing class has not overridden the default behavior.
+         * Returns all the headers from the response
+         * @return returns a Map of headers if the method implementation returns the headers
+         *      or throws Unsupported Operation Exception if the method is not implemented
          */
 
         default Map<String, List<String>> getHeaders() {
-            return Collections.emptyMap();
+            throw new UnsupportedOperationException();
         }
         
     }
