@@ -103,6 +103,20 @@ public class ApacheHttpClientProvider implements HttpProvider {
             setRequestTimeoutInMs(HttpConstants.DEFAULT_REQUEST_TIMEOUT_IN_MS);
         }
 
+        /**
+         * Optionally inject your own CloseableHttpClient with a fully-configured
+         * httpClient of your choosing.
+         * Use this option to set things like connection tuning, or to configure an
+         * HTTP Proxy with proxy authentication.
+         *
+         * <p>
+         * When set to a non-null value, the {@link #setRequestTimeoutInMs(int)}
+         * and {@link #setConnectionTimeoutInMs(int)} are ignored, as the fully-configured
+         * httpClient is used instead.
+         *
+         * @param httpClient inject your own CloseableHttpClient to use
+         * @return this Builder
+         */
         public Builder setHttpClient(final CloseableHttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
