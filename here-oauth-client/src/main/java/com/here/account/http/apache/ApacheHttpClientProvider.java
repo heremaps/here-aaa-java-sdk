@@ -111,8 +111,8 @@ public class ApacheHttpClientProvider implements HttpProvider {
          *
          * <p>
          * When set to a non-null value, the {@link #setRequestTimeoutInMs(int)}
-         * and {@link #setConnectionTimeoutInMs(int)} are ignored, as the fully-configured
-         * httpClient is used instead.
+         * and {@link #setConnectionTimeoutInMs(int)} have no impact,
+         * as the fully-configure httpClient is used instead.
          *
          * @param httpClient inject your own CloseableHttpClient to use
          * @return this Builder
