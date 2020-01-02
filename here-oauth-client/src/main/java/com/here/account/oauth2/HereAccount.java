@@ -21,6 +21,8 @@ import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider;
 import com.here.account.oauth2.bo.TimestampResponse;
+import com.here.account.oauth2.retry.NoRetryPolicy;
+import com.here.account.oauth2.retry.RetryPolicy;
 import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.*;
 
@@ -164,7 +166,7 @@ public class HereAccount {
     public static TokenEndpoint getTokenEndpoint(
             HttpProvider httpProvider,
             ClientCredentialsProvider clientCredentialsProvider) {
-        return new TokenEndpointImpl(reuseClock(clientCredentialsProvider), httpProvider, clientCredentialsProvider, new JacksonSerializer());
+        return new TokenEndpointImpl(reuseClock(clientCredentialsProvider), httpProvider, clientCredentialsProvider, new JacksonSerializer(), new NoRetryPolicy());
     }
     
     
@@ -193,7 +195,7 @@ public class HereAccount {
             ClientAuthorizationRequestProvider clientAuthorizationRequestProvider) {
         return getTokenEndpoint(
                 reuseClock(clientAuthorizationRequestProvider),
-                httpProvider, clientAuthorizationRequestProvider, new JacksonSerializer());
+                httpProvider, clientAuthorizationRequestProvider, new JacksonSerializer(), new NoRetryPolicy());
     }
 
     /**
@@ -236,14 +238,47 @@ public class HereAccount {
         return clock;
     }
 
+    /**
+     * Use {@link HereAccessTokenProvider#builder()} instead.
+     *
+     * @deprecated use {@link HereAccessTokenProvider#builder()} instead
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param clientAuthorizationRequestProvider identifies the token endpoint URL and
+     *     client credentials to be injected into requests
+     * @param serializer the Serializer to use
+     * @return a {@code TokenEndpoint} representing access for the provided client
+     */
+    @Deprecated
     public static TokenEndpoint getTokenEndpoint(
                                                  HttpProvider httpProvider,
                                                  ClientAuthorizationRequestProvider clientAuthorizationRequestProvider,
                                                  Serializer serializer) {
         return getTokenEndpoint(reuseClock(clientAuthorizationRequestProvider),
-                httpProvider, clientAuthorizationRequestProvider, serializer);
+                httpProvider, clientAuthorizationRequestProvider, serializer, new NoRetryPolicy());
     }
 
+    /**
+     * Internal use only.
+     * Get the Token Endpoint which makes various Token Endpoint API calls to the
+     * HERE Account Authorization Server.
+     * See OAuth2.0
+     * <a href="https://tools.ietf.org/html/rfc6749#section-4">Obtaining Authorization</a>.
+     *
+     * @param httpProvider the HTTP-layer provider implementation
+     * @param clientAuthorizationRequestProvider identifies the token endpoint URL and
+     *     client credentials to be injected into requests
+     * @param serializer the Serializer to use
+     * @param retryPolicy retry policy
+     * @return a {@code TokenEndpoint} representing access for the provided client
+     */
+    static TokenEndpoint getTokenEndpoint(
+            HttpProvider httpProvider,
+            ClientAuthorizationRequestProvider clientAuthorizationRequestProvider,
+            Serializer serializer, RetryPolicy retryPolicy) {
+        return getTokenEndpoint(reuseClock(clientAuthorizationRequestProvider),
+                httpProvider, clientAuthorizationRequestProvider, serializer, retryPolicy);
+
+    }
 
     /**
      * Get the ability to run various Token Endpoint API calls to the
@@ -261,14 +296,15 @@ public class HereAccount {
      * @param clientCredentialsProvider identifies the token endpoint URL and
      *     client credentials to be injected into requests
      * @param serializer the Serializer to use
+     * @param retryPolicy retry policy
      * @return a {@code TokenEndpoint} representing access for the provided client
      */
     private static TokenEndpoint getTokenEndpoint(Clock clock,
                                                  HttpProvider httpProvider,
             ClientAuthorizationRequestProvider clientCredentialsProvider,
-            Serializer serializer) {
+            Serializer serializer, RetryPolicy retryPolicy) {
         return new TokenEndpointImpl(clock,
-                httpProvider, clientCredentialsProvider, serializer);
+                httpProvider, clientCredentialsProvider, serializer, retryPolicy);
     }
     
     /**
@@ -341,12 +377,14 @@ public class HereAccount {
          * provides a mechanism to use credentials to authorize access token requests,
          * and provides access token request objects
          * @param serializer used to serialize json To pojo and vice versa
+         * @param retryPolicy retry policy
          */
         private TokenEndpointImpl(
                 Clock clock,
                 HttpProvider httpProvider,
                 ClientAuthorizationRequestProvider clientAuthorizationProvider,
-                Serializer serializer) {
+                Serializer serializer,
+                RetryPolicy retryPolicy) {
             // these values are fixed once selected
             this.clock = clock;
             this.url = clientAuthorizationProvider.getTokenEndpointUrl();
@@ -358,6 +396,7 @@ public class HereAccount {
                     .withHttpProvider(httpProvider)
                     .withClientAuthorizer(clientAuthorizer)
                     .withSerializer(serializer)
+                    .withRetryPolicy(retryPolicy)
                     .build();
             this.httpProvider = httpProvider;
             this.serializer = serializer;

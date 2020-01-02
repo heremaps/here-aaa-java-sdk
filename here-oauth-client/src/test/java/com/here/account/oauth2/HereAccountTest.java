@@ -22,16 +22,14 @@ import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpResponse;
-import com.here.account.http.apache.ApacheHttpClientProvider;
-import com.here.account.http.java.JavaHttpProvider;
 import com.here.account.identity.bo.IdentityTokenRequest;
+import com.here.account.oauth2.retry.NoRetryPolicy;
 import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.SettableSystemClock;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
@@ -748,7 +746,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                                                validToken2.getBytes().length,
                                                new ByteArrayInputStream(validToken2.getBytes("UTF-8")))),
                 new OAuth1ClientCredentialsProvider(mySettableClock, url, accessKeyId, accessKeySecret, scope),
-                new JacksonSerializer());
+                new JacksonSerializer(), new NoRetryPolicy());
         
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.
                 requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
