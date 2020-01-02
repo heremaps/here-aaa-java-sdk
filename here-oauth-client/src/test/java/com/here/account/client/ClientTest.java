@@ -23,6 +23,7 @@ import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.oauth2.ExponentialRandomBackoff;
 import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.JacksonSerializer;
@@ -33,6 +34,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +43,9 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 class FakeResponse implements OlpHttpMessage {
     @JsonProperty("access_token")
@@ -263,6 +266,147 @@ public class ClientTest {
         assertTrue(expectedResponseObject.getTokenType().equals(actualResponse.getTokenType()));
         Mockito.verify(mockHttpRequest, Mockito.times(1)).addHeader(additionalHeaderName, additionalHeaderValue);
 
+    }
+
+    @Test
+    public void test_sendMessageRetry_500() throws IOException, HttpException {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500);
+        ExponentialRandomBackoff exponentialRandomBackoffSpy = spy(ExponentialRandomBackoff.class);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(exponentialRandomBackoffSpy)
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        try {
+            client.sendMessage("POST",
+                    "http://test.com",
+                    fakeRequest,
+                    additionalHeaders,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+        } catch (Exception ex) {
+            //do nothing
+        }
+
+        Mockito.verify(mockHttpProvider, Mockito.times(4)).execute(any(HttpProvider.HttpRequest.class));
+    }
+
+    @Test
+    public void test_sendMessageRetry_exception() throws IOException, HttpException {
+
+        Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackoff())
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        try {
+            client.sendMessage("POST",
+                    "http://test.com",
+                    fakeRequest,
+                    additionalHeaders,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+        } catch (Exception ex) {
+            //do nothing
+        }
+
+        Mockito.verify(mockHttpProvider, Mockito.times(4)).execute(any(HttpProvider.HttpRequest.class));
+    }
+
+    @Test
+    public void test_sendMessage_retry_exception_success() throws IOException, HttpException {
+
+        Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class)
+                .thenThrow(SocketTimeoutException.class).thenReturn(mockHttpResponse);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackoff())
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        try {
+            client.sendMessage("POST",
+                    "http://test.com",
+                    fakeRequest,
+                    additionalHeaders,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+        } catch (Exception ex) {
+            //do nothing
+        }
+
+        Mockito.verify(mockHttpProvider, Mockito.times(3)).execute(any(HttpProvider.HttpRequest.class));
+    }
+
+    @Test
+    public void test_sendMessage_retry_500_success() throws IOException, HttpException {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(500).thenReturn(200);
+        Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenReturn(mockHttpResponse);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackoff())
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        try {
+            client.sendMessage("POST",
+                    "http://test.com",
+                    fakeRequest,
+                    additionalHeaders,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+        } catch (Exception ex) {
+            //do nothing
+        }
+
+        Mockito.verify(mockHttpProvider, Mockito.times(3)).execute(any(HttpProvider.HttpRequest.class));
+    }
+
+    @Test
+    public void test_sendMessage_retry_500_exception_success() throws IOException, HttpException {
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(200);
+        Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class).thenReturn(mockHttpResponse);
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackoff())
+                .withClientAuthorizer(mockHttpRequestAuthorizer).build();
+        FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
+        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        String additionalHeaderName = "foo";
+        String additionalHeaderValue = "bar";
+        additionalHeaders.put(additionalHeaderName, additionalHeaderValue);
+        try {
+            client.sendMessage("POST",
+                    "http://test.com",
+                    fakeRequest,
+                    additionalHeaders,
+                    FakeResponse.class,
+                    ErrorResponse.class,
+                    (statusCode, errorResponse) -> {
+                        return new AccessTokenException(statusCode, errorResponse);
+                    });
+        } catch (Exception ex) {
+            //do nothing
+        }
+
+        Mockito.verify(mockHttpProvider, Mockito.times(3)).execute(any(HttpProvider.HttpRequest.class));
     }
 
     @Test

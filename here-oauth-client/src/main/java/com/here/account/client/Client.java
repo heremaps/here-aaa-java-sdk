@@ -22,6 +22,8 @@ import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
+import com.here.account.oauth2.RetryPolicy;
+import com.here.account.oauth2.NoRetryPolicy;
 import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.OAuthConstants;
@@ -58,6 +60,7 @@ public class Client {
     public static class Builder {
         private HttpProvider httpProvider;
         private Serializer serializer;
+        private RetryPolicy retryPolicy;
         private HttpProvider.HttpRequestAuthorizer clientAuthorizer;
 
         private Builder() {
@@ -79,8 +82,17 @@ public class Client {
             return this;
         }
 
+        public Builder withRetryPolicy(RetryPolicy retryPolicy) {
+            this.retryPolicy = retryPolicy;
+            return this;
+        }
+
         public Client build() {
-            return new Client(httpProvider, serializer, clientAuthorizer);
+            if (null == retryPolicy) {
+                retryPolicy = new NoRetryPolicy();
+            }
+
+            return new Client(httpProvider, serializer, clientAuthorizer, retryPolicy);
         }
     }
 
@@ -93,12 +105,14 @@ public class Client {
     private final HttpProvider httpProvider;
     private final Serializer serializer;
     private final HttpProvider.HttpRequestAuthorizer clientAuthorizer;
+    private final RetryPolicy retryPolicy;
 
     private Client(HttpProvider httpProvider, Serializer serializer,
-                    HttpProvider.HttpRequestAuthorizer clientAuthorizer) {
+                    HttpProvider.HttpRequestAuthorizer clientAuthorizer, RetryPolicy retryPolicy) {
         this.httpProvider = httpProvider;
         this.serializer = serializer;
         this.clientAuthorizer = clientAuthorizer;
+        this.retryPolicy = retryPolicy;
     }
 
     public HttpProvider.HttpRequestAuthorizer getClientAuthorizer() {
@@ -223,7 +237,7 @@ public class Client {
         InputStream jsonInputStream;
 
         try {
-            httpResponse = httpProvider.execute(httpRequest);
+            httpResponse = retryPolicy.executeWithRetry(httpProvider, httpRequest);
             jsonInputStream = httpResponse.getResponseBody();
         } catch (IOException | HttpException e) {
             throw new RequestExecutionException(e);
