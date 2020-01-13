@@ -5,7 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * An implementation of {@link RetryPolicy} to retry on {@code SocketTimeoutException}
- * and http status grater or equal to 500
+ * and http status greater or equal to 500
  */
 public class ExponentialRandomBackOffPolicy implements RetryPolicy {
 
@@ -27,17 +27,14 @@ public class ExponentialRandomBackOffPolicy implements RetryPolicy {
 
     @Override
     public boolean shouldRetry(RetryContext retryContext) {
-        if (retryContext.getRetryCount() == maxNumberOfRetries){
-            return false;
-        } else {
-            if (retryContext.getLastThrowable() instanceof SocketTimeoutException
-                    || (retryContext.getLastRetryResponse() != null && retryContext.getLastRetryResponse().getStatusCode() >= 500)) {
+        if (retryContext.getRetryCount() < maxNumberOfRetries) {
+            if (retryContext.getLastException() instanceof SocketTimeoutException
+                    || (retryContext.getLastRetryResponse() != null
+                            && retryContext.getLastRetryResponse().getStatusCode() >= 500)) {
                 return true;
             }
-            else {
-                return false;
-            }
         }
+        return false;
     }
 
     @Override

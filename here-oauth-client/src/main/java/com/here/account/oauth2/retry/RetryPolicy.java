@@ -13,7 +13,7 @@ public interface RetryPolicy {
     boolean shouldRetry(RetryContext retryContext);
 
     /**
-     * Calculates wait interval after with retry should happen in milliseconds.
+     * Calculates wait interval after which retry should happen in milliseconds.
      * @param retryContext An instance of {@link RetryContext}
      * @return wait interval in milliseconds
      */

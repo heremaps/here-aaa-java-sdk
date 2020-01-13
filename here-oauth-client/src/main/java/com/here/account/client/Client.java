@@ -18,8 +18,6 @@ package com.here.account.client;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
-
-import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
 import com.here.account.oauth2.retry.NoRetryPolicy;
@@ -242,9 +240,9 @@ public class Client {
             Retryable retryable = () -> httpProvider.execute(httpRequest);
             httpResponse = retryExecutor.execute(retryable);
             jsonInputStream = httpResponse.getResponseBody();
-        } catch (Throwable e) {
-            if (e instanceof NullPointerException) throw (NullPointerException) e;
-            if (e instanceof AccessTokenException) throw (AccessTokenException) e;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
             throw new RequestExecutionException(e);
         }
 

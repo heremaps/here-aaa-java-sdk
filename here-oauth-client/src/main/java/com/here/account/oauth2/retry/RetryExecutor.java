@@ -11,27 +11,26 @@ import java.util.logging.Logger;
 public class RetryExecutor {
 
     private final RetryPolicy retryPolicy;
-    private final RetryContext retryContext;
     private static final Logger LOGGER = Logger.getLogger(RetryExecutor.class.getName());
 
     public RetryExecutor(RetryPolicy retryPolicy) {
         this.retryPolicy = retryPolicy;
-        this.retryContext = new RetryContext();
     }
 
     /**
      * Execute the given {@link Retryable} until retry policy decides to retry.
      * @param retryable the {@link Retryable} to execute
      * @return http response return from {@code Retryable}
-     * @throws Throwable
+     * @throws Exception
      */
-    public HttpProvider.HttpResponse execute(Retryable retryable) throws Throwable {
+    public HttpProvider.HttpResponse execute(Retryable retryable) throws Exception {
+        RetryContext retryContext = new RetryContext();
         HttpProvider.HttpResponse httpResponse;
         try {
             httpResponse = retryable.execute();
             retryContext.setLastRetryResponse(httpResponse);
-        } catch (Throwable e) {
-            retryContext.setLastThrowable(e);
+        } catch (Exception e) {
+            retryContext.setLastException(e);
         }
 
         while (retryPolicy.shouldRetry(retryContext)) {
@@ -41,18 +40,20 @@ public class RetryExecutor {
                 int waitInterval = retryPolicy.getNextRetryIntervalMillis(retryContext);
 
                 LOGGER.warning("Retrying after - "+ waitInterval +" milliseconds...");
-                Thread.sleep(waitInterval);
+                try {
+                    Thread.sleep(waitInterval);
+                } finally {
+                    httpResponse = retryable.execute();
+                    retryContext.setLastRetryResponse(httpResponse);
+                }
 
-                httpResponse = retryable.execute();
-                retryContext.setLastRetryResponse(httpResponse);
-
-            } catch (Throwable e) {
-                retryContext.setLastThrowable(e);
+            } catch (Exception e) {
+                retryContext.setLastException(e);
             }
         }
 
-        if (retryContext.getLastThrowable() != null) {
-            throw retryContext.getLastThrowable();
+        if (retryContext.getLastException() != null) {
+            throw retryContext.getLastException();
         }
 
         return retryContext.getLastRetryResponse();

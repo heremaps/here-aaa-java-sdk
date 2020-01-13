@@ -9,7 +9,7 @@ public class RetryContext {
 
     private int retryCount;
     private HttpProvider.HttpResponse lastRetryResponse;
-    private Throwable lastException;
+    private Exception lastException;
 
     public int getRetryCount() {
         return this.retryCount;
@@ -24,15 +24,15 @@ public class RetryContext {
     }
 
     public void setLastRetryResponse(HttpProvider.HttpResponse lastRetryResponse) {
-        this.setLastThrowable(null);
+        this.setLastException(null);
         this.lastRetryResponse = lastRetryResponse;
     }
 
-    public Throwable getLastThrowable() {
+    public Exception getLastException() {
         return lastException;
     }
 
-    public void setLastThrowable(Throwable lastException) {
+    public void setLastException(Exception lastException) {
         this.lastException = lastException;
     }
 }
