@@ -293,7 +293,7 @@ public class ClientTest {
             //do nothing
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(4)).execute(any(HttpProvider.HttpRequest.class));
+        Mockito.verify(mockHttpProvider, Mockito.times(ExponentialRandomBackOffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
     }
 
     @Test
@@ -321,7 +321,7 @@ public class ClientTest {
             //do nothing
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(4)).execute(any(HttpProvider.HttpRequest.class));
+        Mockito.verify(mockHttpProvider, Mockito.times(ExponentialRandomBackOffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
     }
 
     @Test

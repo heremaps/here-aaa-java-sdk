@@ -18,7 +18,7 @@ public class RetryExecutor {
     }
 
     /**
-     * Execute the given {@link Retryable} until retry policy decides to retry.
+     * Execute the given {@link Retryable} until retry policy decides to give up.
      * @param retryable the {@link Retryable} to execute
      * @return http response return from {@code Retryable}
      * @throws Exception
@@ -46,7 +46,6 @@ public class RetryExecutor {
                     httpResponse = retryable.execute();
                     retryContext.setLastRetryResponse(httpResponse);
                 }
-
             } catch (Exception e) {
                 retryContext.setLastException(e);
             }

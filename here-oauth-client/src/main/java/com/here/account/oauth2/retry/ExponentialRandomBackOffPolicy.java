@@ -20,21 +20,17 @@ public class ExponentialRandomBackOffPolicy implements RetryPolicy {
         this.retryIntervalMillis = DEFAULT_RETRY_INTERVAL_MILLIS;
     }
 
-    public ExponentialRandomBackOffPolicy(int noOfRetries, int retryIntervalMillis){
-        this.maxNumberOfRetries = noOfRetries;
+    public ExponentialRandomBackOffPolicy(int maxNumberOfRetries, int retryIntervalMillis){
+        this.maxNumberOfRetries = maxNumberOfRetries;
         this.retryIntervalMillis = retryIntervalMillis;
     }
 
     @Override
     public boolean shouldRetry(RetryContext retryContext) {
-        if (retryContext.getRetryCount() < maxNumberOfRetries) {
-            if (retryContext.getLastException() instanceof SocketTimeoutException
-                    || (retryContext.getLastRetryResponse() != null
-                            && retryContext.getLastRetryResponse().getStatusCode() >= 500)) {
-                return true;
-            }
-        }
-        return false;
+        return retryContext.getRetryCount() < maxNumberOfRetries
+                && (retryContext.getLastException() instanceof SocketTimeoutException
+                || (retryContext.getLastRetryResponse() != null
+                && retryContext.getLastRetryResponse().getStatusCode() >= 500));
     }
 
     @Override

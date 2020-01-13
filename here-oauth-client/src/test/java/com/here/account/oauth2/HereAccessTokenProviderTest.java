@@ -195,7 +195,7 @@ public class HereAccessTokenProviderTest {
 
 
     @Test
-    public void test_HereAccessTokenProvider_retry_1_times() throws IOException, HttpException {
+    public void test_HereAccessTokenProvider_retry_with_custom_maxNumberOfRetries() throws IOException, HttpException {
 
         HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
         HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);

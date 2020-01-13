@@ -746,7 +746,7 @@ public class HereAccountTest extends AbstractCredentialTezt {
                                                validToken2.getBytes().length,
                                                new ByteArrayInputStream(validToken2.getBytes("UTF-8")))),
                 new OAuth1ClientCredentialsProvider(mySettableClock, url, accessKeyId, accessKeySecret, scope),
-                new JacksonSerializer(), new NoRetryPolicy());
+                new JacksonSerializer());
         
         Fresh<AccessTokenResponse> freshToken = tokenEndpoint.
                 requestAutoRefreshingToken(new ClientCredentialsGrantRequest());
