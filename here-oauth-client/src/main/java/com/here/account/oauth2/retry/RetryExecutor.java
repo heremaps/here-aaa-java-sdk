@@ -26,15 +26,16 @@ public class RetryExecutor {
     public HttpProvider.HttpResponse execute(Retryable retryable) throws Exception {
         RetryContext retryContext = new RetryContext();
         HttpProvider.HttpResponse httpResponse;
-        try {
-            httpResponse = retryable.execute();
-            retryContext.setLastRetryResponse(httpResponse);
-        } catch (Exception e) {
-            retryContext.setLastException(e);
-        }
 
-        while (retryPolicy.shouldRetry(retryContext)) {
+        while (true) {
             try {
+                httpResponse = retryable.execute();
+                retryContext.setLastRetryResponse(httpResponse);
+            } catch (Exception e) {
+                retryContext.setLastException(e);
+            }
+
+            if (retryPolicy.shouldRetry(retryContext)) {
                 retryContext.incrementRetryCount();
 
                 int waitInterval = retryPolicy.getNextRetryIntervalMillis(retryContext);
@@ -42,12 +43,11 @@ public class RetryExecutor {
                 LOGGER.warning("Retrying after - "+ waitInterval +" milliseconds...");
                 try {
                     Thread.sleep(waitInterval);
-                } finally {
-                    httpResponse = retryable.execute();
-                    retryContext.setLastRetryResponse(httpResponse);
+                } catch (InterruptedException e){
+                    LOGGER.warning("Got InterruptedException while waiting to retry.");
                 }
-            } catch (Exception e) {
-                retryContext.setLastException(e);
+            } else {
+                break;
             }
         }
 
