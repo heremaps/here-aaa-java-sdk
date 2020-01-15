@@ -20,11 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.http.Header;
@@ -232,11 +228,12 @@ public class ApacheHttpClientProvider implements HttpProvider {
             Header[] headers = apacheHttpResponse.getAllHeaders();
             Map<String, List<String>> ret = new HashMap<>();
             for (Header header: headers) {
-                if(ret.containsKey(header.getName())) {
+                if (ret.containsKey(header.getName())) {
                     ret.get(header.getName()).add(header.getValue());
-                }
-                else {
-                    ret.put(header.getName(), Arrays.asList(header.getValue()));
+                } else {
+                    List<String> values = new ArrayList<String>();
+                    values.add(header.getValue());
+                    ret.put(header.getName(), values);
                 }
             }
             return ret;
