@@ -30,7 +30,8 @@ public class ExponentialRandomBackOffPolicy implements RetryPolicy {
         return retryContext.getRetryCount() < maxNumberOfRetries
                 && (retryContext.getLastException() instanceof SocketTimeoutException
                 || (retryContext.getLastRetryResponse() != null
-                && retryContext.getLastRetryResponse().getStatusCode() >= 500));
+                && retryContext.getLastRetryResponse().getStatusCode() >= 500))
+                || (null != retryContext.getLastException() && retryContext.getLastException().getCause() instanceof SocketTimeoutException);
     }
 
     @Override

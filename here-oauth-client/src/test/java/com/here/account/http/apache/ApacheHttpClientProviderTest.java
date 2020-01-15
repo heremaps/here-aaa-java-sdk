@@ -19,6 +19,11 @@ import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
+import com.here.account.oauth2.HereAccessTokenProvider;
+import com.here.account.oauth2.RequestExecutionException;
+import com.here.account.oauth2.retry.ExponentialRandomBackOffPolicy;
+import com.here.account.oauth2.retry.RetryContext;
+import com.here.account.oauth2.retry.RetryPolicy;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.*;
@@ -318,5 +323,42 @@ public class ApacheHttpClientProviderTest {
         assertTrue("o wasn't an HttpRequestBase", HttpRequestBase.class.isAssignableFrom(o.getClass()));
 
         return (HttpRequestBase) o;
+    }
+
+    @Test(expected = RequestExecutionException.class)
+    public void test_getToken_short_setConnectionTimeoutInMs() throws IOException {
+        HttpProvider httpProvider = ApacheHttpClientProvider.builder()
+                .setConnectionTimeoutInMs(1)
+                .build();
+        ExponentialRandomBackOffPolicy exponentialRandomBackOffPolicy =
+                new ExponentialRandomBackOffPolicy();
+        RetryPolicy retryPolicy = new
+                RetryPolicy() {
+
+                    @Override
+                    public boolean shouldRetry(RetryContext retryContext) {
+                        boolean shouldRetry = exponentialRandomBackOffPolicy
+                                .shouldRetry(retryContext);
+                        assertTrue("shouldRetry was " + shouldRetry
+                                        + " for " + exponentialRandomBackOffPolicy
+                                        + " with LastException: " + retryContext.getLastException(),
+                                shouldRetry);
+                        return false;
+                    }
+
+                    @Override
+                    public int getNextRetryIntervalMillis(RetryContext retryContext) {
+                        return 0;
+                    }
+                };
+        try (
+                HereAccessTokenProvider accessTokenProvider = HereAccessTokenProvider.builder()
+                        .setHttpProvider(httpProvider)
+                        .setRetryPolicy(retryPolicy)
+                        .build();
+        )
+        {
+            accessTokenProvider.getAccessToken();
+        }
     }
 }
