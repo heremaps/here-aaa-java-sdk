@@ -21,7 +21,7 @@ import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.HereAccessTokenProvider;
 import com.here.account.oauth2.RequestExecutionException;
-import com.here.account.oauth2.retry.ExponentialRandomBackOffPolicy;
+import com.here.account.oauth2.retry.Socket5xxExponentialRandomBackoffPolicy;
 import com.here.account.oauth2.retry.RetryContext;
 import com.here.account.oauth2.retry.RetryPolicy;
 import org.apache.http.Header;
@@ -330,17 +330,17 @@ public class ApacheHttpClientProviderTest {
         HttpProvider httpProvider = ApacheHttpClientProvider.builder()
                 .setConnectionTimeoutInMs(1)
                 .build();
-        ExponentialRandomBackOffPolicy exponentialRandomBackOffPolicy =
-                new ExponentialRandomBackOffPolicy();
+        Socket5xxExponentialRandomBackoffPolicy socket5xxExponentialRandomBackoffPolicy =
+                new Socket5xxExponentialRandomBackoffPolicy();
         RetryPolicy retryPolicy = new
                 RetryPolicy() {
 
                     @Override
                     public boolean shouldRetry(RetryContext retryContext) {
-                        boolean shouldRetry = exponentialRandomBackOffPolicy
+                        boolean shouldRetry = socket5xxExponentialRandomBackoffPolicy
                                 .shouldRetry(retryContext);
                         assertTrue("shouldRetry was " + shouldRetry
-                                        + " for " + exponentialRandomBackOffPolicy
+                                        + " for " + socket5xxExponentialRandomBackoffPolicy
                                         + " with LastException: " + retryContext.getLastException(),
                                 shouldRetry);
                         return false;

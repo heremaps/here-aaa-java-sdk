@@ -22,7 +22,7 @@ import com.here.account.auth.NoAuthorizer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
-import com.here.account.oauth2.retry.ExponentialRandomBackOffPolicy;
+import com.here.account.oauth2.retry.Socket5xxExponentialRandomBackoffPolicy;
 import com.here.account.util.Clock;
 import com.here.account.util.Serializer;
 import org.junit.Before;
@@ -185,7 +185,7 @@ public class HereAccessTokenProviderTest {
                 HereAccessTokenProvider hereAccessTokenProvider
                         = HereAccessTokenProvider.builder()
                         .setHttpProvider(mockHttpProvider)
-                        .setRetryPolicy(new ExponentialRandomBackOffPolicy())
+                        .setRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
                         .build();
         ) {
             AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();
@@ -210,7 +210,7 @@ public class HereAccessTokenProviderTest {
                 HereAccessTokenProvider hereAccessTokenProvider
                         = HereAccessTokenProvider.builder()
                         .setHttpProvider(mockHttpProvider)
-                        .setRetryPolicy(new ExponentialRandomBackOffPolicy(2, 100))
+                        .setRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy(2, 100))
                         .build();
         ) {
             AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();

@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * An implementation of {@link RetryPolicy} to retry on {@code SocketTimeoutException}
  * and http status greater or equal to 500
  */
-public class ExponentialRandomBackOffPolicy implements RetryPolicy {
+public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
 
     public static final int DEFAULT_MAX_NO_RETRIES = 3;
     public static final int DEFAULT_RETRY_INTERVAL_MILLIS = 1000;
@@ -15,12 +15,12 @@ public class ExponentialRandomBackOffPolicy implements RetryPolicy {
     private final int maxNumberOfRetries;
     private final int retryIntervalMillis;
 
-    public ExponentialRandomBackOffPolicy(){
+    public Socket5xxExponentialRandomBackoffPolicy(){
         this.maxNumberOfRetries = DEFAULT_MAX_NO_RETRIES;
         this.retryIntervalMillis = DEFAULT_RETRY_INTERVAL_MILLIS;
     }
 
-    public ExponentialRandomBackOffPolicy(int maxNumberOfRetries, int retryIntervalMillis){
+    public Socket5xxExponentialRandomBackoffPolicy(int maxNumberOfRetries, int retryIntervalMillis){
         this.maxNumberOfRetries = maxNumberOfRetries;
         this.retryIntervalMillis = retryIntervalMillis;
     }

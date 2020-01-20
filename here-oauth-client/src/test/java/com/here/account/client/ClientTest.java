@@ -23,7 +23,7 @@ import com.here.account.oauth2.AccessTokenException;
 import com.here.account.oauth2.ErrorResponse;
 import com.here.account.oauth2.RequestExecutionException;
 import com.here.account.oauth2.ResponseParsingException;
-import com.here.account.oauth2.retry.ExponentialRandomBackOffPolicy;
+import com.here.account.oauth2.retry.Socket5xxExponentialRandomBackoffPolicy;
 import com.here.account.olp.OlpHttpMessage;
 import com.here.account.util.CloseUtil;
 import com.here.account.util.JacksonSerializer;
@@ -271,7 +271,7 @@ public class ClientTest {
     @Test
     public void test_sendMessageRetry_500() throws IOException, HttpException {
         Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500);
-        ExponentialRandomBackOffPolicy exponentialRandomBackoffSpy = spy(ExponentialRandomBackOffPolicy.class);
+        Socket5xxExponentialRandomBackoffPolicy exponentialRandomBackoffSpy = spy(Socket5xxExponentialRandomBackoffPolicy.class);
         Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(exponentialRandomBackoffSpy)
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
@@ -293,14 +293,14 @@ public class ClientTest {
             //do nothing
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(ExponentialRandomBackOffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
+        Mockito.verify(mockHttpProvider, Mockito.times(Socket5xxExponentialRandomBackoffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
     }
 
     @Test
     public void test_sendMessageRetry_exception() throws IOException, HttpException {
 
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class);
-        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackOffPolicy())
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
         Map<String, String> additionalHeaders = new HashMap<String, String>();
@@ -321,7 +321,7 @@ public class ClientTest {
             //do nothing
         }
 
-        Mockito.verify(mockHttpProvider, Mockito.times(ExponentialRandomBackOffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
+        Mockito.verify(mockHttpProvider, Mockito.times(Socket5xxExponentialRandomBackoffPolicy.DEFAULT_MAX_NO_RETRIES + 1)).execute(any(HttpProvider.HttpRequest.class));
     }
 
     @Test
@@ -329,7 +329,7 @@ public class ClientTest {
 
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class)
                 .thenThrow(SocketTimeoutException.class).thenReturn(mockHttpResponse);
-        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackOffPolicy())
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
         Map<String, String> additionalHeaders = new HashMap<String, String>();
@@ -357,7 +357,7 @@ public class ClientTest {
     public void test_sendMessage_retry_500_success() throws IOException, HttpException {
         Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(500).thenReturn(200);
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenReturn(mockHttpResponse);
-        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackOffPolicy())
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
         Map<String, String> additionalHeaders = new HashMap<String, String>();
@@ -385,7 +385,7 @@ public class ClientTest {
     public void test_sendMessage_retry_500_exception_success() throws IOException, HttpException {
         Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(200);
         Mockito.when(mockHttpProvider.execute(mockHttpRequest)).thenThrow(SocketTimeoutException.class).thenReturn(mockHttpResponse);
-        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new ExponentialRandomBackOffPolicy())
+        Client client = Client.builder().withHttpProvider(mockHttpProvider).withSerializer(serializer).withRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
                 .withClientAuthorizer(mockHttpRequestAuthorizer).build();
         FakeRequest fakeRequest = new FakeRequest("testClientId", "testScope", "testGrantType");
         Map<String, String> additionalHeaders = new HashMap<String, String>();
