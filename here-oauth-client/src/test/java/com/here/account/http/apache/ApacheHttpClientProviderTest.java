@@ -25,21 +25,22 @@ import com.here.account.oauth2.retry.Socket5xxExponentialRandomBackoffPolicy;
 import com.here.account.oauth2.retry.RetryContext;
 import com.here.account.oauth2.retry.RetryPolicy;
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.ParseException;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -112,6 +113,66 @@ public class ApacheHttpClientProviderTest {
         assertNotNull("response body is null", response.getResponseBody());
         assertTrue("response content length is 0", 0<response.getContentLength());
         assertTrue("Content-Type Header should be present", response.getHeaders().get("Content-Type") != null);
+    }
+
+    private static class MyHeader implements Header {
+
+        private final String name;
+        private final String value;
+
+        public MyHeader(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public HeaderElement[] getElements() throws ParseException {
+            return new HeaderElement[0];
+        }
+    }
+
+    @Test
+    public void test_getHeaders() throws IOException, HttpException {
+        String requestBodyJson = "{\"foo\":\"bar\"}";
+        url = "http://example.com";
+
+        CloseableHttpClient closeableHttpClient = Mockito.mock(CloseableHttpClient.class);
+
+        CloseableHttpResponse closeableHttpResponse = Mockito.mock(CloseableHttpResponse.class);
+        Mockito.when(closeableHttpClient.execute(Mockito.any(HttpRequestBase.class), Mockito.any(HttpContext.class)))
+                .thenReturn(closeableHttpResponse);
+        List<Header> headersList = new ArrayList<Header>();
+        Header fooHeader = new MyHeader("foo", "bar");
+        headersList.add(fooHeader);
+        Header setCookie1Header = new MyHeader("Set-Cookie", "a=b");
+        headersList.add(setCookie1Header);
+        Header setCookie2Header = new MyHeader("Set-Cookie", "c=d");
+        headersList.add(setCookie2Header);
+        Header[] headers = headersList.toArray(new Header[headersList.size()]);
+        Mockito.when(closeableHttpResponse.getAllHeaders())
+                .thenReturn(headers);
+
+        httpProvider = ApacheHttpClientProvider.builder()
+                .setHttpClient(closeableHttpClient)
+                .build();
+        httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "PUT", url, requestBodyJson);
+        HttpProvider.HttpResponse response = httpProvider.execute(httpRequest);
+        assertTrue("response is null", null != response);
+        Map<String, List<String>> headersMap = response.getHeaders();
+        assertTrue("headersMap was null", null != headersMap);
+        List<String> values = headersMap.get(fooHeader.getName());
+        assertTrue("values was expected to contain " + fooHeader.getValue() + ", but was " + values,
+                null != values && 1 == values.size() && fooHeader.getValue().equals(values.get(0)));
     }
 
     @Test
