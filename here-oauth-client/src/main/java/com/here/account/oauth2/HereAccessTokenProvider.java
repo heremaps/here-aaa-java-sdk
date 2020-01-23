@@ -22,6 +22,8 @@ import java.util.function.Supplier;
 import com.here.account.auth.provider.ClientAuthorizationProviderChain;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.apache.ApacheHttpClientProvider;
+import com.here.account.oauth2.retry.NoRetryPolicy;
+import com.here.account.oauth2.retry.RetryPolicy;
 import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.Serializer;
@@ -105,6 +107,7 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
         private HttpProvider httpProvider;
         private boolean alwaysRequestNewToken = false;
         private Serializer serializer;
+        private RetryPolicy retryPolicy;
 
         private Builder() {
         }
@@ -163,6 +166,17 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
             return this;
         }
 
+        /**
+         * Optionally override the retry policy. Default behaviour is no retry.
+         *
+         * @param retryPolicy the RetryPolicy
+         * @return this Builder
+         */
+        public Builder setRetryPolicy(RetryPolicy retryPolicy) {
+            this.retryPolicy = retryPolicy;
+            return this;
+        }
+
 
         /**
          * Build using builders, builders, and more builders.
@@ -190,12 +204,17 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
                 serializer = new JacksonSerializer();
             }
 
+            if (null == retryPolicy) {
+                retryPolicy = new NoRetryPolicy();
+            }
+
             return new HereAccessTokenProvider(
                     serializer,
                     clientAuthorizationRequestProvider,
                     httpProvider,
                     doCloseHttpProvider,
-                    alwaysRequestNewToken);
+                    alwaysRequestNewToken,
+                    retryPolicy);
         }
     }
 
@@ -210,11 +229,11 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
     private HereAccessTokenProvider(
             Serializer serializer,
             ClientAuthorizationRequestProvider credentials, HttpProvider httpProvider,
-            boolean doCloseHttpProvider, boolean alwaysRequestNewToken) {
+            boolean doCloseHttpProvider, boolean alwaysRequestNewToken, RetryPolicy retryPolicy) {
         this.serializer = serializer;
         this.httpProvider = httpProvider;
         this.doCloseHttpProvider = doCloseHttpProvider;
-        this.tokenEndpoint = HereAccount.getTokenEndpoint(httpProvider, credentials, this.serializer);
+        this.tokenEndpoint = HereAccount.getTokenEndpoint(httpProvider, credentials, this.serializer, retryPolicy);
         this.accessTokenRequestSupplier = () -> {
             return credentials.getNewAccessTokenRequest();
         };

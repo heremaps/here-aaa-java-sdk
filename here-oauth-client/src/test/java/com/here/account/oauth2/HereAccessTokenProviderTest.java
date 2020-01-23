@@ -16,14 +16,14 @@
 package com.here.account.oauth2;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 
 import com.here.account.auth.NoAuthorizer;
 import com.here.account.http.HttpConstants;
 import com.here.account.http.HttpException;
 import com.here.account.http.HttpProvider;
+import com.here.account.oauth2.retry.Socket5xxExponentialRandomBackoffPolicy;
 import com.here.account.util.Clock;
-import com.here.account.util.JacksonSerializer;
-import com.here.account.util.JsonSerializer;
 import com.here.account.util.Serializer;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -164,6 +165,56 @@ public class HereAccessTokenProviderTest {
             String scope = accessTokenResponse.getScope();
             assertTrue("expected scope " + expectedScope + ", actual " + scope,
                     expectedScope.equals(scope));
+        }
+    }
+
+
+    @Test
+    public void test_HereAccessTokenProvider_retry() throws IOException, HttpException {
+
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(200);
+        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken, expectedScope);
+        byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(new ByteArrayInputStream(bytes));
+
+        Mockito.when(mockHttpProvider.execute(Mockito.any(HttpProvider.HttpRequest.class))).thenThrow(new SocketTimeoutException()).thenReturn(mockHttpResponse);
+
+        try (
+                HereAccessTokenProvider hereAccessTokenProvider
+                        = HereAccessTokenProvider.builder()
+                        .setHttpProvider(mockHttpProvider)
+                        .setRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy())
+                        .build();
+        ) {
+            AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();
+            Mockito.verify(mockHttpProvider, Mockito.times(3)).execute(any(HttpProvider.HttpRequest.class));
+        }
+    }
+
+
+    @Test
+    public void test_HereAccessTokenProvider_retry_with_custom_maxNumberOfRetries() throws IOException, HttpException {
+
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(500).thenReturn(200);
+        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken, expectedScope);
+        byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(new ByteArrayInputStream(bytes));
+
+        Mockito.when(mockHttpProvider.execute(Mockito.any(HttpProvider.HttpRequest.class))).thenThrow(new SocketTimeoutException()).thenReturn(mockHttpResponse);
+
+        try (
+                HereAccessTokenProvider hereAccessTokenProvider
+                        = HereAccessTokenProvider.builder()
+                        .setHttpProvider(mockHttpProvider)
+                        .setRetryPolicy(new Socket5xxExponentialRandomBackoffPolicy(2, 100))
+                        .build();
+        ) {
+            AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();
+            Mockito.verify(mockHttpProvider, Mockito.times(3)).execute(any(HttpProvider.HttpRequest.class));
         }
     }
 
