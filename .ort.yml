@@ -1,6 +1,6 @@
 excludes:
-  projects:
-  - path: "examples/here-oauth-client-example/pom.xml"
+  paths:
+  - pattern: "examples/here-oauth-client-example/pom.xml"
     reason: "EXAMPLE_OF"
     comment: "The project an example how to implement AAA SDK in a client."
   scopes:
