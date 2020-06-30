@@ -1,12 +1,15 @@
 excludes:
   projects:
-  - path: "examples/here-oauth-client-example/pom.xml"
+  - pattern: "*/src/test/**"
+    reason: "TEST_OF"
+    comment: "Directory is only used for testing."
+  - pattern: "examples/here-oauth-client-example/pom.xml"
     reason: "EXAMPLE_OF"
-    comment: "The project an example how to implement AAA SDK in a client."
+    comment: "The project contains an example how to implement AAA SDK in a client."
   scopes:
   - name: "provided"
-    reason: "PROVIDED_BY"
-    comment: "These are dependencies provided by the JDK or container at runtime. They are not distributed in the context of this project."
+    reason: "PROVIDED_DEPENDENCY_OF"
+    comment: "Packages provided at runtime by the JDK or container only."
   - name: "test"
-    reason: "TEST_TOOL_OF"
-    comment: "These are dependencies used for testing. They are not distributed in the context of this project."
+    reason: "TEST_DEPENDENCY_OF"
+    comment: "Packages for testing only."
