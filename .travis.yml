@@ -25,5 +25,6 @@ script:
   - mvn -Dhere.token.endpoint.url=$HERE_TOKEN_ENDPOINT_URL -Dhere.access.key.id=$ACCESS_KEY_ID -Dhere.access.key.secret=$ACCESS_KEY_SECRET clean install
 
 after_script:
-  - java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -appid $VERACODE_APP_ID -vid $VERACODE_USER_ID -vkey $VERACODE_SECRET_KEY -action UploadAndScan -appname AAA-SDK -createprofile false -autoscan true -scantimeout 10000 -filepath here-oauth-client/target/here-oauth-client-*-SNAPSHOT.jar -version "$TRAVIS_JOB_ID - $TRAVIS_JOB_NUMBER $DATE"
+  - if: branch = master OR branch = veracode
+    java -jar vosp-api-wrappers-java-$VERACODE_WRAPPER_VERSION.jar -appid $VERACODE_APP_ID -vid $VERACODE_USER_ID -vkey $VERACODE_SECRET_KEY -action UploadAndScan -appname AAA-SDK -createprofile false -autoscan true -scantimeout 10000 -filepath here-oauth-client/target/here-oauth-client-*-SNAPSHOT.jar -version "$TRAVIS_JOB_ID - $TRAVIS_JOB_NUMBER $DATE"
 
