@@ -67,7 +67,7 @@
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
         <ini4j.version>0.5.1</ini4j.version>
         <jackson.version>2.10.0.pr1</jackson.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <ning.version>1.8.17</ning.version>
 
