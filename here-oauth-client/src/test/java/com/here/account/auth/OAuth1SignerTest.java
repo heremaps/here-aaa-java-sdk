@@ -251,4 +251,180 @@ public class OAuth1SignerTest {
         //return new Base64.getEncoder().encodeToString(signatureBytes);
         return Base64.getEncoder().encodeToString(signatureBytes);
     }
+
+    @Test
+    public void test_OAuth1Signer_query_parameter_parsing() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        this.clockCurrentTimeMillis = 1600000000000L;
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1", null);
+        String signatureWithQueryParams0 = httpRequest.getAuthorizationHeader();
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?format=jpg", null);
+        String signatureWithQueryParams1 = httpRequest.getAuthorizationHeader();
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?format=jpg&key1=value1", null);
+        String signatureWithQueryParams2 = httpRequest.getAuthorizationHeader();
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?format=jpg&key1=value1&empty", null);
+        String signatureWithQueryParams3 = httpRequest.getAuthorizationHeader();
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?format=jpg&key1=value1&key1=value2", null);
+        String signatureWithQueryParams4 = httpRequest.getAuthorizationHeader();
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?key1=value2&format=jpg&key1=value1", null);
+        String signatureWithQueryParams5 = httpRequest.getAuthorizationHeader();
+        assertTrue(!signatureWithQueryParams0.equals(signatureWithQueryParams1));
+        assertTrue(!signatureWithQueryParams1.equals(signatureWithQueryParams2));
+        assertTrue(!signatureWithQueryParams2.equals(signatureWithQueryParams3));
+        assertTrue(!signatureWithQueryParams3.equals(signatureWithQueryParams4));
+        assertTrue(signatureWithQueryParams4.equals(signatureWithQueryParams5));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_query_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?format=jpg", null);
+        String signatureWithQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"K%2BnbO5%2Bvci0capErAT%2FzRN9A3mNSDWa%2BZFnt5RTt32w%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithQueryParams doesn't match expectedSignature", signatureWithQueryParams.equals(expectedSignature));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_encoded_query_parameters1() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?" + "label=" + URLEncoder.encode("enabled;title=value", "UTF8"), null);
+        String signatureWithEncodedQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"C%2B%2FJibFgx%2F4KmGUbpe34hMWOxjsEqMXaTmxFRIP1QXo%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithEncodedQueryParams doesn't match expectedSignature", signatureWithEncodedQueryParams.equals(expectedSignature));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_RFC_3986_unreserved_chars_in_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        // Testing RFC specification: Characters in the unreserved character set as defined by
+        // [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
+        // NOT be encoded.
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?" + "test=" + URLEncoder.encode("abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789-._~", "UTF8"), null);
+        String signatureWithUnreservedCharsInQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"rQHj8aDUX6CHIDRNaKXGcx2BsrS%2BOUWm5LlOWp7A7Ro%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithUnreservedCharsInQuery doesn't match expectedSignature", signatureWithUnreservedCharsInQueryParams.equals(expectedSignature));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_star_in_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        // Testing RFC specification: Characters in the unreserved character set as defined by
+        // [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
+        // NOT be encoded.
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?" + "test=" + URLEncoder.encode("*", "UTF8"), null);
+        String signatureWithStarInQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"dKpGZp4Wc%2B56o4btchNf%2B5XrteuGfrSvVTZ5PeS%2FBZ0%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithStarInQueryParams doesn't match expectedSignature", signatureWithStarInQueryParams.equals(expectedSignature));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_tilde_in_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        // Testing RFC specification: Characters in the unreserved character set as defined by
+        // [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
+        // NOT be encoded.
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?" + "test=" + URLEncoder.encode("~", "UTF8"), null);
+        String signatureWithTildeInQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"49m1vUzdoVt2LZ68hYXXdOJEl6BsKR3owS%2BJf2UHO0o%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithTildeInQueryParams doesn't match expectedSignature", signatureWithTildeInQueryParams.equals(expectedSignature));
+    }
+
+    @Test
+    public void test_OAuth1Signer_with_space_in_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        // Testing RFC specification: Characters in the unreserved character set as defined by
+        // [RFC3986], Section 2.3 (ALPHA, DIGIT, "-", ".", "_", "~") MUST
+        // NOT be encoded.
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?" + "label=" + URLEncoder.encode("A test", "UTF8"), null);
+        String signatureWithSpaceInQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"bBfpwVDoyLN681mJH4628hVyyiRPPOmQDv%2BGILY4874%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithSpaceInQueryParams doesn't match expectedSignature", signatureWithSpaceInQueryParams.equals(expectedSignature));
+    }
+
+
+    @Test
+    public void test_OAuth1Signer_with_novalue_query_parameters() throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // oauth_timestamp = "1600000000"
+        this.clockCurrentTimeMillis = 1600000000000L;
+        byte[] nonceBytes = {
+                0x00,
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05
+        };
+        // oauth_nonce = "AAECAw"
+        String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(nonceBytes).substring(0, nonceBytes.length);
+        oauth1Signer.authorize(httpRequest, "GET", "http://example.com/photos/photo1?flag1&flag2&flag3=", null);
+        String signatureWithNoValueQueryParams = httpRequest.getAuthorizationHeader();
+        String expectedSignature = "OAuth oauth_consumer_key=\"access-key-id\", oauth_signature_method=\"HMAC-SHA256\", oauth_signature=\"mf6ZGeusZTqh1EaNgsGDQVzHV9TTvcKz5pE%2BW2f55XY%3D\", oauth_timestamp=\"1600000000\", oauth_nonce=\"AAECAw\", oauth_version=\"1.0\"";
+        assertTrue("signatureWithNoValueQueryParams doesn't match expectedSignature", signatureWithNoValueQueryParams.equals(expectedSignature));
+    }
+
 }

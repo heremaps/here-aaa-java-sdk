@@ -280,12 +280,18 @@ public class SignatureCalculator {
     }
 
     /**
-     * Utility method to URL encode a given string. If there are any spaces the URLEncodes encodes it to "+"
-     * but we require it to be "%20".
+     * Utility method to URL encode a given string. If there are any
+     * spaces the URLEncodes encodes it to "+" but we require it to be
+     * "%20". Also the RFC5849 requires that the character '~' must
+     * not be encoded and character '*' has to be encoded since it's
+     * not one.
      */
     static String urlEncode(String s) {
         try {
-            return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING).replaceAll("\\+", "%20");
+            return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING)
+                    .replace("+", "%20")
+                    .replace("*", "%2A")
+                    .replace("%7E", "~");
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException(e);
         }
