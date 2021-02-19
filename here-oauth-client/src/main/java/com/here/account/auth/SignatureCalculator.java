@@ -63,7 +63,8 @@ public class SignatureCalculator {
      * but with oauthVersion hard-coded to "1.0".
      *
      * @param method          the HTTP method
-     * @param baseURL         the base url including the protocol, host and port.
+     * @param baseURL         The base url including the protocol, host, port, and path.
+     *                        The query portion of the request URL must be assembled in the 'queryParams' input.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
      * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
@@ -85,7 +86,8 @@ public class SignatureCalculator {
      * Calculate the OAuth 1.0 signature based on the given parameters
      *
      * @param method          the HTTP method
-     * @param baseURL         the base url including the protocol, host and port.
+     * @param baseURL         The base url including the protocol, host, port, and path.
+     *                        The query portion of the request URL must be assembled in the 'queryParams' input.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
      * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
@@ -137,7 +139,8 @@ public class SignatureCalculator {
      *
      * @param consumerKey     the consumer key
      * @param method          the HTTP method
-     * @param baseURL         the base url including the protocol, host and port.
+     * @param baseURL         The base url including the protocol, host, port, and path.
+     *                        The query portion of the request URL must be assembled in the 'queryParams' input.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
      * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
@@ -187,7 +190,8 @@ public class SignatureCalculator {
      *
      * @param consumerKey     the consumer key
      * @param method          the HTTP method
-     * @param baseURL         the base url including the protocol, host and port.
+     * @param baseURL         The base url including the protocol, host, port, and path.
+     *                        The query portion of the request URL must be assembled in the 'queryParams' input.
      * @param oauthTimestamp  the time stamp
      * @param nonce           nonce
      * @param signatureMethod signature method to be used - supported are HMAC-SHA1, HMAC-SHA256, ES512
@@ -280,12 +284,18 @@ public class SignatureCalculator {
     }
 
     /**
-     * Utility method to URL encode a given string. If there are any spaces the URLEncodes encodes it to "+"
-     * but we require it to be "%20".
+     * Utility method to URL encode a given string. If there are any
+     * spaces the URLEncodes encodes it to "+" but we require it to be
+     * "%20". Also the RFC5849 requires that the character '~' must
+     * not be encoded and character '*' has to be encoded since it's
+     * not one.
      */
     static String urlEncode(String s) {
         try {
-            return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING).replaceAll("\\+", "%20");
+            return URLEncoder.encode(s, OAuthConstants.UTF_8_STRING)
+                    .replace("+", "%20")
+                    .replace("*", "%2A")
+                    .replace("%7E", "~");
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException(e);
         }
