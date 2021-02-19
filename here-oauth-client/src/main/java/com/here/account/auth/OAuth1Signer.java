@@ -18,11 +18,16 @@ package com.here.account.auth;
 import com.here.account.http.HttpProvider;
 import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.util.Clock;
+import com.here.account.util.OAuthConstants;
 import com.here.account.util.SettableSystemClock;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -136,6 +141,39 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
     }
 
     /**
+     * Extract query parameters from a raw query string.
+     *
+     * @param the raw query string as a substring from the URL.
+     * @return map containing list of query parameters.
+     */
+    protected Map<String, List<String>> getQueryParams(String query) {
+        Map<String, List<String>> queryParams = new HashMap<>();
+        String[] kvPairs = query.split("&");
+        for (String kvPair : kvPairs) {
+            int ix = kvPair.indexOf("=");
+            String key = kvPair;
+            String value = "";
+            if (ix != -1) {
+                key = kvPair.substring(0, ix);
+                value = kvPair.substring(ix + 1);
+            }
+            try {
+                key = URLDecoder.decode(key, OAuthConstants.UTF_8_STRING);
+                value = URLDecoder.decode(value, OAuthConstants.UTF_8_STRING);
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException(e);
+            }
+            List<String> values = queryParams.get(key);
+            if (values == null) {
+                values = new ArrayList<>();
+                queryParams.put(key, values);
+            }
+            values.add(value);
+        }
+        return queryParams;
+    }
+
+    /**
      * For cases where there is no Content-Type: application/x-www-form-urlencoded, 
      * and no request token, call this method to get the Authorization Header Value 
      * for a single request.  
@@ -165,15 +203,22 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
         byte[] bytes = new byte[NONCE_LENGTH]; 
         nextBytes(bytes);
         String nonce = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, NONCE_LENGTH);
+        int qPos = url.indexOf('?');
+        Map<String, List<String>> queryParams = null;
+        if (qPos != -1) {
+            String query = url.substring(qPos + 1);
+            queryParams = getQueryParams(query);
+            url = url.substring(0, qPos);
+        }
         String computedSignature = calculator.calculateSignature(method, url, timestamp, nonce, 
                 signatureMethod,
                 formParams,
-                null);
+                queryParams);
         
         return calculator.constructAuthHeader(computedSignature, nonce, timestamp, 
                 signatureMethod);
     }
-    
+
     /**
      * Gets the signature calculator, given that we don't use a user auth, and we do use 
      * the configured client accessKeyId, client accessKeySecret pair.
