@@ -143,7 +143,7 @@ public class OAuth1Signer implements HttpProvider.HttpRequestAuthorizer {
     /**
      * Extract query parameters from a raw query string.
      *
-     * @param the raw query string as a substring from the URL.
+     * @param query is the raw query string as a substring from the URL.
      * @return map containing list of query parameters.
      */
     protected Map<String, List<String>> getQueryParams(String query) {
