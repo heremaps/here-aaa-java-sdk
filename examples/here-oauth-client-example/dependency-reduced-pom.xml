@@ -3,7 +3,7 @@
   <parent>
     <artifactId>here-aaa-sdk</artifactId>
     <groupId>com.here.account</groupId>
-    <version>0.4.22-SNAPSHOT</version>
+    <version>0.4.22</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
