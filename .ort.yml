@@ -7,9 +7,9 @@ excludes:
     reason: "EXAMPLE_OF"
     comment: "The project contains an example how to implement AAA SDK in a client."
   scopes:
-  - name: "provided"
+  - pattern: "provided"
     reason: "PROVIDED_DEPENDENCY_OF"
     comment: "Packages provided at runtime by the JDK or container only."
-  - name: "test"
+  - pattern: "test"
     reason: "TEST_DEPENDENCY_OF"
     comment: "Packages for testing only."
