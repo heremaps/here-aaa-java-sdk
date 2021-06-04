@@ -64,7 +64,7 @@
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 
         <!-- Declare versions for dependencies -->
-        <apache.httpclient.version>4.5.2</apache.httpclient.version>
+        <apache.httpclient.version>4.5.13</apache.httpclient.version>
         <ini4j.version>0.5.1</ini4j.version>
         <jackson.version>2.10.0.pr1</jackson.version>
         <junit.version>4.13.1</junit.version>
