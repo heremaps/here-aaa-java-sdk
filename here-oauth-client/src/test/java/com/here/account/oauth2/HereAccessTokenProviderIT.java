@@ -23,6 +23,7 @@ import com.here.account.auth.provider.FromDefaultHereCredentialsPropertiesFileEx
 import com.here.account.auth.provider.FromHereCredentialsIniFile;
 import com.here.account.auth.provider.FromHereCredentialsIniStream;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.java.JavaHttpProvider;
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
 import org.junit.Ignore;
@@ -47,14 +48,30 @@ public class HereAccessTokenProviderIT {
         try (
                 HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()
         ) {
-            String accessToken = accessTokens.getAccessToken();
-            assertTrue("accessToken was null", null != accessToken);
-            assertTrue("accessToken was blank", accessToken.trim().length() > 0);
+            do_basic(accessTokens);
 
-            AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
-            assertTrue("accessTokenResponse was null", null != accessTokenResponse);
-            assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
         }
+    }
+
+    protected void do_basic(HereAccessTokenProvider accessTokens) {
+        String accessToken = accessTokens.getAccessToken();
+        assertTrue("accessToken was null", null != accessToken);
+        assertTrue("accessToken was blank", accessToken.trim().length() > 0);
+
+        AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+        assertTrue("accessTokenResponse was null", null != accessTokenResponse);
+        assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+    }
+
+    @Test
+    public void test_JavaHttpProvider() throws IOException {
+        try (
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().setHttpProvider(JavaHttpProvider.builder().build()).build();
+        ) {
+            do_basic(accessTokens);
+
+        }
+
     }
 
     private static final int ONE_HOUR_SKEW_MILLIS = 60 * 60 * 1000;
