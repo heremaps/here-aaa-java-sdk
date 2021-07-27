@@ -3,7 +3,7 @@
   <parent>
     <artifactId>here-aaa-sdk</artifactId>
     <groupId>com.here.account</groupId>
-    <version>0.4.22</version>
+    <version>0.4.23-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -71,7 +71,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>

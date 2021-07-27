@@ -41,6 +41,13 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
                 || (null != retryContext.getLastException() && retryContext.getLastException().getCause() instanceof SocketTimeoutException);
     }
 
+    /**
+     * Employs the exponential random backoff policy using a base of 2 and exponent of number of retries,
+     * up to a maximum, subject to the configured maxRetryFactor, and multiplied by the retryIntervalMillis.
+     *
+     * @param retryContext An instance of {@link RetryContext}
+     * @return the next retry interval in milliseconds
+     */
     @Override
     public int getNextRetryIntervalMillis(RetryContext retryContext){
         int retryCount = retryContext.getRetryCount();
