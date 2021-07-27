@@ -11,18 +11,25 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
 
     public static final int DEFAULT_MAX_NO_RETRIES = 3;
     public static final int DEFAULT_RETRY_INTERVAL_MILLIS = 1000;
+    public static final int DEFAULT_MAX_RETRY_FACTOR = 1 << 30;
 
     private final int maxNumberOfRetries;
     private final int retryIntervalMillis;
+    private final int maxRetryFactor;
 
     public Socket5xxExponentialRandomBackoffPolicy(){
-        this.maxNumberOfRetries = DEFAULT_MAX_NO_RETRIES;
-        this.retryIntervalMillis = DEFAULT_RETRY_INTERVAL_MILLIS;
+        this(DEFAULT_MAX_NO_RETRIES, DEFAULT_RETRY_INTERVAL_MILLIS);
     }
 
     public Socket5xxExponentialRandomBackoffPolicy(int maxNumberOfRetries, int retryIntervalMillis){
+        this(maxNumberOfRetries, retryIntervalMillis, DEFAULT_MAX_RETRY_FACTOR);
+    }
+
+    public Socket5xxExponentialRandomBackoffPolicy(int maxNumberOfRetries, int retryIntervalMillis,
+                                                   int maxRetryFactor) {
         this.maxNumberOfRetries = maxNumberOfRetries;
         this.retryIntervalMillis = retryIntervalMillis;
+        this.maxRetryFactor = maxRetryFactor;
     }
 
     @Override
@@ -36,7 +43,8 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
 
     @Override
     public int getNextRetryIntervalMillis(RetryContext retryContext){
-        int factor = 1 << (retryContext.getRetryCount());
+        int retryCount = retryContext.getRetryCount();
+        int factor = Math.min(1 << (Math.min(retryCount, 30)), maxRetryFactor);
         return  retryIntervalMillis * ThreadLocalRandom.current().nextInt(factor);
     }
 }
