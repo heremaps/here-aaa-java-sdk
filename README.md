@@ -30,6 +30,7 @@ Server, for use with HERE Services.
   <version>0.4.23</version>
 </dependency>
 ```
+
 HERE OAuth Client Examples
 ------
 Example usage of the HERE OAuth Client library; these are tutorials intended to be adapted into or
