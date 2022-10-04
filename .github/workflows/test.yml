@@ -19,6 +19,6 @@ jobs:
         with:
           java-version: '8'
       - name: Verify Maven installation
-        run: mvn version
+        run: mvn -v
       - name: Run AAA SDK tests
         run: mvn -Dhere.token.endpoint.url=$HERE_TOKEN_ENDPOINT_URL -Dhere.access.key.id=$ACCESS_KEY_ID -Dhere.access.key.secret=$ACCESS_KEY_SECRET clean install
