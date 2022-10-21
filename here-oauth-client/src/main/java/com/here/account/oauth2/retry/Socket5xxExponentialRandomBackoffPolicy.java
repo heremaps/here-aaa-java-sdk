@@ -11,18 +11,25 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
 
     public static final int DEFAULT_MAX_NO_RETRIES = 3;
     public static final int DEFAULT_RETRY_INTERVAL_MILLIS = 1000;
+    public static final int DEFAULT_MAX_RETRY_FACTOR = 1 << 30;
 
     private final int maxNumberOfRetries;
     private final int retryIntervalMillis;
+    private final int maxRetryFactor;
 
     public Socket5xxExponentialRandomBackoffPolicy(){
-        this.maxNumberOfRetries = DEFAULT_MAX_NO_RETRIES;
-        this.retryIntervalMillis = DEFAULT_RETRY_INTERVAL_MILLIS;
+        this(DEFAULT_MAX_NO_RETRIES, DEFAULT_RETRY_INTERVAL_MILLIS);
     }
 
     public Socket5xxExponentialRandomBackoffPolicy(int maxNumberOfRetries, int retryIntervalMillis){
+        this(maxNumberOfRetries, retryIntervalMillis, DEFAULT_MAX_RETRY_FACTOR);
+    }
+
+    public Socket5xxExponentialRandomBackoffPolicy(int maxNumberOfRetries, int retryIntervalMillis,
+                                                   int maxRetryFactor) {
         this.maxNumberOfRetries = maxNumberOfRetries;
         this.retryIntervalMillis = retryIntervalMillis;
+        this.maxRetryFactor = maxRetryFactor;
     }
 
     @Override
@@ -34,9 +41,18 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
                 || (null != retryContext.getLastException() && retryContext.getLastException().getCause() instanceof SocketTimeoutException);
     }
 
+    /**
+     * Employs the exponential random backoff policy using a base of 2 and exponent of number of retries,
+     * up to a maximum, subject to the configured maxRetryFactor, and multiplied by the retryIntervalMillis.
+     *
+     * @param retryContext An instance of {@link RetryContext}
+     * @return the next retry interval in milliseconds
+     */
     @Override
     public int getNextRetryIntervalMillis(RetryContext retryContext){
-        int factor = 1 << (retryContext.getRetryCount());
-        return  retryIntervalMillis * ThreadLocalRandom.current().nextInt(factor);
+        int retryCount = retryContext.getRetryCount();
+        int factor = Math.min(1 << (Math.min(retryCount, 30)), maxRetryFactor);
+        long value = ((long) retryIntervalMillis) * ThreadLocalRandom.current().nextInt(factor);
+        return (int) Math.min(Integer.MAX_VALUE, value);
     }
 }
