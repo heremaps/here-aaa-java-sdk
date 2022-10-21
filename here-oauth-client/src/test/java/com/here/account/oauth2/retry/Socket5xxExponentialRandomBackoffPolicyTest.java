@@ -23,6 +23,18 @@ public class Socket5xxExponentialRandomBackoffPolicyTest {
     }
 
     @Test
+    public void test_largeRetryCount_notNegative() {
+        for (int j = 0; j < 10; j++) {
+            RetryContext retryContext = new RetryContext();
+            for (int i = 0; i < 40; i++) {
+                retryContext.incrementRetryCount();
+                int nextRetryIntervalMillis = socket5xxExponentialRandomBackoffPolicy.getNextRetryIntervalMillis(retryContext);
+                assertTrue("i=" + i + ", retryContext.getRetryCount()=" + retryContext.getRetryCount() + ", nextRetryIntervalMillis was negative " + nextRetryIntervalMillis, nextRetryIntervalMillis >= 0);
+            }
+        }
+    }
+
+    @Test
     public void test_shouldRetry() {
         HttpProvider.HttpResponse httpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
         Mockito.when(httpResponse.getStatusCode()).thenReturn(503);

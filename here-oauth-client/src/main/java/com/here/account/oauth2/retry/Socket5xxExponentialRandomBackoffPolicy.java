@@ -52,6 +52,7 @@ public class Socket5xxExponentialRandomBackoffPolicy implements RetryPolicy {
     public int getNextRetryIntervalMillis(RetryContext retryContext){
         int retryCount = retryContext.getRetryCount();
         int factor = Math.min(1 << (Math.min(retryCount, 30)), maxRetryFactor);
-        return  retryIntervalMillis * ThreadLocalRandom.current().nextInt(factor);
+        long value = ((long) retryIntervalMillis) * ThreadLocalRandom.current().nextInt(factor);
+        return (int) Math.min(Integer.MAX_VALUE, value);
     }
 }
