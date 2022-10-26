@@ -25,7 +25,7 @@ Server, for use with HERE Services.
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client</artifactId>
-  <version>0.4.23</version>
+  <version>0.4.25</version>
 </dependency>
 ```
 HERE OAuth Client Examples
@@ -36,7 +36,7 @@ inform design of applications
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client-example</artifactId>
-  <version>0.4.21</version>
+  <version>0.4.25</version>
 </dependency>
 ```
 
