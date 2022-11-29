@@ -25,18 +25,25 @@ Server, for use with HERE Services.
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client</artifactId>
-  <version>0.4.25</version>
+  <version>0.4.23</version>
 </dependency>
 ```
 HERE OAuth Client Examples
 ------
-Example usage of the HERE OAuth Client library; these are tutorials intended to be adapted into or
-inform design of applications
+Example usage of the HERE OAuth Client library; these are tutorials intended to be 
+adapted into or inform design of applications. 
+
+Specify the version of the HERE OAuth Client library to include in your code by setting
+the version element below with a version available on Maven Central:
+
+http://central.maven.org/maven2/com/here/account/here-oauth-client/
+
+Pick the version that you see most fit. We recommend that you select the latest version.
 ```
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client-example</artifactId>
-  <version>0.4.25</version>
+  <version>0.4.21</version>
 </dependency>
 ```
 
@@ -110,6 +117,10 @@ Test instructions
 
 The tests must be configured with valid HERE client credentials to pass.  To get HERE client
 credentials, please contact HERE_ACCOUNT_SUPPORT@here.com.
+
+When you commit your code in GitHub it will be automatically tested with Github Workflows.
+
+https://docs.github.com/en/actions/using-workflows
 
 Open a command prompt at the working tree's root directory and type:
 
