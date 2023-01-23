@@ -2,10 +2,10 @@ HERE Authentication, Authorization, and Accounting
 
 Introduction
 ============
-This repository contains the complete source code for the here-aaa-sdk project.  Basic
+This repository contains the complete source code for the here-aaa-sdk project. Basic
 technical information is contained in this file.
 
-This project is maintained by the HERE Authentication, Authorization, and Accounting team.  For
+This project is maintained by the HERE Identity and Access Management team. For
 questions contact HERE_ACCOUNT_SUPPORT@here.com.
 
 Deliverables
