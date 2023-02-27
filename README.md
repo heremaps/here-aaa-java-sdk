@@ -43,7 +43,7 @@ Pick the version that you see most fit. We recommend that you select the latest 
 <dependency>
   <groupId>com.here.account</groupId>
   <artifactId>here-oauth-client-example</artifactId>
-  <version>0.4.21</version>
+  <version>0.4.25</version>
 </dependency>
 ```
 
