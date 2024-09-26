@@ -109,5 +109,11 @@
             <artifactId>async-http-client</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.lightbody.bmp</groupId>
+            <artifactId>browsermob-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

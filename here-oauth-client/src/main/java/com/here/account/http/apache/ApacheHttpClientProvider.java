@@ -25,7 +25,10 @@ import java.util.Map.Entry;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -40,8 +43,10 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 
@@ -92,6 +97,11 @@ public class ApacheHttpClientProvider implements HttpProvider {
         private RequestConfig.Builder apacheConfigBuilder;
         private CloseableHttpClient httpClient;
         private boolean doCloseHttpClient = true;
+        private String proxyHost;
+        private int proxyPort;
+        private String scheme = "https";
+        private String proxyUsername;
+        private String proxyPassword;
 
         private Builder() {
             apacheConfigBuilder = RequestConfig.custom();
@@ -134,19 +144,38 @@ public class ApacheHttpClientProvider implements HttpProvider {
             return this;
         }
 
+        public Builder setProxy(String proxyHost, int proxyPort, String scheme) {
+            this.proxyHost = proxyHost;
+            this.proxyPort = proxyPort;
+            this.scheme = scheme;
+            return this;
+        }
+
+        public Builder setProxyAuthentication(String proxyUsername, String proxyPassword) {
+            this.proxyUsername = proxyUsername;
+            this.proxyPassword = proxyPassword;
+            return this;
+        }
+
         /**
          * Build using builders, builders, and more builders.
          * 
          * @return the built HttpProvider implementation for Apache httpclient.
          */
         public HttpProvider build() {
-
-            CloseableHttpClient client = this.httpClient != null ? this.httpClient :
-            // uses PoolingHttpClientConnectionManager by default
-                    HttpClientBuilder.create().setDefaultRequestConfig(apacheConfigBuilder.build()).build();
-
+            HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                    .setDefaultRequestConfig(apacheConfigBuilder.build());
+            if (null != proxyHost && proxyPort > 0) {
+                clientBuilder.setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost(proxyHost, proxyPort, scheme)));
+                if (null != proxyUsername && null != proxyPassword) {
+                    BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost, proxyPort),
+                            new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+                    clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                }
+            }
+            CloseableHttpClient client = null != this.httpClient ? this.httpClient : clientBuilder.build();
             return new ApacheHttpClientProvider(client, this.doCloseHttpClient);
-
         }
     }
 

@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 
@@ -265,6 +267,60 @@ public class HereAccessTokenProviderTest {
         }
     }
 
+    @Test
+    public void test_HereAccessTokenProvider_withProxy() throws IOException, HttpException {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
+        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken, expectedScope);
+        byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(200);
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(new ByteArrayInputStream(bytes));
+        Mockito.when(mockHttpProvider.execute(Mockito.any(HttpProvider.HttpRequest.class)))
+                .thenReturn(mockHttpResponse);
+        try (
+                HereAccessTokenProvider hereAccessTokenProvider = HereAccessTokenProvider.builder()
+                        .setHttpProvider(mockHttpProvider)
+                        .setClientAuthorizationRequestProvider(clientAuthorizationRequestProvider)
+                        .setProxy("localhost", 8000, "http")
+                        .build()
+        ) {
+            AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();
+            assertNotNull("accessTokenResponse was null", accessTokenResponse);
+            String accessToken = accessTokenResponse.getAccessToken();
+            assertEquals("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
+                    expectedAccessToken, accessToken);
+            String scope = accessTokenResponse.getScope();
+            assertEquals("expected scope " + expectedScope + ", actual " + scope, expectedScope, scope);
+        }
+    }
 
+    @Test
+    public void test_HereAccessTokenProvider_withProxyAuthentication() throws IOException, HttpException {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        HttpProvider.HttpResponse mockHttpResponse = Mockito.mock(HttpProvider.HttpResponse.class);
+        String responseBody = HereAccountTest.getResponseBody(expectedAccessToken, expectedScope);
+        byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
+        Mockito.when(mockHttpResponse.getStatusCode()).thenReturn(200);
+        Mockito.when(mockHttpResponse.getResponseBody()).thenReturn(new ByteArrayInputStream(bytes));
+        Mockito.when(mockHttpProvider.execute(Mockito.any(HttpProvider.HttpRequest.class)))
+                .thenReturn(mockHttpResponse);
+        try (
+                HereAccessTokenProvider hereAccessTokenProvider
+                        = HereAccessTokenProvider.builder()
+                        .setHttpProvider(mockHttpProvider)
+                        .setClientAuthorizationRequestProvider(clientAuthorizationRequestProvider)
+                        .setProxy("localhost", 8000)
+                        .setProxyAuthentication("myUsername", "myPassword")
+                        .build()
+        ) {
+            AccessTokenResponse accessTokenResponse = hereAccessTokenProvider.getAccessTokenResponse();
+            assertNotNull("accessTokenResponse was null", accessTokenResponse);
+            String accessToken = accessTokenResponse.getAccessToken();
+            assertEquals("expected accessToken " + expectedAccessToken + ", actual " + accessToken,
+                    expectedAccessToken, accessToken);
+            String scope = accessTokenResponse.getScope();
+            assertEquals("expected scope " + expectedScope + ", actual " + scope, expectedScope, scope);
+        }
+    }
 
 }

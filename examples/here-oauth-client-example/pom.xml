@@ -72,6 +72,16 @@
                           <mainClass>com.here.account.oauth2.tutorial.HereAccessTokenProviderTutorial</mainClass>
                         </transformer>
                       </transformers>
+                      <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                      </filters>
                     </configuration>
                   </execution>
                 </executions>
@@ -93,6 +103,10 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.lightbody.bmp</groupId>
+            <artifactId>browsermob-core</artifactId>
         </dependency>
 
         <!-- test dependencies -->
