@@ -23,8 +23,16 @@ import com.here.account.auth.provider.FromDefaultHereCredentialsPropertiesFileEx
 import com.here.account.auth.provider.FromHereCredentialsIniFile;
 import com.here.account.auth.provider.FromHereCredentialsIniStream;
 import com.here.account.http.HttpProvider;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.BrowserMobProxyServer;
+import net.lightbody.bmp.proxy.auth.AuthType;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,8 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author kmccrack
@@ -55,6 +62,66 @@ public class HereAccessTokenProviderIT {
             assertTrue("accessTokenResponse was null", null != accessTokenResponse);
             assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
         }
+    }
+
+    @Ignore // We don't want to create and run a server each time
+    @Test
+    public void test_builder_proxy() throws Exception {
+        // Creating custom httpClient for testing purposes as real server will require SSL verification certificates
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLContext(SSLContextBuilder.create().loadTrustMaterial((chain, authType) -> true).build())
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .build();
+        // Create a proxy
+        BrowserMobProxy proxy = new BrowserMobProxyServer();
+        // Start proxy
+        proxy.start(0);
+        try (
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                        .setHttpProvider(ApacheHttpClientProvider.builder().setHttpClient(httpClient).build())
+                        .setProxy("localhost", proxy.getPort(), "http")
+                        .build()
+        ) {
+            String accessToken = accessTokens.getAccessToken();
+            assertNotNull("accessToken was null", accessToken);
+            assertFalse("accessToken was blank", accessToken.trim().isEmpty());
+            AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+            assertNotNull("accessTokenResponse was null", accessTokenResponse);
+            assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+        }
+        proxy.stop();
+    }
+
+    @Ignore // We don't want to create and run a server each time
+    @Test
+    public void test_builder_proxy_and_auth() throws Exception {
+        // Creating custom httpClient for testing purposes as real server will require SSL verification certificates
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setSSLContext(SSLContextBuilder.create().loadTrustMaterial((chain, authType) -> true).build())
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .build();
+        // Create a proxy
+        BrowserMobProxy proxy = new BrowserMobProxyServer();
+        // Start proxy
+        proxy.start(0);
+        String proxyUsername = "yourUsername";
+        String proxyPassword = "yourPassword";
+        proxy.autoAuthorization("localhost:" + proxy.getPort(), proxyUsername, proxyPassword, AuthType.BASIC);
+        try (
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                        .setHttpProvider(ApacheHttpClientProvider.builder().setHttpClient(httpClient).build())
+                        .setProxy("localhost", proxy.getPort())
+                        .setProxyAuthentication(proxyUsername, proxyPassword)
+                        .build()
+        ) {
+            String accessToken = accessTokens.getAccessToken();
+            assertNotNull("accessToken was null", accessToken);
+            assertFalse("accessToken was blank", accessToken.trim().isEmpty());
+            AccessTokenResponse accessTokenResponse = accessTokens.getAccessTokenResponse();
+            assertNotNull("accessTokenResponse was null", accessTokenResponse);
+            assertEquals("tokenType invalid", "bearer", accessTokenResponse.getTokenType());
+        }
+        proxy.stop();
     }
 
     private static final int ONE_HOUR_SKEW_MILLIS = 60 * 60 * 1000;

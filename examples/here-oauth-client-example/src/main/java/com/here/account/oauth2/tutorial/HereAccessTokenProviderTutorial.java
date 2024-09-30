@@ -15,13 +15,15 @@
  */
 package com.here.account.oauth2.tutorial;
 
-import java.util.List;
-import java.util.Map;
-
-import com.here.account.auth.OAuth2Authorizer;
-import com.here.account.http.HttpProvider;
-import com.here.account.http.HttpProvider.HttpRequest;
+import com.here.account.http.apache.ApacheHttpClientProvider;
 import com.here.account.oauth2.HereAccessTokenProvider;
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.BrowserMobProxyServer;
+import net.lightbody.bmp.proxy.auth.AuthType;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 
 /**
  * A simple tutorial demonstrating how to get a HERE Access Token.
@@ -33,6 +35,8 @@ public class HereAccessTokenProviderTutorial {
     public static void main(String[] argv) {
         HereAccessTokenProviderTutorial t = new HereAccessTokenProviderTutorial(argv);
         t.doGetAccessToken();
+        t.doGetAccessTokenViaProxy();
+        t.doGetAccessTokenViaProxyAndAuth();
     }
     
     private final Args args;
@@ -61,6 +65,87 @@ public class HereAccessTokenProviderTutorial {
             trouble(e);
         }
 
+    }
+
+    /**
+     * A simple method that builds a HereAccessTokenProvider via a proxy,
+     * gets one Access Token,
+     * and if successful outputs the first few characters of the valid token.
+     */
+    protected void doGetAccessTokenViaProxy() {
+        try {
+            // Creating custom httpClient for test purposes as real server will require SSL verification certificates
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(SSLContextBuilder.create().loadTrustMaterial((chain, authType) -> true).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+            // Create a proxy
+            BrowserMobProxy proxy = new BrowserMobProxyServer();
+            // Start proxy
+            proxy.start(0);
+            try (
+                    // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+                    HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                            .setHttpProvider(ApacheHttpClientProvider.builder().setHttpClient(httpClient).build())
+                            .setProxy("localhost", proxy.getPort(), "http")
+                            .build()
+            ) {
+                // call accessTokens.getAccessToken(); every time one is needed, it will always be fresh
+                String accessToken = accessTokens.getAccessToken();
+                // use accessToken on a request...
+                useAccessToken(accessToken);
+            } catch (Exception e) {
+                trouble(e);
+            }
+            finally {
+                // Stop proxy
+                proxy.stop();
+            }
+        } catch (Exception e) {
+            trouble(e);
+        }
+    }
+
+    /**
+     * A simple method that builds a HereAccessTokenProvider via a proxy and Auth,
+     * gets one Access Token,
+     * and if successful outputs the first few characters of the valid token.
+     */
+    protected void doGetAccessTokenViaProxyAndAuth() {
+        try {
+            // Creating custom httpClient for test purposes as real server will require SSL verification certificates
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLContext(SSLContextBuilder.create().loadTrustMaterial((chain, authType) -> true).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+            // Create a proxy
+            BrowserMobProxy proxy = new BrowserMobProxyServer();
+            // Start proxy
+            proxy.start(0);
+            String proxyUsername = "yourUsername";
+            String proxyPassword = "yourPassword";
+            proxy.autoAuthorization("localhost:" + proxy.getPort(), proxyUsername, proxyPassword, AuthType.BASIC);
+            try (
+                    // use your provided System properties, ~/.here/credentials.ini, or credentials.properties file
+                    HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                            .setHttpProvider(ApacheHttpClientProvider.builder().setHttpClient(httpClient).build())
+                            .setProxy("localhost", proxy.getPort()) // uses https as default scheme
+                            .setProxyAuthentication(proxyUsername, proxyPassword)
+                            .build()
+            ) {
+                // call accessTokens.getAccessToken(); every time one is needed, it will always be fresh
+                String accessToken = accessTokens.getAccessToken();
+                // use accessToken on a request...
+                useAccessToken(accessToken);
+            } catch (Exception e) {
+                trouble(e);
+            } finally {
+                // Stop proxy
+                proxy.stop();
+            }
+        } catch (Exception e) {
+            trouble(e);
+        }
     }
     
     protected void useAccessToken(String accessToken) {

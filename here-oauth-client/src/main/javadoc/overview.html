@@ -29,7 +29,39 @@
 
             }
         </pre>
+
+    <p>
+        To use proxy server to get access token:
+            <pre>
+            {@code
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                            .setProxy(proxyHost, proxyHost) // uses https as default scheme
+                            .build();
+            }
+
+            {@code
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                            .setProxy(proxyHost, proxyPort, scheme) // scheme can be http or https
+                            .build();
+            }
+
+            {@code
+                HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+                            .setProxy(proxyHost, proxyPort, scheme)
+                            .setProxyAuthentication(proxyUsername, proxyPassword)
+                            .build();
+            }
+        </pre>
+
         <p>
-            See the {@link com.here.account.oauth2.HereAccessTokenProvider} entry point class for detailed usage instructions.
+            If you want move advanced options, you can provide your own custom HttpProvider
+            <pre>
+            {@code
+                HereAccessTokenProvider.builder().setHttpProvider(httpProvider).build();
+            }
+        </pre>
+
+            <p>
+            See the {@link com.here.account.oauth2.HereAccessTokenProvider} entry point class for detailed usage instructions.}
     </body>
 </html>

@@ -185,6 +185,13 @@ A third option is to get an id_token
 - get Id Token via `com.here.account.oauth2.HereAccount`'s `TokenEndpoint.requestToken(..)` approach by setting the
 scope field in the request.
 
+You can also use one of the proxy options to getAccessToken
+- use `HereAccessTokenProvider.builder().setProxy(<proxyHost>, <proxyPort>).build();` (Uses https by default)
+- use `HereAccessTokenProvider.builder().setProxy(<proxyHost>, <proxyPort>, <scheme>).build();` (Can be used to set http/https scheme)
+- use `HereAccessTokenProvider.builder().setProxy(<proxyHost>, <proxyPort>, <scheme>).setProxyAuthentication(<proxyUsername>, <proxyPassword>).build();`
+
+If you want move advanced options, you can provide your own HttpProvider `HereAccessTokenProvider.builder().setHttpProvider(<httpProvider>).build();`
+
 # License
 
 Copyright (C) 2016-2019 HERE Europe B.V.

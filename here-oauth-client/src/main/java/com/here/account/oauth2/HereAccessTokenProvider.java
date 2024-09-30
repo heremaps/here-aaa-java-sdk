@@ -28,6 +28,7 @@ import com.here.account.util.Clock;
 import com.here.account.util.JacksonSerializer;
 import com.here.account.util.Serializer;
 import com.here.account.util.SettableSystemClock;
+import org.apache.http.HttpHost;
 
 /**
  * An implementation that provides HERE Access Tokens, by accessing HERE Account 
@@ -108,6 +109,11 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
         private boolean alwaysRequestNewToken = false;
         private Serializer serializer;
         private RetryPolicy retryPolicy;
+        private String proxyHost;
+        private int proxyPort;
+        private String scheme;
+        private String proxyUsername;
+        private String proxyPassword;
 
         private Builder() {
         }
@@ -177,6 +183,45 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
             return this;
         }
 
+        /**
+         * Optionally set proxy endpoint configurations (https by default)
+         * @param proxyHost proxy host
+         * @param proxyPort proxy port
+         * @return this Builder
+         */
+        public Builder setProxy(String proxyHost, int proxyPort) {
+            this.proxyHost = proxyHost;
+            this.proxyPort = proxyPort;
+            this.scheme = "https";
+            return this;
+        }
+
+        /**
+         * Optionally set proxy endpoint configurations (https by default)
+         * @param proxyHost proxy host
+         * @param proxyPort proxy port
+         * @param scheme "http" or "https"
+         *
+         * @return this Builder
+         */
+        public Builder setProxy(String proxyHost, int proxyPort, String scheme) {
+            this.proxyHost = proxyHost;
+            this.proxyPort = proxyPort;
+            this.scheme = scheme;
+            return this;
+        }
+
+        /**
+         * Optionally set proxy authentication configurations
+         * @param proxyUsername proxy username
+         * @param proxyPassword proxy password
+         * @return this Builder
+         */
+        public  Builder setProxyAuthentication(String proxyUsername, String proxyPassword) {
+            this.proxyUsername = proxyUsername;
+            this.proxyPassword = proxyPassword;
+            return this;
+        }
 
         /**
          * Build using builders, builders, and more builders.
@@ -194,8 +239,15 @@ public class HereAccessTokenProvider implements AccessTokenSupplier, Closeable, 
 
             boolean doCloseHttpProvider = false;
             if (null == httpProvider) {
+                ApacheHttpClientProvider.Builder apacheHttpClientProvider = ApacheHttpClientProvider.builder();
+                if (null != proxyHost && proxyPort > 0) {
+                    apacheHttpClientProvider = apacheHttpClientProvider.setProxy(proxyHost, proxyPort, scheme);
+                    if (null != proxyUsername && null != proxyPassword) {
+                        apacheHttpClientProvider = apacheHttpClientProvider.setProxyAuthentication(proxyUsername, proxyPassword);
+                    }
+                }
                 // uses PoolingHttpClientConnectionManager by default
-                this.httpProvider = ApacheHttpClientProvider.builder().build();
+                this.httpProvider = apacheHttpClientProvider.build();
                 // because the httpProvider was not injected, we should close it
                 doCloseHttpProvider = true;
             }

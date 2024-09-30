@@ -149,7 +149,7 @@ public class SignInWithClientCredentialsIT extends AbstractCredentialTezt {
             String error = errorResponse.getError();
             String expectedError = "invalid_request";
             assertTrue("expected error " + expectedError + ", actual " + error, expectedError.equals(error));
-            String expectedErrorDescriptionContains = "timestamp";
+            String expectedErrorDescriptionContains = "offset";
             String errorDescription = errorResponse.getErrorDescription();
             assertTrue("expected error_description to contain " + errorDescription + ", actual " + errorDescription, 
                     null != errorDescription && errorDescription.contains(expectedErrorDescriptionContains));

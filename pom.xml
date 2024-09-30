@@ -70,6 +70,7 @@
         <junit.version>4.13.1</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <ning.version>1.8.17</ning.version>
+        <browsermob.version>2.1.5</browsermob.version>
 
         <!-- configure surefire and maven to be individually skippable -->
         <!-- set to skip all tests -->
@@ -117,6 +118,11 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${apache.httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lightbody.bmp</groupId>
+                <artifactId>browsermob-core</artifactId>
+                <version>${browsermob.version}</version>
             </dependency>
 
             <!-- test dependencies -->
