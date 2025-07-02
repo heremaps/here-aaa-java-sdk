@@ -13,5 +13,5 @@ jobs:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4.7.1
         with:
-          base-ref: ${{ github.event.pull_request.base.sha || 'origin/master' }}
+          base-ref: ${{ github.event.pull_request.base.sha }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
