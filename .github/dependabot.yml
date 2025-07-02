@@ -9,14 +9,12 @@ updates:
     directories:
       - "**/*"
     schedule:
-      interval: daily
-      #      day: friday
-      #      timezone: Etc/UTC
-      time: 12:00
-      commit-message:
-        prefix: "mvn"
-      assignees:
-        - "owenkellett"
-        - "spaltis"
-        - "ashishKhushiKumar"
-        - "anishb266"
+      interval: weekly
+      day: friday
+    commit-message:
+        prefix: "Update"
+    reviewers:
+      - "owenkellett"
+      - "spaltis"
+      - "ashishKhushiKumar"
+      - "anishb266"
