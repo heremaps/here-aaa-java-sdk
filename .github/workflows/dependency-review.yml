@@ -10,6 +10,6 @@ jobs:
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@v4.7.1
         with:
-          fail-on-severity: critical, high, moderate
+          fail-on-severity: critical | high | moderate
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
