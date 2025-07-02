@@ -1,6 +1,9 @@
 name: 'Dependency Review'
 on: [pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   dependency-review:
     runs-on: ubuntu-latest
@@ -12,4 +15,3 @@ jobs:
         with:
           base-ref: ${{ github.event.pull_request.base.sha || 'master' }}
           head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          manifests: /
