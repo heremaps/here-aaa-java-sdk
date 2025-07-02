@@ -1,5 +1,5 @@
 name: 'Dependency Review'
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   dependency-review:
