@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-java@v4.7.1
         with:
           java-version: '8'
+          distribution: 'zulu'
       - name: Verify Maven installation
         run: mvn -v
       - name: Run AAA SDK tests
