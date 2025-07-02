@@ -1,6 +1,3 @@
-include:
-  - local: '.github/dependabot.yml'
-
 name: Run AAA SDK CI
 
 on: [push, workflow_dispatch]
