@@ -22,7 +22,5 @@ jobs:
         run: mvn -v
       - name: Run AAA SDK tests
         run: mvn -Dhere.token.endpoint.url=https://stg.account.api.here.com/oauth2/token -Dhere.access.key.id=${{ secrets.ACCESS_KEY_ID }} -Dhere.access.key.secret=${{ secrets.ACCESS_KEY_SECRET }} clean install
-      - name: 'Checkout Repository'
-        uses: actions/checkout@v4
       - name: 'Dependency Review'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v4.7.1
