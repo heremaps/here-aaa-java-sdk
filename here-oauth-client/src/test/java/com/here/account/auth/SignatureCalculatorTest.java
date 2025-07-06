@@ -15,12 +15,15 @@
  */
 package com.here.account.auth;
 
-import com.ning.http.client.FluentStringsMap;
-import com.ning.http.client.oauth.ConsumerKey;
-import com.ning.http.client.oauth.OAuthSignatureCalculator;
-import com.ning.http.client.oauth.RequestToken;
+import org.asynchttpclient.Param;
+import org.asynchttpclient.oauth.ConsumerKey;
+import org.asynchttpclient.oauth.OAuthSignatureCalculatorInstance;
+import org.asynchttpclient.oauth.RequestToken;
+import org.asynchttpclient.uri.Uri;
+import org.asynchttpclient.util.Utf8UrlEncoder;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.security.*;
 import java.security.spec.*;
 import java.util.*;
@@ -49,7 +52,7 @@ public class SignatureCalculatorTest {
 
     /////////////////////////////// HMAC-SHA1 //////////////////////////////////////////
     @Test
-    public void testSignatureHmacSha1() {
+    public void testSignatureHmacSha1() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURL, null, null);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -59,7 +62,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithFormParams() {
+    public void testSignatureHmacSha1WithFormParams() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURL, params, null);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -69,7 +72,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithFormParamsWithSpacesInValue() {
+    public void testSignatureHmacSha1WithFormParamsWithSpacesInValue() throws Exception {
 
         Map<String, List<String>> nestedParams = new HashMap<>();
         nestedParams.put("http_method", Arrays.asList("POST"));
@@ -87,7 +90,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithQueryParams() {
+    public void testSignatureHmacSha1WithQueryParams() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURL, null, params);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -97,7 +100,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithFormAndQueryParams() {
+    public void testSignatureHmacSha1WithFormAndQueryParams() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURL, params, params);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -107,7 +110,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithBaseURLWithPort() {
+    public void testSignatureHmacSha1WithBaseURLWithPort() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURLWithPort, params, params);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -117,7 +120,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testSignatureHmacSha1WithBaseURLWithNonStandardPort() {
+    public void testSignatureHmacSha1WithBaseURLWithNonStandardPort() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURLWithNonStandardPort, params, params);
 
         SignatureCalculator sc = new SignatureCalculator(consumerKey, consumerSecret);
@@ -127,7 +130,7 @@ public class SignatureCalculatorTest {
     }
 
     @Test
-    public void testVerifySha1Signature() {
+    public void testVerifySha1Signature() throws Exception {
         String expectedSignature = computeSHA1SignatureUsingLibrary(baseURLWithNonStandardPort, params, params);
 
         boolean verified = SignatureCalculator.verifySignature(consumerKey, method, baseURLWithNonStandardPort, timestamp, nonce,
@@ -260,23 +263,21 @@ public class SignatureCalculatorTest {
         }
     }
 
-    private static String computeSHA1SignatureUsingLibrary(String url, Map<String, List<String>> formParams, Map<String, List<String>> queryParams) {
-        RequestToken emptyUserAuth = new RequestToken(null, "");
-        OAuthSignatureCalculator calculator = new OAuthSignatureCalculator(new ConsumerKey(consumerKey, consumerSecret), emptyUserAuth);
+    private static String computeSHA1SignatureUsingLibrary(String url, Map<String, List<String>> formParams, Map<String, List<String>> queryParams) throws Exception {
+        Method computeSignature = OAuthSignatureCalculatorInstance.class.getDeclaredMethod("computeSignature", ConsumerKey.class, RequestToken.class, Uri.class, String.class, List.class, List.class, long.class, String.class);
+        computeSignature.setAccessible(true);
+        return (String) computeSignature.invoke(new OAuthSignatureCalculatorInstance(), new ConsumerKey(consumerKey, consumerSecret), new RequestToken(null, ""), Uri.create(url), method, toParamList(formParams), toParamList(queryParams), timestamp, Utf8UrlEncoder.percentEncodeQueryElement(nonce));
+    }
 
-        FluentStringsMap fluentFormParams = null;
-        if (null != formParams && !formParams.isEmpty()) {
-            fluentFormParams = new FluentStringsMap();
-            fluentFormParams.putAll(formParams);
+    private static List<Param> toParamList(Map<String, List<String>> paramMap) {
+        if (paramMap == null || paramMap.isEmpty()) return null;
+        List<Param> paramList = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
+            for (String value : entry.getValue()) {
+                paramList.add(new Param(entry.getKey(), value));
+            }
         }
-
-        FluentStringsMap fluentQueryParams = null;
-        if (null != queryParams && !queryParams.isEmpty()) {
-            fluentQueryParams = new FluentStringsMap();
-            fluentQueryParams.putAll(queryParams);
-        }
-
-        return calculator.calculateSignature(method, url, timestamp, nonce, fluentFormParams, fluentQueryParams);
+        return paramList;
     }
 
     private static Map<String, List<String>> createParamsList() {

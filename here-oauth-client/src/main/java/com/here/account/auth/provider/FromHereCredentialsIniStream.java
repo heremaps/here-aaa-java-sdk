@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Properties;
 
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
-import org.ini4j.Ini;
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
@@ -64,30 +68,38 @@ implements ClientAuthorizationRequestProvider {
         try {
             Properties properties = getPropertiesFromIni(inputStream, sectionName);
             return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties);
-        } catch (IOException e) {
+        } catch (IOException | ConfigurationException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
         }
     }
 
     static final String DEFAULT_INI_SECTION_NAME = "default";
-    
-    static Properties getPropertiesFromIni(InputStream inputStream, String sectionName) throws IOException {
-        Ini ini = new Ini();
-        try (Reader reader = new InputStreamReader(inputStream, OAuthConstants.UTF_8_CHARSET)) {
-            ini.load(reader);
-            Ini.Section section = ini.get(sectionName);
-            Properties properties = new Properties();
-            properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY,
-                    section.get(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY));
-            properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY,
-                    section.get(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY));
-            properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY,
-                    section.get(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY));
-            // scope is optional
-            String scope = section.get(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY);
-            if (null != scope)
-                properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, scope);
 
+    static Properties getPropertiesFromIni(InputStream inputStream, String sectionName) throws IOException, ConfigurationException {
+        try (Reader reader = new InputStreamReader(inputStream, OAuthConstants.UTF_8_CHARSET)) {
+            INIConfiguration ini = new INIConfiguration();
+            ini.read(reader);
+            HierarchicalConfiguration<ImmutableNode> section = ini.getSection(sectionName);
+            Properties properties = new Properties();
+            Iterator<String> it = section.getKeys();
+            while (it.hasNext()) {
+                String key = it.next();
+                String value = section.getString(key);
+                switch (key.replaceAll("\\.+", ".")) {
+                    case OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY:
+                        properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, value);
+                        break;
+                    case OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY:
+                        properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_ID_PROPERTY, value);
+                        break;
+                    case OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY:
+                        properties.put(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY, value);
+                        break;
+                    case OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY:
+                        properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, value);
+                        break;
+                }
+            }
             return properties;
         }
     }
