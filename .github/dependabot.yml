@@ -8,9 +8,6 @@ updates:
   - package-ecosystem: maven
     directories:
       - "**/*"
-    schedule:
-      interval: weekly
-      day: friday
     commit-message:
         prefix: "Update"
     reviewers:
