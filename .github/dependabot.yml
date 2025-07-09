@@ -11,8 +11,9 @@ updates:
     schedule:
       interval: daily
     commit-message:
-        prefix: "Update"
+      prefix: "Update"
     reviewers:
       - "owenkellett"
       - "spaltis"
       - "ashishKhushiKumar"
+      - "anishb266"
