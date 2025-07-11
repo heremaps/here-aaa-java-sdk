@@ -9,9 +9,9 @@ updates:
     directories:
       - "**/*"
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
-      prefix: "Update"
+      prefix: "Maven"
     reviewers:
       - "owenkellett"
       - "spaltis"
