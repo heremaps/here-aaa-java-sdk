@@ -1,23 +1,25 @@
 name: Run AAA SDK CI
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, workflow_dispatch]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4.2.2
       - name: Cache local Maven repository
-        uses: actions/cache@v2
+        uses: actions/cache@v4.2.3
         with:
           path: $HOME/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4.7.1
         with:
           java-version: '8'
+          distribution: 'zulu'
       - name: Verify Maven installation
         run: mvn -v
       - name: Run AAA SDK tests
