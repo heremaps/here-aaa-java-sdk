@@ -65,11 +65,11 @@
 
         <!-- Declare versions for dependencies -->
         <apache.httpclient.version>4.5.13</apache.httpclient.version>
-        <ini4j.version>0.5.4</ini4j.version>
-        <jackson.version>2.13.3</jackson.version>
+        <commons-configuration2.version>2.12.0</commons-configuration2.version>
+        <jackson.version>2.19.1</jackson.version>
         <junit.version>4.13.1</junit.version>
         <mockito.version>1.10.19</mockito.version>
-        <ning.version>1.8.17</ning.version>
+        <org.asynchttpclient.version>2.12.4</org.asynchttpclient.version>
         <browsermob.version>2.1.5</browsermob.version>
 
         <!-- configure surefire and maven to be individually skippable -->
@@ -105,9 +105,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.ini4j</groupId>
-                <artifactId>ini4j</artifactId>
-                <version>${ini4j.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>${commons-configuration2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -139,9 +139,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.ning</groupId>
+                <groupId>org.asynchttpclient</groupId>
                 <artifactId>async-http-client</artifactId>
-                <version>${ning.version}</version>
+                <version>${org.asynchttpclient.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

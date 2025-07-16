@@ -20,6 +20,7 @@ import com.here.account.http.HttpProvider.HttpRequest;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
 import com.here.account.oauth2.ClientAuthorizationRequestProvider;
 import com.here.account.util.Clock;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -84,7 +85,7 @@ public class FromHereCredentialsIniStreamTest extends FromHereCredentialsIniCons
     }
 
     @Test(expected = RuntimeException.class)
-    public void test_invalid_stream() throws IOException {
+    public void test_invalid_stream() throws IOException, ConfigurationException {
         FromHereCredentialsIniStream.getPropertiesFromIni(null, TEST_DEFAULT_INI_SECTION_NAME);
     }
 
