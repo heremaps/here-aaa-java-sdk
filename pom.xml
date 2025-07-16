@@ -67,7 +67,7 @@
         <apache.httpclient.version>4.5.13</apache.httpclient.version>
         <commons-configuration2.version>2.12.0</commons-configuration2.version>
         <jackson.version>2.19.1</jackson.version>
-        <junit.version>4.13.1</junit.version>
+        <junit.version>4.13.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <org.asynchttpclient.version>2.12.4</org.asynchttpclient.version>
         <browsermob.version>2.1.5</browsermob.version>
