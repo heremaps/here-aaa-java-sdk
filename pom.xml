@@ -54,7 +54,7 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.3</maven-source-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>        
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
