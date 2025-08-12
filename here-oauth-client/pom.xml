@@ -85,12 +85,13 @@
                         <phase>compile</phase>
                         <configuration>
                             <rules>
-                                <dependencyConvergence/>
+                                <dependencyConvergence>
+                                    <uniqueVersions>true</uniqueVersions>
+                                </dependencyConvergence>
                                 <requireUpperBoundDeps>
                                     <uniqueVersions>true</uniqueVersions>
                                 </requireUpperBoundDeps>
                             </rules>
-                            <fail>true</fail>
                         </configuration>
                         <goals>
                             <goal>enforce</goal>
