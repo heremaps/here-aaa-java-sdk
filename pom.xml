@@ -294,11 +294,15 @@
                     <version>3.6.1</version>
                     <executions>
                         <execution>
-                            <id>enforce</id>
+                            <id>enforce-dependency-convergence</id>
                             <configuration>
                                 <rules>
                                     <dependencyConvergence/>
+                                    <requireUpperBoundDeps>
+                                        <uniqueVersions>true</uniqueVersions>
+                                    </requireUpperBoundDeps>
                                 </rules>
+                                <fail>true</fail>
                             </configuration>
                             <goals>
                                 <goal>enforce</goal>
@@ -306,6 +310,7 @@
                         </execution>
                     </executions>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -348,7 +353,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
 
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -430,6 +434,27 @@
                         </execution>
                 </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.1</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-dependency-convergence</id>
+                            <configuration>
+                                <rules>
+                                    <dependencyConvergence/>
+                                    <requireUpperBoundDeps/>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
