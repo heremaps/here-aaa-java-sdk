@@ -82,6 +82,7 @@
                 <executions>
                     <execution>
                         <id>enforce-dependency-convergence</id>
+                        <phase>compile</phase>
                         <configuration>
                             <rules>
                                 <dependencyConvergence/>
