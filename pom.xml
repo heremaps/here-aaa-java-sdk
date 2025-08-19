@@ -54,7 +54,7 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.11.3</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.3</maven-source-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>        
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
@@ -65,16 +65,16 @@
         <!-- Declare versions for dependencies -->
         <apache.httpclient.version>4.5.14</apache.httpclient.version>
         <commons-configuration2.version>2.12.0</commons-configuration2.version>
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.19.2</jackson.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <org.asynchttpclient.version>2.12.4</org.asynchttpclient.version>
         <browsermob.version>2.1.5</browsermob.version>
         <io.netty.version>4.2.3.Final</io.netty.version>
-        <org.slf4j.version>1.7.30</org.slf4j.version>
+        <org.slf4j.version>2.0.17</org.slf4j.version>
         <com.google.guava.version>33.4.8-android</com.google.guava.version>
         <commons.logging.version>1.3.5</commons.logging.version>
-        <com.fasterxml.jackson.core.version>2.19.1</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.core.version>2.19.2</com.fasterxml.jackson.core.version>
         <org.apache.commons.version>3.18.0</org.apache.commons.version>
 
         <!-- configure surefire and maven to be individually skippable -->
@@ -88,7 +88,7 @@
         <!-- custom properties to support jacoco configuration -->
         <jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec</jacoco.it.execution.data.file>
         <jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec</jacoco.ut.execution.data.file>
-        <argLine></argLine>
+        <argLine/>
 
     </properties>
 
@@ -108,6 +108,12 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${apache.httpclient.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>net.lightbody.bmp</groupId>
@@ -291,29 +297,26 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.4.1</version>
-                    <configuration>
-                        <rules>
-                            <dependencyConvergence />
-                        </rules>
-                        <fail>true</fail>
-                    </configuration>
+                    <version>3.6.1</version>
                     <executions>
                         <execution>
-                            <id>enforce-rules</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <phase>validate</phase>
+                            <id>enforce-dependency-convergence</id>
                             <configuration>
                                 <rules>
-                                    <dependencyConvergence />
+                                    <dependencyConvergence/>
+                                    <requireUpperBoundDeps>
+                                        <uniqueVersions>true</uniqueVersions>
+                                    </requireUpperBoundDeps>
                                 </rules>
                                 <fail>true</fail>
                             </configuration>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -356,7 +359,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
 
                 <plugin>
                     <groupId>org.jacoco</groupId>
