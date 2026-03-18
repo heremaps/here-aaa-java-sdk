@@ -199,13 +199,13 @@ public class RefreshableResponseProvider<T extends ExpiringResponse> {
   }
   
   /**
-   * Shutdown the background threads
+   * Shutdown the background threads without waiting for queued tasks
    */
   public void shutdown() {
     if (started) {
       try {
         LOG.info("Shutting down refresh token thread");
-        scheduledExecutorService.shutdown();
+        scheduledExecutorService.shutdownNow();
       } finally {
         started = false;
       }
