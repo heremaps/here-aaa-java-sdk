@@ -17,6 +17,7 @@ package com.here.account.auth.provider;
 
 import java.util.Properties;
 
+import com.here.account.auth.JwtClientAssertionProvider;
 import com.here.account.auth.OAuth1ClientCredentialsProvider;
 import com.here.account.http.HttpConstants.HttpMethods;
 import com.here.account.http.HttpProvider.HttpRequestAuthorizer;
@@ -57,6 +58,16 @@ implements ClientAuthorizationRequestProvider {
     }
 
     static ClientCredentialsProvider getClientCredentialsProviderWithDefaultTokenEndpointUrl(Clock clock, Properties properties) {
+        // Check if properties indicate OAuth 2.1 private_key_jwt
+        if (JwtClientAssertionProvider.isPrivateKeyJwtConfigured(properties)) {
+            // Create a copy to avoid mutating the caller's properties
+            Properties jwtProps = new Properties();
+            jwtProps.putAll(properties);
+            if (jwtProps.getProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY) == null) {
+                jwtProps.setProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY, DEFAULT_TOKEN_ENDPOINT_URL);
+            }
+            return new JwtClientAssertionProviderAdapter(clock, jwtProps);
+        }
         return new OAuth1ClientCredentialsProvider(
                 clock,
                 properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_ENDPOINT_URL_PROPERTY, DEFAULT_TOKEN_ENDPOINT_URL),
@@ -64,6 +75,16 @@ implements ClientAuthorizationRequestProvider {
                 properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.ACCESS_KEY_SECRET_PROPERTY),
                 properties.getProperty(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY)
         );
+    }
+
+    /**
+     * Adapter that wraps JwtClientAssertionProvider as a ClientCredentialsProvider.
+     */
+    private static class JwtClientAssertionProviderAdapter extends JwtClientAssertionProvider
+            implements ClientCredentialsProvider {
+        JwtClientAssertionProviderAdapter(Clock clock, Properties properties) {
+            super(clock, properties);
+        }
     }
 
     /**
@@ -81,7 +102,15 @@ implements ClientAuthorizationRequestProvider {
     public HttpRequestAuthorizer getClientAuthorizer() {
         return getDelegate().getClientAuthorizer();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public com.here.account.oauth2.AccessTokenRequest getNewAccessTokenRequest() {
+        return getDelegate().getNewAccessTokenRequest();
+    }
+
     /**
      * {@inheritDoc}
      */

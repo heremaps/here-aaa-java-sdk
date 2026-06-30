@@ -192,6 +192,49 @@ You can also use one of the proxy options to getAccessToken
 
 If you want move advanced options, you can provide your own HttpProvider `HereAccessTokenProvider.builder().setHttpProvider(<httpProvider>).build();`
 
+OAuth 2.1 private_key_jwt Authentication
+----------------------------------------
+
+A fourth option uses OAuth 2.1 JWT client assertions (`private_key_jwt` per RFC 7523 §2.2) instead of OAuth 1.0 signatures.
+The client authenticates by signing a short-lived JWT with its RSA private key. The corresponding public key must be
+registered on the HERE Account server as a JWK.
+
+Credentials file (`~/.here/credentials.properties` or `~/.here/credentials.ini`):
+```properties
+here.token.endpoint.url=https://account.api.here.com/oauth2/token
+here.auth.method=private_key_jwt
+here.client.id=<your_client_id>
+here.private.key=/path/to/private-key.pem
+here.key.id=<optional_kid>
+```
+
+Usage (same API as OAuth 1.0 — auto-detected by the provider chain):
+```java
+try (HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder().build()) {
+    String accessToken = accessTokens.getAccessToken();
+}
+```
+
+Or construct the provider explicitly:
+```java
+JwtClientAssertionProvider provider = new JwtClientAssertionProvider(
+    new SettableSystemClock(),
+    "https://account.api.here.com/oauth2/token",
+    "<your_client_id>",
+    JwtClientAssertionProvider.loadPrivateKey("/path/to/private-key.pem"),
+    null,  // scope (optional)
+    "<kid>"  // key ID (optional)
+);
+try (HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
+        .setClientAuthorizationRequestProvider(provider)
+        .build()) {
+    String accessToken = accessTokens.getAccessToken();
+}
+```
+
+The private key must be a PKCS#8 PEM-encoded RSA key. The `here.private.key` value can be either
+a file path or the inline PEM content itself (useful for environment variables in CI).
+
 # License
 
 Copyright (C) 2016-2019 HERE Europe B.V.
