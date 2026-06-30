@@ -490,13 +490,26 @@ public class JwtClientAssertionIT {
         String privateKeyValue = props.getProperty(JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY);
         String keyId = props.getProperty(JwtClientAssertionProvider.KEY_ID_PROPERTY);
 
+        // INI format can't handle multi-line PEM values inline.
+        // If the private key value is inline PEM content, write it to a temp file first.
+        String privateKeyRef = privateKeyValue;
+        File tempKeyFile = null;
+        if (privateKeyValue.contains("-----BEGIN") || privateKeyValue.contains("MII")) {
+            tempKeyFile = File.createTempFile("jwt-it-key", ".pem");
+            tempKeyFile.deleteOnExit();
+            try (java.io.FileWriter fw = new java.io.FileWriter(tempKeyFile)) {
+                fw.write(privateKeyValue);
+            }
+            privateKeyRef = tempKeyFile.getAbsolutePath();
+        }
+
         // Build INI content
         StringBuilder ini = new StringBuilder();
         ini.append("[default]\n");
         ini.append("here.token.endpoint.url = ").append(tokenUrl).append("\n");
         ini.append("here.auth.method = private_key_jwt\n");
         ini.append("here.client.id = ").append(clientId).append("\n");
-        ini.append("here.private.key = ").append(privateKeyValue).append("\n");
+        ini.append("here.private.key = ").append(privateKeyRef).append("\n");
         if (keyId != null) {
             ini.append("here.key.id = ").append(keyId).append("\n");
         }
