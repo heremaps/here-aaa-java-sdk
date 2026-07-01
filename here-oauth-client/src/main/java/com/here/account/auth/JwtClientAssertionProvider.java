@@ -58,6 +58,8 @@ import java.util.Properties;
  *   <li>{@value #CLIENT_ID_PROPERTY} - the client identifier</li>
  *   <li>{@value #PRIVATE_KEY_PROPERTY} - PEM-encoded PKCS#8 RSA private key (inline or file path)</li>
  *   <li>{@value #TOKEN_SCOPE_PROPERTY} - (optional) token scope</li>
+ *   <li>{@value #KEY_ID_PROPERTY} - (optional) key ID matching the registered JWK</li>
+ *   <li>{@value #SIGNING_ALGORITHM_PROPERTY} - (optional) signing algorithm, defaults to RS256. Currently only RS256 is supported.</li>
  * </ul>
  *
  * @see <a href="https://www.rfc-editor.org/rfc/rfc7523#section-2.2">RFC 7523 §2.2</a>
@@ -71,6 +73,7 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
     public static final String TOKEN_SCOPE_PROPERTY = "here.token.scope";
     public static final String AUTH_METHOD_PROPERTY = "here.auth.method";
     public static final String KEY_ID_PROPERTY = "here.key.id";
+    public static final String SIGNING_ALGORITHM_PROPERTY = "here.signing.algorithm";
 
     /**
      * The auth method value that identifies private_key_jwt authentication.
@@ -83,6 +86,7 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
     private final PrivateKey privateKey;
     private final String scope;
     private final String kid;
+    private final JwtClientAssertionBuilder.SigningAlgorithm algorithm;
     private final NoAuthorizer noAuthorizer = new NoAuthorizer();
 
     /**
@@ -96,7 +100,7 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
      */
     public JwtClientAssertionProvider(Clock clock, String tokenEndpointUrl, String clientId,
                                       PrivateKey privateKey, String scope) {
-        this(clock, tokenEndpointUrl, clientId, privateKey, scope, null);
+        this(clock, tokenEndpointUrl, clientId, privateKey, scope, null, null);
     }
 
     /**
@@ -111,6 +115,23 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
      */
     public JwtClientAssertionProvider(Clock clock, String tokenEndpointUrl, String clientId,
                                       PrivateKey privateKey, String scope, String kid) {
+        this(clock, tokenEndpointUrl, clientId, privateKey, scope, kid, null);
+    }
+
+    /**
+     * Construct a new JwtClientAssertionProvider with key ID and algorithm.
+     *
+     * @param clock            the clock implementation
+     * @param tokenEndpointUrl the token endpoint URL
+     * @param clientId         the client identifier
+     * @param privateKey       the RSA private key for signing assertions
+     * @param scope            the optional token scope (may be null)
+     * @param kid              the optional key ID to include in JWT header (may be null)
+     * @param algorithm        the optional signing algorithm (may be null, defaults to RS256)
+     */
+    JwtClientAssertionProvider(Clock clock, String tokenEndpointUrl, String clientId,
+                               PrivateKey privateKey, String scope, String kid,
+                               JwtClientAssertionBuilder.SigningAlgorithm algorithm) {
         Objects.requireNonNull(clock, "clock is required");
         Objects.requireNonNull(tokenEndpointUrl, "tokenEndpointUrl is required");
         Objects.requireNonNull(clientId, "clientId is required");
@@ -122,6 +143,7 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
         this.privateKey = privateKey;
         this.scope = scope;
         this.kid = kid;
+        this.algorithm = algorithm;
     }
 
     /**
@@ -136,7 +158,9 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
                 properties.getProperty(CLIENT_ID_PROPERTY),
                 loadPrivateKey(properties.getProperty(PRIVATE_KEY_PROPERTY)),
                 properties.getProperty(TOKEN_SCOPE_PROPERTY),
-                properties.getProperty(KEY_ID_PROPERTY));
+                properties.getProperty(KEY_ID_PROPERTY),
+                JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName(
+                        properties.getProperty(SIGNING_ALGORITHM_PROPERTY)));
     }
 
     /**
@@ -171,6 +195,9 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
                 clock, clientId, tokenEndpointUrl, privateKey);
         if (kid != null && !kid.isEmpty()) {
             builder.setKid(kid);
+        }
+        if (algorithm != null) {
+            builder.setAlgorithm(algorithm);
         }
         String assertion = builder.buildAssertion();
 

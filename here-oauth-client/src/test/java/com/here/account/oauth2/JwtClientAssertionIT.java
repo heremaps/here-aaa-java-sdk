@@ -436,6 +436,60 @@ public class JwtClientAssertionIT {
     }
 
     /**
+     * Negative test: JWT header contains an unsupported algorithm.
+     * The server only supports RS256; other values should be rejected.
+     * Expected: 400 - UnsupportedAppJwkAlg
+     */
+    @Test
+    public void test_clientAssertion_unsupportedAlgorithm_returns400() {
+        String clientId = props.getProperty(JwtClientAssertionProvider.CLIENT_ID_PROPERTY);
+        String tokenEndpointUrl = props.getProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY);
+        PrivateKey privateKey = JwtClientAssertionProvider.loadPrivateKey(
+                props.getProperty(JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY));
+        String kid = props.getProperty(JwtClientAssertionProvider.KEY_ID_PROPERTY);
+
+        // Manually craft a JWT with alg=PS256 in the header but still sign with RSA
+        // (the server rejects based on the alg header value, not the actual signature algorithm)
+        long nowSeconds = System.currentTimeMillis() / 1000L;
+        String header = "{\"alg\":\"PS256\",\"typ\":\"JWT\"" +
+                (kid != null ? ",\"kid\":\"" + kid + "\"" : "") + "}";
+        String payload = "{\"iss\":\"" + clientId + "\",\"sub\":\"" + clientId +
+                "\",\"aud\":\"" + tokenEndpointUrl + "\",\"exp\":" + (nowSeconds + 300) +
+                ",\"iat\":" + nowSeconds + ",\"jti\":\"" + java.util.UUID.randomUUID() + "\"}";
+
+        String headerEncoded = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(header.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String payloadEncoded = java.util.Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String signingInput = headerEncoded + "." + payloadEncoded;
+
+        // Sign with SHA256withRSA (the key we have), but header claims PS256
+        String signature;
+        try {
+            java.security.Signature sig = java.security.Signature.getInstance("SHA256withRSA");
+            sig.initSign(privateKey);
+            sig.update(signingInput.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            signature = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(sig.sign());
+        } catch (Exception e) {
+            fail("Failed to sign: " + e.getMessage());
+            return;
+        }
+
+        String jwt = signingInput + "." + signature;
+        ClientAssertionCredentialsGrantRequest request = new ClientAssertionCredentialsGrantRequest(jwt);
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(httpProvider, provider);
+        try {
+            tokenEndpoint.requestToken(request);
+            fail("Should have thrown AccessTokenException for unsupported algorithm");
+        } catch (AccessTokenException e) {
+            // 400454 = UnsupportedAppJwkAlg (alg not in server's supported list)
+            assertEquals("expected 400 status", 400, e.getStatusCode());
+            assertEquals("expected errorCode 400454", Integer.valueOf(400454), e.getErrorResponse().getErrorCode());
+        }
+    }
+
+    /**
      * Test: HereAccessTokenProvider.builder().build() picks up private_key_jwt
      * from system properties via the ClientAuthorizationProviderChain.
      * This simulates a production user setting -Dhere.auth.method=private_key_jwt etc.

@@ -119,6 +119,9 @@ implements ClientAuthorizationRequestProvider {
                     case JwtClientAssertionProvider.KEY_ID_PROPERTY:
                         properties.put(JwtClientAssertionProvider.KEY_ID_PROPERTY, value);
                         break;
+                    case JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY, value);
+                        break;
                 }
             }
             return properties;

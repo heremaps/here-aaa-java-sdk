@@ -206,6 +206,7 @@ here.auth.method=private_key_jwt
 here.client.id=<your_client_id>
 here.private.key=/path/to/private-key.pem
 here.key.id=<optional_kid>
+here.signing.algorithm=RS256
 ```
 
 Usage (same API as OAuth 1.0 — auto-detected by the provider chain):
@@ -234,6 +235,8 @@ try (HereAccessTokenProvider accessTokens = HereAccessTokenProvider.builder()
 
 The private key must be a PKCS#8 PEM-encoded RSA key. The `here.private.key` value can be either
 a file path or the inline PEM content itself (useful for environment variables in CI).
+
+Currently only the RS256 signing algorithm is supported. PS256 and ES256 are reserved for future use.
 
 # License
 

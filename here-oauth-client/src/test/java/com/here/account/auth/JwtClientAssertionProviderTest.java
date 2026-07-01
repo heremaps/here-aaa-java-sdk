@@ -134,6 +134,37 @@ public class JwtClientAssertionProviderTest {
     }
 
     @Test
+    public void testFromProperties_withExplicitAlgorithm() {
+        Properties props = new Properties();
+        props.setProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY, TOKEN_ENDPOINT);
+        props.setProperty(JwtClientAssertionProvider.CLIENT_ID_PROPERTY, CLIENT_ID);
+        props.setProperty(JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY, pemPrivateKey);
+        props.setProperty(JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY, "RS256");
+
+        JwtClientAssertionProvider provider = new JwtClientAssertionProvider(clock, props);
+        AccessTokenRequest request = provider.getNewAccessTokenRequest();
+        String jwt = request.toFormParams().get("client_assertion").get(0);
+        String header = new String(Base64.getUrlDecoder().decode(jwt.split("\\.")[0]));
+        assertTrue("header should contain RS256", header.contains("\"alg\":\"RS256\""));
+    }
+
+    @Test
+    public void testFromProperties_unknownAlgorithmFallsBackToDefault() {
+        Properties props = new Properties();
+        props.setProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY, TOKEN_ENDPOINT);
+        props.setProperty(JwtClientAssertionProvider.CLIENT_ID_PROPERTY, CLIENT_ID);
+        props.setProperty(JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY, pemPrivateKey);
+        props.setProperty(JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY, "PS256");
+
+        // PS256 is not yet in the enum, so fromJwtName returns null, provider uses default RS256
+        JwtClientAssertionProvider provider = new JwtClientAssertionProvider(clock, props);
+        AccessTokenRequest request = provider.getNewAccessTokenRequest();
+        String jwt = request.toFormParams().get("client_assertion").get(0);
+        String header = new String(Base64.getUrlDecoder().decode(jwt.split("\\.")[0]));
+        assertTrue("should fall back to RS256", header.contains("\"alg\":\"RS256\""));
+    }
+
+    @Test
     public void testIsPrivateKeyJwtConfigured_trueWhenAllPresent() {
         Properties props = new Properties();
         props.setProperty(JwtClientAssertionProvider.AUTH_METHOD_PROPERTY, "private_key_jwt");

@@ -172,6 +172,40 @@ public class JwtClientAssertionBuilderTest {
         new JwtClientAssertionBuilder(clock, CLIENT_ID, TOKEN_ENDPOINT, null);
     }
 
+    @Test
+    public void testDefaultAlgorithm_isRS256() {
+        JwtClientAssertionBuilder builder = new JwtClientAssertionBuilder(clock, CLIENT_ID, TOKEN_ENDPOINT, privateKey);
+        String jwt = builder.buildAssertion();
+        String header = decodeBase64Url(jwt.split("\\.")[0]);
+        assertTrue("default algorithm must be RS256", header.contains("\"alg\":\"RS256\""));
+    }
+
+    @Test
+    public void testFromJwtName_returnsRS256() {
+        JwtClientAssertionBuilder.SigningAlgorithm alg = JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName("RS256");
+        assertNotNull(alg);
+        assertEquals("RS256", alg.getJwtName());
+        assertEquals("SHA256withRSA", alg.getJavaName());
+    }
+
+    @Test
+    public void testFromJwtName_caseInsensitive() {
+        JwtClientAssertionBuilder.SigningAlgorithm alg = JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName("rs256");
+        assertNotNull(alg);
+        assertEquals("RS256", alg.getJwtName());
+    }
+
+    @Test
+    public void testFromJwtName_nullReturnsNull() {
+        assertNull(JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName(null));
+    }
+
+    @Test
+    public void testFromJwtName_unknownReturnsNull() {
+        assertNull(JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName("PS256"));
+        assertNull(JwtClientAssertionBuilder.SigningAlgorithm.fromJwtName("UNKNOWN"));
+    }
+
     private static String decodeBase64Url(String encoded) {
         return new String(Base64.getUrlDecoder().decode(encoded), java.nio.charset.StandardCharsets.UTF_8);
     }

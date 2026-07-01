@@ -45,7 +45,47 @@ import java.util.UUID;
  */
 public class JwtClientAssertionBuilder {
 
-    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+    /**
+     * Supported signing algorithms and their corresponding Java Security algorithm names.
+     * Currently only RS256 is supported by the HERE Account server.
+     * PS256 and ES256 are reserved for future use.
+     *
+     * To enable PS256/ES256 support when the server adds it:
+     * 1. Uncomment the enum values below
+     * 2. Make setAlgorithm() public
+     * The property parsing (here.signing.algorithm), provider wiring, and builder
+     * logic are already in place — no other changes needed.
+     */
+    enum SigningAlgorithm {
+        RS256("RS256", "SHA256withRSA");
+        // PS256("PS256", "SHA256withRSAandMGF1"),  // reserved for future use
+        // ES256("ES256", "SHA256withECDSA");        // reserved for future use
+
+        private final String jwtName;
+        private final String javaName;
+
+        SigningAlgorithm(String jwtName, String javaName) {
+            this.jwtName = jwtName;
+            this.javaName = javaName;
+        }
+
+        public String getJwtName() { return jwtName; }
+        public String getJavaName() { return javaName; }
+
+        /**
+         * Parse a signing algorithm from its JWT name (e.g. "RS256").
+         * Returns null if the algorithm is not recognized or not yet supported.
+         */
+        static SigningAlgorithm fromJwtName(String name) {
+            if (name == null) return null;
+            for (SigningAlgorithm alg : values()) {
+                if (alg.jwtName.equalsIgnoreCase(name)) return alg;
+            }
+            return null;
+        }
+    }
+
+    private static final SigningAlgorithm DEFAULT_ALGORITHM = SigningAlgorithm.RS256;
 
     /**
      * Default token lifetime: 5 minutes (300 seconds).
@@ -59,6 +99,7 @@ public class JwtClientAssertionBuilder {
     private final Clock clock;
     private long expirySeconds = DEFAULT_EXPIRY_SECONDS;
     private String kid;
+    private SigningAlgorithm algorithm = DEFAULT_ALGORITHM;
 
     /**
      * Construct a new JWT client assertion builder.
@@ -108,6 +149,20 @@ public class JwtClientAssertionBuilder {
     }
 
     /**
+     * Set the signing algorithm. Default is RS256.
+     * The algorithm must match what is registered on the app's JWK on the server.
+     * Currently only RS256 is supported.
+     *
+     * @param algorithm the signing algorithm to use
+     * @return this builder
+     */
+    JwtClientAssertionBuilder setAlgorithm(SigningAlgorithm algorithm) {
+        Objects.requireNonNull(algorithm, "algorithm is required");
+        this.algorithm = algorithm;
+        return this;
+    }
+
+    /**
      * Build and sign a new JWT client assertion.
      *
      * <p>Per RFC 7523 §3, the JWT MUST contain:
@@ -141,10 +196,13 @@ public class JwtClientAssertionBuilder {
     }
 
     private String buildHeaderJson() {
+        StringBuilder header = new StringBuilder();
+        header.append("{\"alg\":\"").append(algorithm.getJwtName()).append("\",\"typ\":\"JWT\"");
         if (kid != null && !kid.isEmpty()) {
-            return "{\"alg\":\"RS256\",\"typ\":\"JWT\",\"kid\":\"" + escapeJson(kid) + "\"}";
+            header.append(",\"kid\":\"").append(escapeJson(kid)).append("\"");
         }
-        return "{\"alg\":\"RS256\",\"typ\":\"JWT\"}";
+        header.append("}");
+        return header.toString();
     }
 
     private String buildPayloadJson(long iat, long exp, String jti) {
@@ -162,7 +220,7 @@ public class JwtClientAssertionBuilder {
 
     private String sign(String signingInput) {
         try {
-            Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
+            Signature sig = Signature.getInstance(algorithm.getJavaName());
             sig.initSign(privateKey);
             sig.update(signingInput.getBytes(OAuthConstants.UTF_8_CHARSET));
             byte[] signatureBytes = sig.sign();
