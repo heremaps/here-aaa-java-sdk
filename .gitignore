@@ -10,3 +10,10 @@ target
 /bin/
 pom.xml.versionsBackup
 examples/here-oauth-client-example/dependency-reduced-pom.xml
+
+# Credentials / secrets — never commit
+*.credentials.properties
+credentials.properties
+credentials.ini
+*.pem
+*.key

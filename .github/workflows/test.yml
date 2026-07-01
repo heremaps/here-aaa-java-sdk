@@ -24,3 +24,15 @@ jobs:
         run: mvn -v
       - name: Run AAA SDK tests
         run: mvn -Dhere.token.endpoint.url=https://stg.account.api.here.com/oauth2/token -Dhere.access.key.id=${{ secrets.ACCESS_KEY_ID }} -Dhere.access.key.secret=${{ secrets.ACCESS_KEY_SECRET }} clean install
+      - name: Run JWT client assertion integration test
+        if: ${{ env.JWT_PRIVATE_KEY != '' }}
+        env:
+          JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+        run: |
+          mvn test -pl here-oauth-client -Dtest=JwtClientAssertionIT \
+            -Dhere.token.endpoint.url=https://stg.account.api.here.com/oauth2/token \
+            -Dhere.jwt.client.id=${{ secrets.JWT_CLIENT_ID }} \
+            -Dhere.jwt.private.key="${{ secrets.JWT_PRIVATE_KEY }}" \
+            -Dhere.jwt.key.id=${{ secrets.JWT_KEY_ID }} \
+            -Dhere.jwt.token.scope=${{ secrets.JWT_TOKEN_SCOPE }}
+

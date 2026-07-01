@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Properties;
 
+import com.here.account.auth.JwtClientAssertionProvider;
 import com.here.account.util.Clock;
 import com.here.account.util.SettableSystemClock;
 import org.apache.commons.configuration2.INIConfiguration;
@@ -67,6 +68,14 @@ implements ClientAuthorizationRequestProvider {
                                                                                      String sectionName) {
         try {
             Properties properties = getPropertiesFromIni(inputStream, sectionName);
+            if (JwtClientAssertionProvider.isPrivateKeyJwtConfigured(properties)) {
+                // Default token endpoint URL if not specified in INI
+                if (properties.getProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY) == null) {
+                    properties.setProperty(JwtClientAssertionProvider.TOKEN_ENDPOINT_URL_PROPERTY,
+                            "https://account.api.here.com/oauth2/token");
+                }
+                return new JwtClientAssertionProvider(clock, properties);
+            }
             return FromSystemProperties.getClientCredentialsProviderWithDefaultTokenEndpointUrl(clock, properties);
         } catch (IOException | ConfigurationException e) {
             throw new RequestProviderException("trouble FromFile " + e, e);
@@ -98,6 +107,21 @@ implements ClientAuthorizationRequestProvider {
                     case OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY:
                         properties.put(OAuth1ClientCredentialsProvider.FromProperties.TOKEN_SCOPE_PROPERTY, value);
                         break;
+                    case JwtClientAssertionProvider.AUTH_METHOD_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.AUTH_METHOD_PROPERTY, value);
+                        break;
+                    case JwtClientAssertionProvider.CLIENT_ID_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.CLIENT_ID_PROPERTY, value);
+                        break;
+                    case JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.PRIVATE_KEY_PROPERTY, value);
+                        break;
+                    case JwtClientAssertionProvider.KEY_ID_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.KEY_ID_PROPERTY, value);
+                        break;
+                    case JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY:
+                        properties.put(JwtClientAssertionProvider.SIGNING_ALGORITHM_PROPERTY, value);
+                        break;
                 }
             }
             return properties;
@@ -119,7 +143,15 @@ implements ClientAuthorizationRequestProvider {
     public HttpRequestAuthorizer getClientAuthorizer() {
         return getDelegate().getClientAuthorizer();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public com.here.account.oauth2.AccessTokenRequest getNewAccessTokenRequest() {
+        return getDelegate().getNewAccessTokenRequest();
+    }
+
     /**
      * {@inheritDoc}
      */
