@@ -58,6 +58,13 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
      */
     protected static final String SCOPE_JSON = "scope";
     protected static final String SCOPE_FORM = "scope";
+
+    /**
+     * resource; the parameter name for RFC 8707 resource indicators when conveyed in a form body.
+     * No JSON equivalent — the SDK always sends token requests as application/x-www-form-urlencoded,
+     * which also aligns with RFC 8707 §2.
+     */
+    protected static final String RESOURCE_FORM = "resource";
     
     private final String grantType;
 
@@ -242,7 +249,7 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
         addFormParam(formParams, GRANT_TYPE_FORM, getGrantType());
         addFormParam(formParams, EXPIRES_IN_FORM, getExpiresIn());
         addFormParam(formParams, SCOPE_FORM, getScope());
-        addFormParams(formParams, "resource", resource);
+        addFormParams(formParams, RESOURCE_FORM, getResource());
         return formParams;
     }
 
