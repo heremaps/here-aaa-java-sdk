@@ -1076,4 +1076,47 @@ public class HereAccountTest extends AbstractCredentialTezt {
 
         assertEquals(expectedCorrelationId, token.getCorrelationId());
     }
+
+    @Test
+    public void testRequestAutoRefreshingToken_propagatesResource() throws Exception {
+        HttpProvider mockHttpProvider = Mockito.mock(HttpProvider.class);
+        final String body = "{\"access_token\":\"my-token\",\"expires_in\":300}";
+        final HttpProvider.HttpResponse mockHttpResponse = new HttpProvider.HttpResponse() {
+            @Override public int getStatusCode() { return 200; }
+            @Override public long getContentLength() { return body.getBytes(StandardCharsets.UTF_8).length; }
+            @Override public Map<String, List<String>> getHeaders() { return new HashMap<String, List<String>>(); }
+            @Override public InputStream getResponseBody() throws IOException {
+                return new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8));
+            }
+        };
+        Mockito.when(mockHttpProvider.execute(Mockito.any())).thenReturn(mockHttpResponse);
+
+        final List<Map<String, List<String>>> capturedParams = new ArrayList<Map<String, List<String>>>();
+        Mockito.when(mockHttpProvider.getRequest(
+                Mockito.any(HttpProvider.HttpRequestAuthorizer.class),
+                Mockito.anyString(), Mockito.anyString(),
+                Mockito.any(Map.class)))
+                .thenAnswer(new org.mockito.stubbing.Answer<HttpProvider.HttpRequest>() {
+                    @Override
+                    public HttpProvider.HttpRequest answer(org.mockito.invocation.InvocationOnMock inv) {
+                        capturedParams.add((Map<String, List<String>>) inv.getArguments()[3]);
+                        return Mockito.mock(HttpProvider.HttpRequest.class);
+                    }
+                });
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(
+                mockHttpProvider,
+                new OAuth1ClientCredentialsProvider(new SettableSystemClock(),
+                        url, accessKeyId, accessKeySecret, scope));
+
+        List<String> resources = Arrays.asList("https://api.example.com", "https://data.example.com");
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest()
+                .setResource(resources);
+
+        tokenEndpoint.requestAutoRefreshingToken(request);
+
+        assertFalse("no requests were captured", capturedParams.isEmpty());
+        List<String> actualResource = capturedParams.get(0).get("resource");
+        assertEquals("resource not propagated to auto-refresh request", resources, actualResource);
+    }
 }

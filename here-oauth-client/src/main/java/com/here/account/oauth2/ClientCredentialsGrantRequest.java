@@ -15,6 +15,8 @@
  */
 package com.here.account.oauth2;
 
+import java.util.List;
+
 /**
  * An {@link AccessTokenRequest} for grant_type=client_credentials.
  * 
@@ -35,6 +37,15 @@ public class ClientCredentialsGrantRequest extends AccessTokenRequest {
     @Override
     public ClientCredentialsGrantRequest setExpiresIn(Long expiresIn) {
         super.setExpiresIn(expiresIn);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClientCredentialsGrantRequest setResource(List<String> resource) {
+        super.setResource(resource);
         return this;
     }
     

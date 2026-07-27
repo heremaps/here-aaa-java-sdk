@@ -256,6 +256,28 @@ public class ApacheHttpClientProviderTest {
         assertTrue("httpEntity was expected null, actual "+httpEntity, null == httpEntity);
     }
 
+    @Test
+    public void test_formParams_multiValue_repeatedParams() throws Exception {
+        formParams = new HashMap<String, List<String>>();
+        formParams.put("grant_type", Collections.singletonList("client_credentials"));
+        formParams.put("resource", Arrays.asList("https://api.example.com", "https://data.example.com"));
+        httpRequest = httpProvider.getRequest(httpRequestAuthorizer, "POST", url, formParams);
+        HttpRequestBase httpRequestBase = getHttpRequestBase();
+        HttpPost httpPost = (HttpPost) httpRequestBase;
+        HttpEntity httpEntity = httpPost.getEntity();
+        assertNotNull("httpEntity was null", httpEntity);
+        String body = org.apache.http.util.EntityUtils.toString(httpEntity);
+        long resourceCount = 0;
+        for (String part : body.split("&")) {
+            if (part.startsWith("resource=")) resourceCount++;
+        }
+        assertEquals("expected 2 resource= params in: " + body, 2, resourceCount);
+        assertTrue("body should contain resource=https%3A%2F%2Fapi.example.com: " + body,
+                body.contains("resource=https%3A%2F%2Fapi.example.com"));
+        assertTrue("body should contain resource=https%3A%2F%2Fdata.example.com: " + body,
+                body.contains("resource=https%3A%2F%2Fdata.example.com"));
+    }
+
     
     @Test
     public void test_methodDoesntSupportJson() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {

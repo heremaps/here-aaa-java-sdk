@@ -570,7 +570,8 @@ public class HereAccount {
             return requestAutoRefreshingToken(() -> {
                         return new ClientCredentialsGrantRequest()
                                 .setExpiresIn(request.getExpiresIn())
-                                .setScope(request.getScope());
+                                .setScope(request.getScope())
+                                .setResource(request.getResource());
                     });
         }
         
