@@ -187,6 +187,23 @@ public class JwtClientAssertionProvider implements ClientAuthorizationRequestPro
      * Builds a new {@link ClientAssertionCredentialsGrantRequest} with a freshly
      * signed JWT assertion.
      *
+     * <p>
+     * {@code scope} is baked into this provider at construction time because it is a
+     * configuration-time concern (which project this provider is configured for).
+     *
+     * <p>
+     * {@code resource} (RFC 8707) is intentionally NOT set here. It is a per-request
+     * parameter identifying the target resource server for which the token is intended.
+     * RFC 8707 anticipates callers varying {@code resource} per call, so it belongs on
+     * the request, not the provider. Callers should set it on the returned request:
+     * <pre>
+     * {@code
+     * AccessTokenRequest req = provider.getNewAccessTokenRequest();
+     * req.setResource(Arrays.asList("https://api.example.com"));
+     * tokenEndpoint.requestToken(req);
+     * }
+     * </pre>
+     *
      * {@inheritDoc}
      */
     @Override

@@ -17,6 +17,8 @@ package com.here.account.oauth2;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -88,5 +90,28 @@ public class ClientAssertionCredentialsGrantRequestTest {
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_rejectsEmpty() {
         new ClientAssertionCredentialsGrantRequest("");
+    }
+
+    @Test
+    public void testFormParams_singleResource() {
+        ClientAssertionCredentialsGrantRequest request = new ClientAssertionCredentialsGrantRequest(FAKE_JWT)
+                .setResource(Collections.singletonList("https://example.com/api"));
+        Map<String, List<String>> formParams = request.toFormParams();
+        assertEquals(Collections.singletonList("https://example.com/api"), formParams.get("resource"));
+    }
+
+    @Test
+    public void testFormParams_multipleResources() {
+        List<String> resources = Arrays.asList("https://api.example.com", "https://data.example.com");
+        ClientAssertionCredentialsGrantRequest request = new ClientAssertionCredentialsGrantRequest(FAKE_JWT)
+                .setResource(resources);
+        Map<String, List<String>> formParams = request.toFormParams();
+        assertEquals(resources, formParams.get("resource"));
+    }
+
+    @Test
+    public void testFormParams_noResource() {
+        ClientAssertionCredentialsGrantRequest request = new ClientAssertionCredentialsGrantRequest(FAKE_JWT);
+        assertNull(request.toFormParams().get("resource"));
     }
 }

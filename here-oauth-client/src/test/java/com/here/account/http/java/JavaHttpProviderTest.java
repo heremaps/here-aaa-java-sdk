@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -252,6 +253,24 @@ public class JavaHttpProviderTest {
                 || bytesMatch(formBody, expectedOption5.getBytes("UTF-8"))
                 || bytesMatch(formBody, expectedOption6.getBytes("UTF-8"))
                 );
+    }
+
+    @Test
+    public void test_getFormBody_repeatedResourceParams() throws UnsupportedEncodingException {
+        Map<String, List<String>> formParams = new HashMap<String, List<String>>();
+        formParams.put("grant_type", Collections.singletonList("client_credentials"));
+        formParams.put("resource", Arrays.asList("https://api.example.com", "https://data.example.com"));
+        byte[] formBody = JavaHttpProvider.getFormBody(formParams);
+        String body = new String(formBody, "UTF-8");
+        long resourceCount = 0;
+        for (String part : body.split("&")) {
+            if (part.startsWith("resource=")) resourceCount++;
+        }
+        assertEquals("expected 2 resource= params in: " + body, 2, resourceCount);
+        assertTrue("body should contain resource=https%3A%2F%2Fapi.example.com: " + body,
+                body.contains("resource=https%3A%2F%2Fapi.example.com"));
+        assertTrue("body should contain resource=https%3A%2F%2Fdata.example.com: " + body,
+                body.contains("resource=https%3A%2F%2Fdata.example.com"));
     }
 
     

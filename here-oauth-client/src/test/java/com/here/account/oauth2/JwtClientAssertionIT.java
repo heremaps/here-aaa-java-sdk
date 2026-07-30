@@ -79,6 +79,8 @@ public class JwtClientAssertionIT {
         String sysPropTokenUrl = System.getProperty("here.token.endpoint.url",
                 "https://stg.account.api.here.com/oauth2/token");
         String sysPropScope = System.getProperty("here.jwt.token.scope");
+        // RFC 8707 resource indicator — optional, used by test_clientAssertion_withResource
+        String sysPropResource = System.getProperty("here.jwt.token.resource");
 
         if (sysPropClientId != null && sysPropPrivateKey != null) {
             props = new Properties();
@@ -91,6 +93,9 @@ public class JwtClientAssertionIT {
             }
             if (sysPropScope != null) {
                 props.setProperty(JwtClientAssertionProvider.TOKEN_SCOPE_PROPERTY, sysPropScope);
+            }
+            if (sysPropResource != null) {
+                props.setProperty("here.token.resource", sysPropResource);
             }
         } else {
             // Fall back to credentials file
@@ -232,6 +237,78 @@ public class JwtClientAssertionIT {
         assertNotNull("response must not be null", response);
         assertNotNull("accessToken must not be null", response.getAccessToken());
         assertFalse("accessToken must not be blank", response.getAccessToken().trim().isEmpty());
+    }
+
+    /**
+     * Test: RFC 8707 resource indicator parameter with private_key_jwt authentication.
+     *
+     * <p>RFC 8707 §2 defines {@code resource} as a per-request parameter identifying the
+     * target resource server for which the token is intended. It is orthogonal to the
+     * client authentication method — {@code client_assertion} authenticates the client
+     * while {@code resource} scopes the token's audience. Both can appear in the same
+     * token request body per RFC 8707 §2 and RFC 7523 §2.2.
+     *
+     * <p>The {@code resource} value is set on the request returned by
+     * {@link JwtClientAssertionProvider#getNewAccessTokenRequest()}, not baked into the
+     * provider, because RFC 8707 anticipates callers varying the resource per call.
+     *
+     * <p>Note: this test verifies the token is issued successfully. It does not assert
+     * audience binding in the returned JWT (e.g. that {@code aud} matches the resource URI)
+     * because the SDK treats access tokens as opaque strings and has no JWT parsing
+     * dependency. Audience binding and the "no resource ⇒ no aud restriction" behaviour
+     * are server-side concerns verified by server-side tests.
+     *
+     * <p>If {@code here.token.resource} is not configured in credentials or system
+     * properties ({@code -Dhere.jwt.token.resource=...}), this test is skipped.
+     */
+    @Test
+    public void test_clientAssertion_withResource() {
+        String resource = props.getProperty("here.token.resource");
+        Assume.assumeTrue("Skipping resource test: here.token.resource not set in credentials",
+                resource != null && !resource.isEmpty());
+
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(httpProvider, provider);
+        // resource is a per-request parameter per RFC 8707 — get a fresh request and set it
+        AccessTokenRequest request = provider.getNewAccessTokenRequest();
+        // single URI from config covers the common case; callers needing multiple resource
+        // indicators construct the list themselves and call setResource() directly
+        request.setResource(Collections.singletonList(resource));
+
+        AccessTokenResponse response = tokenEndpoint.requestToken(request);
+
+        assertNotNull("response must not be null", response);
+        assertNotNull("accessToken must not be null", response.getAccessToken());
+        assertFalse("accessToken must not be blank", response.getAccessToken().trim().isEmpty());
+    }
+
+    /**
+     * Negative test: an invalid {@code resource} value (relative URI, which violates
+     * RFC 8707 §2's absolute URI requirement) should be rejected by the server.
+     *
+     * <p>RFC 8707 §2 requires each resource value to be an absolute URI. The SDK does
+     * not validate this client-side (validation is the server's responsibility), so the
+     * error surfaces as an {@link AccessTokenException} with a 4xx status. The exact
+     * error code depends on the server's implementation of RFC 8707 §2 validation.
+     *
+     * <p>This test confirms that the SDK correctly propagates the server error rather
+     * than silently swallowing it or throwing an unrelated exception.
+     */
+    @Test
+    public void test_clientAssertion_invalidResource_returns4xx() {
+        TokenEndpoint tokenEndpoint = HereAccount.getTokenEndpoint(httpProvider, provider);
+        AccessTokenRequest request = provider.getNewAccessTokenRequest();
+        // A relative URI violates RFC 8707 §2 (absolute URI required); the server should reject it
+        request.setResource(Collections.singletonList("not-an-absolute-uri"));
+
+        try {
+            tokenEndpoint.requestToken(request);
+            fail("Expected AccessTokenException for invalid resource URI");
+        } catch (AccessTokenException e) {
+            // Server must return 4xx; exact code is server-defined per RFC 8707
+            assertTrue("expected 4xx status for invalid resource, got " + e.getStatusCode(),
+                    e.getStatusCode() >= 400 && e.getStatusCode() < 500);
+            assertNotNull("error response must not be null", e.getErrorResponse());
+        }
     }
 
     /**

@@ -15,6 +15,7 @@
  */
 package com.here.account.oauth2;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,13 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
      */
     protected static final String SCOPE_JSON = "scope";
     protected static final String SCOPE_FORM = "scope";
+
+    /**
+     * resource; the parameter name for RFC 8707 resource indicators when conveyed in a form body.
+     * No JSON equivalent — the SDK always sends token requests as application/x-www-form-urlencoded,
+     * which also aligns with RFC 8707 §2.
+     */
+    protected static final String RESOURCE_FORM = "resource";
     
     private final String grantType;
 
@@ -70,6 +78,7 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
     private Long expiresIn;
 
     private String scope;
+    private List<String> resource;
     private transient Map<String, String> additionalHeaders = null;
     private transient String correlationId = null;
     
@@ -207,15 +216,40 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
     }
 
     /**
-     * Converts this request, to its formParams Map representation.
-     * 
-     * @return the formParams, for use with application/x-www-form-urlencoded bodies.
+     * Get the RFC 8707 resource indicator URIs for this token request.
+     *
+     * @return the list of resource URIs, or null if not set
      */
+    public List<String> getResource() {
+        return resource;
+    }
+
+    /**
+     * Set the RFC 8707 resource indicator URIs for this token request.
+     * Each value must be an absolute URI per RFC 8707 §2. Query components
+     * SHOULD NOT be included; fragments MUST NOT be included.
+     * Sent as repeated {@code resource=} form parameters in the
+     * {@code application/x-www-form-urlencoded} POST body — not as URL query parameters.
+     *
+     * <p>No client-side URI validation is performed. Validation is the authorization
+     * server's responsibility per RFC 8707 §2; client-side checks would duplicate
+     * server logic and risk divergence.
+     *
+     * @param resource list of absolute resource URIs
+     * @return this
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8707">RFC 8707</a>
+     */
+    public AccessTokenRequest setResource(List<String> resource) {
+        this.resource = resource;
+        return this;
+    }
+
     public Map<String, List<String>> toFormParams() {
         Map<String, List<String>> formParams = new HashMap<String, List<String>>();
         addFormParam(formParams, GRANT_TYPE_FORM, getGrantType());
         addFormParam(formParams, EXPIRES_IN_FORM, getExpiresIn());
         addFormParam(formParams, SCOPE_FORM, getScope());
+        addFormParams(formParams, RESOURCE_FORM, getResource());
         return formParams;
     }
 
@@ -231,6 +265,21 @@ public abstract class AccessTokenRequest implements OlpHttpMessage {
     protected final static void addFormParam(Map<String, List<String>> formParams, String name, Object value) {
         if (null != formParams && null != name && null != value) {
             formParams.put(name, Collections.singletonList(value.toString()));
+        }
+    }
+
+    /**
+     * Adds a multi-value form parameter entry to the given map.
+     * A defensive copy of {@code values} is stored.
+     * No-op if any of {@code formParams}, {@code name}, or {@code values} is null or empty.
+     *
+     * @param formParams the map to populate; must not be null
+     * @param name       the parameter name; must not be null
+     * @param values     the parameter values; must not be null or empty
+     */
+    protected final static void addFormParams(Map<String, List<String>> formParams, String name, List<String> values) {
+        if (null != formParams && null != name && null != values && !values.isEmpty()) {
+            formParams.put(name, new ArrayList<>(values));
         }
     }
 }

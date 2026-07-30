@@ -82,4 +82,13 @@ public class ClientAssertionCredentialsGrantRequest extends AccessTokenRequest {
         addFormParam(formParams, CLIENT_ASSERTION_FORM, clientAssertion);
         return formParams;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClientAssertionCredentialsGrantRequest setResource(List<String> resource) {
+        super.setResource(resource);
+        return this;
+    }
 }

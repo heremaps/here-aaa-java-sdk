@@ -343,10 +343,12 @@ public class ApacheHttpClientProvider implements HttpProvider {
                 String key = entry.getKey();
                 List<String> valueList = entry.getValue();
                 if (null != key && null != valueList && valueList.size() > 0) {
-                    String value = valueList.get(0);
-                    if (null != value) {
-                        NameValuePair nameValuePair = new BasicNameValuePair(key, value);
-                        parameters.add(nameValuePair);
+                    // A key may have multiple values to support repeated form parameters
+                    // (e.g. RFC 8707 resource=uri1&resource=uri2).
+                    for (String value : valueList) {
+                        if (null != value) {
+                            parameters.add(new BasicNameValuePair(key, value));
+                        }
                     }
                 }
             }
