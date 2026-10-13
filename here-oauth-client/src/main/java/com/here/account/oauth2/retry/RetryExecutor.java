@@ -2,6 +2,8 @@ package com.here.account.oauth2.retry;
 
 import com.here.account.http.HttpProvider;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 /**
@@ -28,6 +30,7 @@ public class RetryExecutor {
         HttpProvider.HttpResponse httpResponse;
 
         while (true) {
+            httpResponse = null;
             try {
                 httpResponse = retryable.execute();
                 retryContext.setLastRetryResponse(httpResponse);
@@ -43,6 +46,7 @@ public class RetryExecutor {
                 int waitInterval = retryPolicy.getNextRetryIntervalMillis(retryContext);
 
                 LOGGER.warning("Retrying after - "+ waitInterval +" milliseconds...");
+                releaseConnectionOf(httpResponse);
                 try {
                     Thread.sleep(waitInterval);
                 } catch (InterruptedException e){
@@ -58,5 +62,19 @@ public class RetryExecutor {
         }
 
         return retryContext.getLastRetryResponse();
+    }
+
+    private void releaseConnectionOf(HttpProvider.HttpResponse httpResponse) {
+        if (null == httpResponse) {
+            return;
+        }
+        try {
+            InputStream responseBody = httpResponse.getResponseBody();
+            if (null != responseBody) {
+                responseBody.close();
+            }
+        } catch (IOException e) {
+            LOGGER.warning("Trouble releasing the connection of an abandoned response - " + e);
+        }
     }
 }
